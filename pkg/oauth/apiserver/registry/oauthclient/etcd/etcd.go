@@ -10,7 +10,7 @@ import (
 
 	"github.com/openshift/api/oauth"
 	oauthapi "github.com/openshift/origin/pkg/oauth/apis/oauth"
-	"github.com/openshift/origin/pkg/oauth/registry/oauthclient"
+	"github.com/openshift/origin/pkg/oauth/apiserver/registry/oauthclient"
 	printersinternal "github.com/openshift/origin/pkg/printers/internalversion"
 	"github.com/openshift/origin/pkg/util/restoptions"
 )

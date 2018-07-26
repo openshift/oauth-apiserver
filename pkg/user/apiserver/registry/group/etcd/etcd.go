@@ -10,7 +10,7 @@ import (
 	"github.com/openshift/api/user"
 	printersinternal "github.com/openshift/origin/pkg/printers/internalversion"
 	userapi "github.com/openshift/origin/pkg/user/apis/user"
-	"github.com/openshift/origin/pkg/user/registry/group"
+	"github.com/openshift/origin/pkg/user/apiserver/registry/group"
 	"github.com/openshift/origin/pkg/util/restoptions"
 )
 

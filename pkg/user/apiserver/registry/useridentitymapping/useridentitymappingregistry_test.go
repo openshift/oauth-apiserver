@@ -1,4 +1,4 @@
-package test
+package useridentitymapping
 
 import (
 	userapi "github.com/openshift/origin/pkg/user/apis/user"

@@ -11,31 +11,31 @@ import (
 
 	"github.com/openshift/api/oauth"
 	oauthapi "github.com/openshift/origin/pkg/oauth/apis/oauth"
-	"github.com/openshift/origin/pkg/oauth/registry/oauthauthorizetoken"
-	"github.com/openshift/origin/pkg/oauth/registry/oauthclient"
+	"github.com/openshift/origin/pkg/oauth/apiserver/registry/oauthaccesstoken"
+	"github.com/openshift/origin/pkg/oauth/apiserver/registry/oauthclient"
 	printersinternal "github.com/openshift/origin/pkg/printers/internalversion"
 	"github.com/openshift/origin/pkg/util/restoptions"
 )
 
-// rest implements a RESTStorage for authorize tokens against etcd
+// rest implements a RESTStorage for access tokens against etcd
 type REST struct {
 	*registry.Store
 }
 
 var _ rest.StandardStorage = &REST{}
 
-// NewREST returns a RESTStorage object that will work against authorize tokens
+// NewREST returns a RESTStorage object that will work against access tokens
 func NewREST(optsGetter restoptions.Getter, clientGetter oauthclient.Getter) (*REST, error) {
-	strategy := oauthauthorizetoken.NewStrategy(clientGetter)
+	strategy := oauthaccesstoken.NewStrategy(clientGetter)
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &oauthapi.OAuthAuthorizeToken{} },
-		NewListFunc:              func() runtime.Object { return &oauthapi.OAuthAuthorizeTokenList{} },
-		DefaultQualifiedResource: oauth.Resource("oauthauthorizetokens"),
+		NewFunc:                  func() runtime.Object { return &oauthapi.OAuthAccessToken{} },
+		NewListFunc:              func() runtime.Object { return &oauthapi.OAuthAccessTokenList{} },
+		DefaultQualifiedResource: oauth.Resource("oauthaccesstokens"),
 
 		TableConvertor: printerstorage.TableConvertor{TablePrinter: printers.NewTablePrinter().With(printersinternal.AddHandlers)},
 
 		TTLFunc: func(obj runtime.Object, existing uint64, update bool) (uint64, error) {
-			token := obj.(*oauthapi.OAuthAuthorizeToken)
+			token := obj.(*oauthapi.OAuthAccessToken)
 			expires := uint64(token.ExpiresIn)
 			return expires, nil
 		},
@@ -47,10 +47,11 @@ func NewREST(optsGetter restoptions.Getter, clientGetter oauthclient.Getter) (*R
 
 	options := &generic.StoreOptions{
 		RESTOptions: optsGetter,
-		AttrFunc:    storage.AttrFunc(storage.DefaultNamespaceScopedAttr).WithFieldMutation(oauthapi.OAuthAuthorizeTokenFieldSelector),
+		AttrFunc:    storage.AttrFunc(storage.DefaultNamespaceScopedAttr).WithFieldMutation(oauthapi.OAuthAccessTokenFieldSelector),
 	}
 	if err := store.CompleteWithOptions(options); err != nil {
 		return nil, err
 	}
+
 	return &REST{store}, nil
 }

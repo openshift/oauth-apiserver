@@ -1,4 +1,4 @@
-package oauthauthorizetoken
+package oauthaccesstoken
 
 import (
 	"context"
@@ -12,10 +12,10 @@ import (
 	scopeauthorizer "github.com/openshift/origin/pkg/authorization/authorizer/scope"
 	oauthapi "github.com/openshift/origin/pkg/oauth/apis/oauth"
 	"github.com/openshift/origin/pkg/oauth/apis/oauth/validation"
-	"github.com/openshift/origin/pkg/oauth/registry/oauthclient"
+	"github.com/openshift/origin/pkg/oauth/apiserver/registry/oauthclient"
 )
 
-// strategy implements behavior for OAuthAuthorizeTokens
+// strategy implements behavior for OAuthAccessTokens
 type strategy struct {
 	runtime.ObjectTyper
 
@@ -48,14 +48,10 @@ func (strategy) GenerateName(base string) string {
 func (strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 }
 
-// Canonicalize normalizes the object after validation.
-func (strategy) Canonicalize(obj runtime.Object) {
-}
-
 // Validate validates a new token
 func (s strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	token := obj.(*oauthapi.OAuthAuthorizeToken)
-	validationErrors := validation.ValidateAuthorizeToken(token)
+	token := obj.(*oauthapi.OAuthAccessToken)
+	validationErrors := validation.ValidateAccessToken(token)
 
 	client, err := s.clientGetter.Get(token.ClientName, metav1.GetOptions{})
 	if err != nil {
@@ -70,9 +66,9 @@ func (s strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorL
 
 // ValidateUpdate validates an update
 func (s strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	oldToken := old.(*oauthapi.OAuthAuthorizeToken)
-	newToken := obj.(*oauthapi.OAuthAuthorizeToken)
-	return validation.ValidateAuthorizeTokenUpdate(newToken, oldToken)
+	oldToken := old.(*oauthapi.OAuthAccessToken)
+	newToken := obj.(*oauthapi.OAuthAccessToken)
+	return validation.ValidateAccessTokenUpdate(newToken, oldToken)
 }
 
 // AllowCreateOnUpdate is false for OAuth objects
@@ -82,4 +78,8 @@ func (strategy) AllowCreateOnUpdate() bool {
 
 func (strategy) AllowUnconditionalUpdate() bool {
 	return false
+}
+
+// Canonicalize normalizes the object after validation.
+func (strategy) Canonicalize(obj runtime.Object) {
 }

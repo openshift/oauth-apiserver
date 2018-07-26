@@ -17,7 +17,6 @@ import (
 
 	userapi "github.com/openshift/api/user/v1"
 	userapiinternal "github.com/openshift/origin/pkg/user/apis/user"
-	"github.com/openshift/origin/pkg/user/registry/test"
 
 	_ "github.com/openshift/origin/pkg/api/install"
 )
@@ -84,10 +83,10 @@ func disassociate(user *userapi.User, identity *userapi.Identity) (*userapi.User
 	return &userCopy, &identityCopy
 }
 
-func setupRegistries(identity *userapi.Identity, users ...*userapi.User) (*[]test.Action, *test.UserRegistry, *test.IdentityRegistry, *REST) {
-	actions := &[]test.Action{}
+func setupRegistries(identity *userapi.Identity, users ...*userapi.User) (*[]Action, *UserRegistry, *IdentityRegistry, *REST) {
+	actions := &[]Action{}
 
-	userRegistry := &test.UserRegistry{
+	userRegistry := &UserRegistry{
 		GetUsers:  map[string]*userapi.User{},
 		GetErr:    map[string]error{},
 		UpdateErr: map[string]error{},
@@ -97,7 +96,7 @@ func setupRegistries(identity *userapi.Identity, users ...*userapi.User) (*[]tes
 		userRegistry.GetUsers[user.Name] = user
 	}
 
-	identityRegistry := &test.IdentityRegistry{
+	identityRegistry := &IdentityRegistry{
 		GetIdentities: map[string]*userapi.Identity{},
 		GetErr:        map[string]error{},
 		Actions:       actions,
@@ -111,7 +110,7 @@ func setupRegistries(identity *userapi.Identity, users ...*userapi.User) (*[]tes
 	return actions, userRegistry, identityRegistry, rest
 }
 
-func verifyActions(expectedActions []test.Action, actualActions []test.Action, t *testing.T) {
+func verifyActions(expectedActions []Action, actualActions []Action, t *testing.T) {
 	for i, actualAction := range actualActions {
 		if len(expectedActions) <= i {
 			t.Errorf("Expected %d actions, got extras: %#v", len(expectedActions), actualActions[i:])
@@ -146,7 +145,7 @@ func verifyMapping(object runtime.Object, user *userapi.User, identity *userapi.
 
 func TestGet(t *testing.T) {
 	user, identity := makeAssociated()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: identity.Name},
 		{Name: "GetUser", Object: user.Name},
 	}
@@ -163,7 +162,7 @@ func TestGet(t *testing.T) {
 
 func TestGetMissingIdentity(t *testing.T) {
 	user, identity := makeAssociated()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: identity.Name},
 	}
 
@@ -178,7 +177,7 @@ func TestGetMissingIdentity(t *testing.T) {
 
 func TestGetIdentityWithoutUser(t *testing.T) {
 	identity := makeIdentity()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: identity.Name},
 	}
 
@@ -196,7 +195,7 @@ func TestGetIdentityWithoutUser(t *testing.T) {
 
 func TestGetMissingUser(t *testing.T) {
 	user, identity := makeAssociated()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: identity.Name},
 		{Name: "GetUser", Object: user.Name},
 	}
@@ -216,7 +215,7 @@ func TestGetMissingUser(t *testing.T) {
 func TestGetUserWithoutIdentity(t *testing.T) {
 	user, identity := makeAssociated()
 	user.Identities = []string{}
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: identity.Name},
 		{Name: "GetUser", Object: user.Name},
 	}
@@ -236,7 +235,7 @@ func TestGetUserWithoutIdentity(t *testing.T) {
 func TestCreate(t *testing.T) {
 	associatedUser, associatedIdentity := makeAssociated()
 	unassociatedUser, unassociatedIdentity := disassociate(associatedUser, associatedIdentity)
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: unassociatedIdentity.Name},
 		{Name: "GetUser", Object: unassociatedUser.Name},
 		{Name: "UpdateUser", Object: associatedUser},
@@ -260,7 +259,7 @@ func TestCreate(t *testing.T) {
 
 func TestCreateExists(t *testing.T) {
 	user, identity := makeAssociated()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: identity.Name},
 		{Name: "GetUser", Object: user.Name},
 	}
@@ -284,7 +283,7 @@ func TestCreateExists(t *testing.T) {
 
 func TestCreateMissingIdentity(t *testing.T) {
 	user, identity := makeUnassociated()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: identity.Name},
 	}
 
@@ -307,7 +306,7 @@ func TestCreateMissingIdentity(t *testing.T) {
 
 func TestCreateMissingUser(t *testing.T) {
 	user, identity := makeUnassociated()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: identity.Name},
 		{Name: "GetUser", Object: user.Name},
 	}
@@ -332,7 +331,7 @@ func TestCreateMissingUser(t *testing.T) {
 func TestCreateUserUpdateError(t *testing.T) {
 	associatedUser, associatedIdentity := makeAssociated()
 	unassociatedUser, unassociatedIdentity := disassociate(associatedUser, associatedIdentity)
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: unassociatedIdentity.Name},
 		{Name: "GetUser", Object: unassociatedUser.Name},
 		{Name: "UpdateUser", Object: associatedUser},
@@ -360,7 +359,7 @@ func TestCreateUserUpdateError(t *testing.T) {
 func TestCreateIdentityUpdateError(t *testing.T) {
 	associatedUser, associatedIdentity := makeAssociated()
 	unassociatedUser, unassociatedIdentity := disassociate(associatedUser, associatedIdentity)
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: unassociatedIdentity.Name},
 		{Name: "GetUser", Object: unassociatedUser.Name},
 		{Name: "UpdateUser", Object: associatedUser},
@@ -393,7 +392,7 @@ func TestUpdate(t *testing.T) {
 	unassociatedUser1, unassociatedIdentity1 := disassociate(associatedUser1, associatedIdentity1User1)
 	associatedUser2, associatedIdentity1User2 := associate(unassociatedUser2, unassociatedIdentity1)
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: associatedIdentity1User1.Name},
 		{Name: "GetUser", Object: associatedUser1.Name},
@@ -433,7 +432,7 @@ func TestUpdateMissingIdentity(t *testing.T) {
 	// Finishing conditions
 	_, unassociatedIdentity1 := disassociate(associatedUser1, associatedIdentity1User1)
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: associatedIdentity1User1.Name},
 	}
@@ -463,7 +462,7 @@ func TestUpdateMissingUser(t *testing.T) {
 	// Finishing conditions
 	_, unassociatedIdentity1 := disassociate(associatedUser1, associatedIdentity1User1)
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: associatedIdentity1User1.Name},
 		{Name: "GetUser", Object: associatedUser1.Name},
@@ -492,7 +491,7 @@ func TestUpdateMissingUser(t *testing.T) {
 func TestUpdateOldUserMatches(t *testing.T) {
 	user, identity := makeAssociated()
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: identity.Name},
 		{Name: "GetUser", Object: user.Name},
@@ -524,7 +523,7 @@ func TestUpdateWithEmptyResourceVersion(t *testing.T) {
 	// Finishing conditions
 	_, unassociatedIdentity1 := disassociate(associatedUser1, associatedIdentity1User1)
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: associatedIdentity1User1.Name},
 		{Name: "GetUser", Object: associatedUser1.Name},
@@ -554,7 +553,7 @@ func TestUpdateWithMismatchedResourceVersion(t *testing.T) {
 	// Finishing conditions
 	_, unassociatedIdentity1 := disassociate(associatedUser1, associatedIdentity1User1)
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: associatedIdentity1User1.Name},
 		{Name: "GetUser", Object: associatedUser1.Name},
@@ -586,7 +585,7 @@ func TestUpdateOldUserUpdateError(t *testing.T) {
 	unassociatedUser1, unassociatedIdentity1 := disassociate(associatedUser1, associatedIdentity1User1)
 	associatedUser2, associatedIdentity1User2 := associate(unassociatedUser2, unassociatedIdentity1)
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: associatedIdentity1User1.Name},
 		{Name: "GetUser", Object: associatedUser1.Name},
@@ -630,7 +629,7 @@ func TestUpdateUserUpdateError(t *testing.T) {
 	_, unassociatedIdentity1 := disassociate(associatedUser1, associatedIdentity1User1)
 	associatedUser2, _ := associate(unassociatedUser2, unassociatedIdentity1)
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: associatedIdentity1User1.Name},
 		{Name: "GetUser", Object: associatedUser1.Name},
@@ -668,7 +667,7 @@ func TestUpdateIdentityUpdateError(t *testing.T) {
 	_, unassociatedIdentity1 := disassociate(associatedUser1, associatedIdentity1User1)
 	associatedUser2, associatedIdentity1User2 := associate(unassociatedUser2, unassociatedIdentity1)
 
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		// Existing mapping lookup
 		{Name: "GetIdentity", Object: associatedIdentity1User1.Name},
 		{Name: "GetUser", Object: associatedUser1.Name},
@@ -703,7 +702,7 @@ func TestUpdateIdentityUpdateError(t *testing.T) {
 func TestDelete(t *testing.T) {
 	associatedUser, associatedIdentity := makeAssociated()
 	unassociatedUser, unassociatedIdentity := disassociate(associatedUser, associatedIdentity)
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: associatedIdentity.Name},
 		{Name: "GetUser", Object: associatedUser.Name},
 		{Name: "UpdateUser", Object: unassociatedUser},
@@ -721,7 +720,7 @@ func TestDelete(t *testing.T) {
 
 func TestDeleteMissingIdentity(t *testing.T) {
 	associatedUser, associatedIdentity := makeAssociated()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: associatedIdentity.Name},
 	}
 
@@ -739,7 +738,7 @@ func TestDeleteMissingIdentity(t *testing.T) {
 
 func TestDeleteMissingUser(t *testing.T) {
 	associatedUser, associatedIdentity := makeAssociated()
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: associatedIdentity.Name},
 		{Name: "GetUser", Object: associatedUser.Name},
 	}
@@ -759,7 +758,7 @@ func TestDeleteMissingUser(t *testing.T) {
 func TestDeleteUserUpdateError(t *testing.T) {
 	associatedUser, associatedIdentity := makeAssociated()
 	unassociatedUser, _ := disassociate(associatedUser, associatedIdentity)
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: associatedIdentity.Name},
 		{Name: "GetUser", Object: associatedUser.Name},
 		{Name: "UpdateUser", Object: unassociatedUser},
@@ -782,7 +781,7 @@ func TestDeleteUserUpdateError(t *testing.T) {
 func TestDeleteIdentityUpdateError(t *testing.T) {
 	associatedUser, associatedIdentity := makeAssociated()
 	unassociatedUser, unassociatedIdentity := disassociate(associatedUser, associatedIdentity)
-	expectedActions := []test.Action{
+	expectedActions := []Action{
 		{Name: "GetIdentity", Object: associatedIdentity.Name},
 		{Name: "GetUser", Object: associatedUser.Name},
 		{Name: "UpdateUser", Object: unassociatedUser},

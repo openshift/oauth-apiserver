@@ -1,4 +1,4 @@
-package test
+package useridentitymapping
 
 import (
 	kerrs "k8s.io/apimachinery/pkg/api/errors"

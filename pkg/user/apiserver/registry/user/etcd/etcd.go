@@ -23,7 +23,7 @@ import (
 	printersinternal "github.com/openshift/origin/pkg/printers/internalversion"
 	userapi "github.com/openshift/origin/pkg/user/apis/user"
 	"github.com/openshift/origin/pkg/user/apis/user/validation"
-	"github.com/openshift/origin/pkg/user/registry/user"
+	"github.com/openshift/origin/pkg/user/apiserver/registry/user"
 	"github.com/openshift/origin/pkg/util/restoptions"
 )
 

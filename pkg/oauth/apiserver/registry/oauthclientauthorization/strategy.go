@@ -14,7 +14,7 @@ import (
 	scopeauthorizer "github.com/openshift/origin/pkg/authorization/authorizer/scope"
 	oauthapi "github.com/openshift/origin/pkg/oauth/apis/oauth"
 	"github.com/openshift/origin/pkg/oauth/apis/oauth/validation"
-	"github.com/openshift/origin/pkg/oauth/registry/oauthclient"
+	"github.com/openshift/origin/pkg/oauth/apiserver/registry/oauthclient"
 )
 
 // strategy implements behavior for OAuthClientAuthorization objects
