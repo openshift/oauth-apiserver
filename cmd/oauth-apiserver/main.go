@@ -13,14 +13,11 @@ import (
 	"github.com/openshift/oauth-apiserver/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	genericapiserver "k8s.io/apiserver/pkg/server"
 	utilflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
 )
 
 func main() {
-	stopCh := genericapiserver.SetupSignalHandler()
-
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	pflag.CommandLine.SetNormalizeFunc(utilflag.WordSepNormalizeFunc)
@@ -35,14 +32,14 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	command := NewOpenshiftApiServerCommand(stopCh)
+	command := NewOAuthAPIServerCommand()
 	if err := command.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 }
 
-func NewOpenshiftApiServerCommand(stopCh <-chan struct{}) *cobra.Command {
+func NewOAuthAPIServerCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "oauth-apiserver",
 		Short: "Command for the OpenShift OAuth API Server",
@@ -51,7 +48,7 @@ func NewOpenshiftApiServerCommand(stopCh <-chan struct{}) *cobra.Command {
 			os.Exit(1)
 		},
 	}
-	start := oauth_apiserver.NewOpenShiftAPIServerCommand("start", os.Stdout, os.Stderr, stopCh)
+	start := oauth_apiserver.NewOpenShiftAPIServerCommand("start", os.Stdout)
 	cmd.AddCommand(start)
 
 	return cmd

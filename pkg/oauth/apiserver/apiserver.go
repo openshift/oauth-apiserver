@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"sync"
 
+	oauthinstall "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth/install"
 	"k8s.io/apimachinery/pkg/runtime"
+
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -23,13 +25,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type ExtraConfig struct {
-	KubeAPIServerClientConfig *restclient.Config
-	ServiceAccountMethod      string
+var (
+	scheme = runtime.NewScheme()
+	codecs = serializer.NewCodecFactory(scheme)
+)
 
-	// TODO these should all become local eventually
-	Scheme *runtime.Scheme
-	Codecs serializer.CodecFactory
+func init() {
+	oauthinstall.Install(scheme)
+}
+
+type ExtraConfig struct {
+	ServiceAccountMethod string
 
 	makeV1Storage sync.Once
 	v1Storage     map[string]rest.Storage
@@ -45,8 +51,9 @@ type OAuthAPIServer struct {
 }
 
 type completedConfig struct {
-	GenericConfig genericapiserver.CompletedConfig
-	ExtraConfig   *ExtraConfig
+	GenericConfig             genericapiserver.CompletedConfig
+	ExtraConfig               *ExtraConfig
+	kubeAPIServerClientConfig *restclient.Config
 }
 
 type CompletedConfig struct {
@@ -57,8 +64,9 @@ type CompletedConfig struct {
 // Complete fills in any fields not set that are required to have valid data. It's mutating the receiver.
 func (c *OAuthAPIServerConfig) Complete() completedConfig {
 	cfg := completedConfig{
-		c.GenericConfig.Complete(),
-		&c.ExtraConfig,
+		GenericConfig:             c.GenericConfig.Complete(),
+		ExtraConfig:               &c.ExtraConfig,
+		kubeAPIServerClientConfig: c.GenericConfig.ClientConfig,
 	}
 
 	return cfg
@@ -80,7 +88,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		return nil, err
 	}
 
-	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(oauthapiv1.GroupName, c.ExtraConfig.Scheme, metav1.ParameterCodec, c.ExtraConfig.Codecs)
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(oauthapiv1.GroupName, scheme, metav1.ParameterCodec, codecs)
 	apiGroupInfo.VersionedResourcesStorageMap[oauthapiv1.SchemeGroupVersion.Version] = v1Storage
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
 		return nil, err
@@ -114,11 +122,11 @@ func (c *completedConfig) newV1RESTStorage() (map[string]rest.Storage, error) {
 	if err != nil {
 		return nil, err
 	}
-	routeClient, err := routeclient.NewForConfig(c.ExtraConfig.KubeAPIServerClientConfig)
+	routeClient, err := routeclient.NewForConfig(c.kubeAPIServerClientConfig)
 	if err != nil {
 		return nil, err
 	}
-	coreV1Client, err := corev1.NewForConfig(c.ExtraConfig.KubeAPIServerClientConfig)
+	coreV1Client, err := corev1.NewForConfig(c.kubeAPIServerClientConfig)
 	if err != nil {
 		return nil, err
 	}
