@@ -3,15 +3,10 @@ package install
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/kubernetes/pkg/api/legacyscheme"
 
 	userv1 "github.com/openshift/api/user/v1"
-	userapiv1 "github.com/openshift/openshift-apiserver/pkg/user/apis/user/v1"
+	userapiv1 "github.com/openshift/oauth-apiserver/pkg/user/apis/user/v1"
 )
-
-func init() {
-	Install(legacyscheme.Scheme)
-}
 
 // Install registers the API group and adds types to a scheme
 func Install(scheme *runtime.Scheme) {

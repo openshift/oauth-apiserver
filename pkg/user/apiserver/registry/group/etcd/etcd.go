@@ -4,14 +4,14 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apiserver/pkg/registry/generic"
 	"k8s.io/apiserver/pkg/registry/generic/registry"
-	"k8s.io/kubernetes/pkg/printers"
-	printerstorage "k8s.io/kubernetes/pkg/printers/storage"
 
 	"github.com/openshift/api/user"
+	"github.com/openshift/oauth-apiserver/pkg/printers"
+	"github.com/openshift/oauth-apiserver/pkg/printerstorage"
 
-	userapi "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
-	"github.com/openshift/openshift-apiserver/pkg/user/apiserver/registry/group"
-	userprinters "github.com/openshift/openshift-apiserver/pkg/user/printers/internalversion"
+	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
+	"github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/group"
+	userprinters "github.com/openshift/oauth-apiserver/pkg/user/printers/internalversion"
 )
 
 // REST implements a RESTStorage for groups against etcd

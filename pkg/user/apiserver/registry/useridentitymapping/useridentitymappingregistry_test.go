@@ -1,7 +1,7 @@
 package useridentitymapping
 
 import (
-	userapi "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
+	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 )
 
 type UserIdentityMappingRegistry struct {

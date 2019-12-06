@@ -15,10 +15,10 @@ import (
 	oauthclient "github.com/openshift/client-go/oauth/clientset/versioned/typed/oauth/v1"
 	routeclient "github.com/openshift/client-go/route/clientset/versioned/typed/route/v1"
 	"github.com/openshift/library-go/pkg/oauth/oauthserviceaccountclient"
-	accesstokenetcd "github.com/openshift/openshift-apiserver/pkg/oauth/apiserver/registry/oauthaccesstoken/etcd"
-	authorizetokenetcd "github.com/openshift/openshift-apiserver/pkg/oauth/apiserver/registry/oauthauthorizetoken/etcd"
-	clientetcd "github.com/openshift/openshift-apiserver/pkg/oauth/apiserver/registry/oauthclient/etcd"
-	clientauthetcd "github.com/openshift/openshift-apiserver/pkg/oauth/apiserver/registry/oauthclientauthorization/etcd"
+	accesstokenetcd "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthaccesstoken/etcd"
+	authorizetokenetcd "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthauthorizetoken/etcd"
+	clientetcd "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthclient/etcd"
+	clientauthetcd "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthclientauthorization/etcd"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

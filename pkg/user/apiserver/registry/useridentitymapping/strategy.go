@@ -3,12 +3,13 @@ package useridentitymapping
 import (
 	"context"
 
+	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"k8s.io/kubernetes/pkg/api/legacyscheme"
 
-	userapi "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
-	"github.com/openshift/openshift-apiserver/pkg/user/apis/user/validation"
+	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
+	"github.com/openshift/oauth-apiserver/pkg/user/apis/user/validation"
 )
 
 // userIdentityMappingStrategy implements behavior for image repository mappings.
@@ -18,7 +19,7 @@ type userIdentityMappingStrategy struct {
 
 // Strategy is the default logic that applies when creating UserIdentityMapping
 // objects via the REST API.
-var Strategy = userIdentityMappingStrategy{legacyscheme.Scheme}
+var Strategy = userIdentityMappingStrategy{serverscheme.Scheme}
 
 // NamespaceScoped is true for image repository mappings.
 func (s userIdentityMappingStrategy) NamespaceScoped() bool {

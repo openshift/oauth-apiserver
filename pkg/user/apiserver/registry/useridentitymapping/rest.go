@@ -12,12 +12,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/registry/rest"
-	kapi "k8s.io/kubernetes/pkg/apis/core"
 
 	"github.com/openshift/api/user"
 	userapi "github.com/openshift/api/user/v1"
 	userclient "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
-	userinternal "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
+	userinternal "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 )
 
 // REST implements the RESTStorage interface in terms of an image registry and
@@ -317,11 +316,11 @@ func mappingFor(user *userapi.User, identity *userapi.Identity) (*userinternal.U
 			ResourceVersion: identity.ResourceVersion,
 			UID:             identity.UID,
 		},
-		Identity: kapi.ObjectReference{
+		Identity: corev1.ObjectReference{
 			Name: identity.Name,
 			UID:  identity.UID,
 		},
-		User: kapi.ObjectReference{
+		User: corev1.ObjectReference{
 			Name: user.Name,
 			UID:  user.UID,
 		},

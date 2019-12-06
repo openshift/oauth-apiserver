@@ -3,11 +3,10 @@ package v1
 import (
 	"testing"
 
-	"k8s.io/apimachinery/pkg/runtime"
-
 	v1 "github.com/openshift/api/user/v1"
-	"github.com/openshift/openshift-apiserver/pkg/api/apihelpers/apitesting"
-	userapi "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
+	"github.com/openshift/oauth-apiserver/pkg/apitesting"
+	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestFieldSelectorConversions(t *testing.T) {
