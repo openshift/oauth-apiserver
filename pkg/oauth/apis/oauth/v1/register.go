@@ -4,6 +4,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/openshift/api/oauth/v1"
+	v1 "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth/v1"
 	"github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth"
 )
 

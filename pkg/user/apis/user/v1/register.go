@@ -5,6 +5,7 @@ import (
 	corev1conversions "k8s.io/kubernetes/pkg/apis/core/v1"
 
 	"github.com/openshift/api/user/v1"
+	v1 "github.com/openshift/oauth-apiserver/pkg/user/apis/user/v1"
 	"github.com/openshift/openshift-apiserver/pkg/user/apis/user"
 )
 
