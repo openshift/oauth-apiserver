@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	kvalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/api/validation/path"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	kvalidation "k8s.io/kubernetes/pkg/apis/core/validation"
 
-	userapi "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
+	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 )
 
 func ValidateUserName(name string, _ bool) []string {

@@ -6,10 +6,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/registry/rest"
-	"k8s.io/kubernetes/pkg/api/legacyscheme"
 
-	userapi "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
-	"github.com/openshift/openshift-apiserver/pkg/user/apis/user/validation"
+	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
+	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
+	"github.com/openshift/oauth-apiserver/pkg/user/apis/user/validation"
 )
 
 // identityStrategy implements behavior for Identities
@@ -19,7 +19,7 @@ type identityStrategy struct {
 
 // Strategy is the default logic that applies when creating and updating Identity
 // objects via the REST API.
-var Strategy = identityStrategy{legacyscheme.Scheme}
+var Strategy = identityStrategy{serverscheme.Scheme}
 
 var _ rest.GarbageCollectionDeleteStrategy = identityStrategy{}
 

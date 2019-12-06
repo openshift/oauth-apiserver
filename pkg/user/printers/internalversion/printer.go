@@ -6,20 +6,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	kprinters "k8s.io/kubernetes/pkg/printers"
 
 	userv1 "github.com/openshift/api/user/v1"
-	userapi "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
+	"github.com/openshift/oauth-apiserver/pkg/printers"
+	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 )
 
-func AddUserOpenShiftHandler(h kprinters.PrintHandler) {
+func AddUserOpenShiftHandler(h printers.PrintHandler) {
 	addUser(h)
 	addIdentity(h)
 	addUserIdentityMapping(h)
 	addGroup(h)
 }
 
-func addUser(h kprinters.PrintHandler) {
+func addUser(h printers.PrintHandler) {
 	userColumnsDefinitions := []metav1.TableColumnDefinition{
 		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
 		{Name: "UID", Type: "string", Description: metav1.ObjectMeta{}.SwaggerDoc()["uid"]},
@@ -44,7 +44,7 @@ func formatResourceName(kind schema.GroupKind, name string, withKind bool) strin
 	return strings.ToLower(kind.String()) + "/" + name
 }
 
-func printUser(user *userapi.User, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printUser(user *userapi.User, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: user},
 	}
@@ -59,7 +59,7 @@ func printUser(user *userapi.User, options kprinters.GenerateOptions) ([]metav1.
 	return []metav1.TableRow{row}, nil
 }
 
-func printUserList(userList *userapi.UserList, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printUserList(userList *userapi.UserList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	rows := make([]metav1.TableRow, 0, len(userList.Items))
 	for i := range userList.Items {
 		r, err := printUser(&userList.Items[i], options)
@@ -71,7 +71,7 @@ func printUserList(userList *userapi.UserList, options kprinters.GenerateOptions
 	return rows, nil
 }
 
-func addIdentity(h kprinters.PrintHandler) {
+func addIdentity(h printers.PrintHandler) {
 	identityColumnsDefinitions := []metav1.TableColumnDefinition{
 		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
 		{Name: "IDP Name", Type: "string", Format: "name", Description: userv1.Identity{}.SwaggerDoc()["providerName"]},
@@ -87,7 +87,7 @@ func addIdentity(h kprinters.PrintHandler) {
 	}
 }
 
-func printIdentity(identity *userapi.Identity, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printIdentity(identity *userapi.Identity, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: identity},
 	}
@@ -103,7 +103,7 @@ func printIdentity(identity *userapi.Identity, options kprinters.GenerateOptions
 	return []metav1.TableRow{row}, nil
 }
 
-func printIdentityList(identityList *userapi.IdentityList, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printIdentityList(identityList *userapi.IdentityList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	rows := make([]metav1.TableRow, 0, len(identityList.Items))
 	for i := range identityList.Items {
 		r, err := printIdentity(&identityList.Items[i], options)
@@ -115,7 +115,7 @@ func printIdentityList(identityList *userapi.IdentityList, options kprinters.Gen
 	return rows, nil
 }
 
-func addUserIdentityMapping(h kprinters.PrintHandler) {
+func addUserIdentityMapping(h printers.PrintHandler) {
 	identityColumnsDefinitions := []metav1.TableColumnDefinition{
 		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
 		{Name: "Identity", Type: "string", Description: userv1.UserIdentityMapping{}.SwaggerDoc()["identity"]},
@@ -127,7 +127,7 @@ func addUserIdentityMapping(h kprinters.PrintHandler) {
 	}
 }
 
-func printUserIdentityMapping(mapping *userapi.UserIdentityMapping, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printUserIdentityMapping(mapping *userapi.UserIdentityMapping, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: mapping},
 	}
@@ -142,7 +142,7 @@ func printUserIdentityMapping(mapping *userapi.UserIdentityMapping, options kpri
 	return []metav1.TableRow{row}, nil
 }
 
-func addGroup(h kprinters.PrintHandler) {
+func addGroup(h printers.PrintHandler) {
 	groupColumnsDefinitions := []metav1.TableColumnDefinition{
 		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
 		{Name: "Users", Type: "string", Description: userv1.Group{}.SwaggerDoc()["users"]},
@@ -156,7 +156,7 @@ func addGroup(h kprinters.PrintHandler) {
 	}
 }
 
-func printGroup(group *userapi.Group, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printGroup(group *userapi.Group, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: group},
 	}
@@ -169,7 +169,7 @@ func printGroup(group *userapi.Group, options kprinters.GenerateOptions) ([]meta
 	return []metav1.TableRow{row}, nil
 }
 
-func printGroupList(groupList *userapi.GroupList, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printGroupList(groupList *userapi.GroupList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	rows := make([]metav1.TableRow, 0, len(groupList.Items))
 	for i := range groupList.Items {
 		r, err := printGroup(&groupList.Items[i], options)

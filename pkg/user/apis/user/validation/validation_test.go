@@ -3,9 +3,9 @@ package validation
 import (
 	"testing"
 
-	userapi "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
+	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapi "k8s.io/kubernetes/pkg/apis/core"
 )
 
 func TestValidateGroup(t *testing.T) {
@@ -168,7 +168,7 @@ func TestValidateIdentity(t *testing.T) {
 			},
 			ProviderName:     "myprovider",
 			ProviderUserName: "myproviderusername",
-			User:             kapi.ObjectReference{Name: "myuser", UID: "myuseruid"},
+			User:             corev1.ObjectReference{Name: "myuser", UID: "myuseruid"},
 		}
 	}
 
@@ -222,7 +222,7 @@ func TestValidateIdentityUpdate(t *testing.T) {
 			},
 			ProviderName:     "myprovider",
 			ProviderUserName: "myproviderusername",
-			User:             kapi.ObjectReference{Name: "myuser", UID: "myuseruid"},
+			User:             corev1.ObjectReference{Name: "myuser", UID: "myuseruid"},
 		}
 	}
 
@@ -275,8 +275,8 @@ func TestValidateUserIdentityMapping(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "myprovider:myproviderusername",
 			},
-			Identity: kapi.ObjectReference{Name: "myprovider:myproviderusername"},
-			User:     kapi.ObjectReference{Name: "myuser"},
+			Identity: corev1.ObjectReference{Name: "myprovider:myproviderusername"},
+			User:     corev1.ObjectReference{Name: "myuser"},
 		}
 	}
 
@@ -310,8 +310,8 @@ func TestValidateUserIdentityMappingUpdate(t *testing.T) {
 				Name:            "myprovider:myproviderusername",
 				ResourceVersion: "1",
 			},
-			Identity: kapi.ObjectReference{Name: "myprovider:myproviderusername"},
-			User:     kapi.ObjectReference{Name: "myuser"},
+			Identity: corev1.ObjectReference{Name: "myprovider:myproviderusername"},
+			User:     corev1.ObjectReference{Name: "myuser"},
 		}
 	}
 

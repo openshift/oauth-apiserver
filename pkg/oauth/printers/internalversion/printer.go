@@ -7,13 +7,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	kprinters "k8s.io/kubernetes/pkg/printers"
 
 	oauthv1 "github.com/openshift/api/oauth/v1"
-	oauthapi "github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth"
+	oauthapi "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth"
+	"github.com/openshift/oauth-apiserver/pkg/printers"
 )
 
-func AddOAuthOpenShiftHandler(h kprinters.PrintHandler) {
+func AddOAuthOpenShiftHandler(h printers.PrintHandler) {
 	addOAuthClient(h)
 	addOAuthAccessToken(h)
 	addOAuthAuthorizeToken(h)
@@ -30,7 +30,7 @@ func formatResourceName(kind schema.GroupKind, name string, withKind bool) strin
 	return strings.ToLower(kind.String()) + "/" + name
 }
 
-func addOAuthClient(h kprinters.PrintHandler) {
+func addOAuthClient(h printers.PrintHandler) {
 	// oauthClientColumns              = []string{"Name", "Secret", "WWW-Challenge", "Token-Max-Age", "Redirect URIs"}
 	oauthClientColumnsDefinitions := []metav1.TableColumnDefinition{
 		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
@@ -47,7 +47,7 @@ func addOAuthClient(h kprinters.PrintHandler) {
 	}
 }
 
-func printOAuthClient(oauthClient *oauthapi.OAuthClient, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printOAuthClient(oauthClient *oauthapi.OAuthClient, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: oauthClient},
 	}
@@ -68,7 +68,7 @@ func printOAuthClient(oauthClient *oauthapi.OAuthClient, options kprinters.Gener
 	return []metav1.TableRow{row}, nil
 }
 
-func printOAuthClientList(oauthClientList *oauthapi.OAuthClientList, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printOAuthClientList(oauthClientList *oauthapi.OAuthClientList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	rows := make([]metav1.TableRow, 0, len(oauthClientList.Items))
 	for i := range oauthClientList.Items {
 		r, err := printOAuthClient(&oauthClientList.Items[i], options)
@@ -80,7 +80,7 @@ func printOAuthClientList(oauthClientList *oauthapi.OAuthClientList, options kpr
 	return rows, nil
 }
 
-func addOAuthClientAuthorization(h kprinters.PrintHandler) {
+func addOAuthClientAuthorization(h printers.PrintHandler) {
 	oauthClientColumnsDefinitions := []metav1.TableColumnDefinition{
 		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
 		{Name: "User Name", Type: "string", Format: "name", Description: oauthv1.OAuthClientAuthorization{}.SwaggerDoc()["userName"]},
@@ -95,7 +95,7 @@ func addOAuthClientAuthorization(h kprinters.PrintHandler) {
 	}
 }
 
-func printOAuthClientAuthorization(oauthClientAuthorization *oauthapi.OAuthClientAuthorization, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printOAuthClientAuthorization(oauthClientAuthorization *oauthapi.OAuthClientAuthorization, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: oauthClientAuthorization},
 	}
@@ -108,7 +108,7 @@ func printOAuthClientAuthorization(oauthClientAuthorization *oauthapi.OAuthClien
 	return []metav1.TableRow{row}, nil
 }
 
-func printOAuthClientAuthorizationList(oauthClientAuthorizationList *oauthapi.OAuthClientAuthorizationList, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printOAuthClientAuthorizationList(oauthClientAuthorizationList *oauthapi.OAuthClientAuthorizationList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	rows := make([]metav1.TableRow, 0, len(oauthClientAuthorizationList.Items))
 	for i := range oauthClientAuthorizationList.Items {
 		r, err := printOAuthClientAuthorization(&oauthClientAuthorizationList.Items[i], options)
@@ -120,7 +120,7 @@ func printOAuthClientAuthorizationList(oauthClientAuthorizationList *oauthapi.OA
 	return rows, nil
 }
 
-func addOAuthAccessToken(h kprinters.PrintHandler) {
+func addOAuthAccessToken(h printers.PrintHandler) {
 	oauthClientColumnsDefinitions := []metav1.TableColumnDefinition{
 		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
 		{Name: "User Name", Type: "string", Format: "name", Description: oauthv1.OAuthAccessToken{}.SwaggerDoc()["userName"]},
@@ -138,7 +138,7 @@ func addOAuthAccessToken(h kprinters.PrintHandler) {
 	}
 }
 
-func printOAuthAccessToken(oauthAccessToken *oauthapi.OAuthAccessToken, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printOAuthAccessToken(oauthAccessToken *oauthapi.OAuthAccessToken, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: oauthAccessToken},
 	}
@@ -159,7 +159,7 @@ func printOAuthAccessToken(oauthAccessToken *oauthapi.OAuthAccessToken, options 
 	return []metav1.TableRow{row}, nil
 }
 
-func printOAuthAccessTokenList(oauthAccessTokenList *oauthapi.OAuthAccessTokenList, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printOAuthAccessTokenList(oauthAccessTokenList *oauthapi.OAuthAccessTokenList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	rows := make([]metav1.TableRow, 0, len(oauthAccessTokenList.Items))
 	for i := range oauthAccessTokenList.Items {
 		r, err := printOAuthAccessToken(&oauthAccessTokenList.Items[i], options)
@@ -171,7 +171,7 @@ func printOAuthAccessTokenList(oauthAccessTokenList *oauthapi.OAuthAccessTokenLi
 	return rows, nil
 }
 
-func addOAuthAuthorizeToken(h kprinters.PrintHandler) {
+func addOAuthAuthorizeToken(h printers.PrintHandler) {
 	oauthClientColumnsDefinitions := []metav1.TableColumnDefinition{
 		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
 		{Name: "User Name", Type: "string", Format: "name", Description: oauthv1.OAuthAuthorizeToken{}.SwaggerDoc()["userName"]},
@@ -189,7 +189,7 @@ func addOAuthAuthorizeToken(h kprinters.PrintHandler) {
 	}
 }
 
-func printOAuthAuthorizeToken(oauthAuthorizeToken *oauthapi.OAuthAuthorizeToken, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printOAuthAuthorizeToken(oauthAuthorizeToken *oauthapi.OAuthAuthorizeToken, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: oauthAuthorizeToken},
 	}
@@ -210,7 +210,7 @@ func printOAuthAuthorizeToken(oauthAuthorizeToken *oauthapi.OAuthAuthorizeToken,
 	return []metav1.TableRow{row}, nil
 }
 
-func printOAuthAuthorizeTokenList(oauthAuthorizeTokenList *oauthapi.OAuthAuthorizeTokenList, options kprinters.GenerateOptions) ([]metav1.TableRow, error) {
+func printOAuthAuthorizeTokenList(oauthAuthorizeTokenList *oauthapi.OAuthAuthorizeTokenList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	rows := make([]metav1.TableRow, 0, len(oauthAuthorizeTokenList.Items))
 	for i := range oauthAuthorizeTokenList.Items {
 		r, err := printOAuthAuthorizeToken(&oauthAuthorizeTokenList.Items[i], options)
