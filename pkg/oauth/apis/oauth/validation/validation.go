@@ -6,17 +6,17 @@ import (
 	"regexp"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/validation"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/api/validation/path"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/authentication/serviceaccount"
-	"k8s.io/kubernetes/pkg/apis/core/validation"
 
 	routev1 "github.com/openshift/api/route/v1"
 	bootstrap "github.com/openshift/library-go/pkg/authentication/bootstrapauthenticator"
 	scopemetadata "github.com/openshift/library-go/pkg/authorization/scopemetadata"
-	oauthapi "github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth"
-	uservalidation "github.com/openshift/openshift-apiserver/pkg/user/apis/user/validation"
+	oauthapi "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth"
+	uservalidation "github.com/openshift/oauth-apiserver/pkg/user/apis/user/validation"
 )
 
 const (

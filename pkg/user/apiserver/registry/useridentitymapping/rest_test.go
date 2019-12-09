@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
 	kerrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -13,12 +14,9 @@ import (
 	apirequest "k8s.io/apiserver/pkg/endpoints/request"
 	apiserverrest "k8s.io/apiserver/pkg/registry/rest"
 	kapirest "k8s.io/apiserver/pkg/registry/rest"
-	kapi "k8s.io/kubernetes/pkg/apis/core"
 
 	userapi "github.com/openshift/api/user/v1"
-	userapiinternal "github.com/openshift/openshift-apiserver/pkg/user/apis/user"
-
-	_ "github.com/openshift/openshift-apiserver/pkg/api/install"
+	userapiinternal "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 )
 
 var sequence = 0
@@ -243,8 +241,8 @@ func TestCreate(t *testing.T) {
 	}
 
 	mapping := &userapiinternal.UserIdentityMapping{
-		Identity: kapi.ObjectReference{Name: unassociatedIdentity.Name},
-		User:     kapi.ObjectReference{Name: unassociatedUser.Name},
+		Identity: corev1.ObjectReference{Name: unassociatedIdentity.Name},
+		User:     corev1.ObjectReference{Name: unassociatedUser.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(unassociatedIdentity, unassociatedUser)
@@ -265,8 +263,8 @@ func TestCreateExists(t *testing.T) {
 	}
 
 	mapping := &userapiinternal.UserIdentityMapping{
-		Identity: kapi.ObjectReference{Name: identity.Name},
-		User:     kapi.ObjectReference{Name: user.Name},
+		Identity: corev1.ObjectReference{Name: identity.Name},
+		User:     corev1.ObjectReference{Name: user.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(identity, user)
@@ -288,8 +286,8 @@ func TestCreateMissingIdentity(t *testing.T) {
 	}
 
 	mapping := &userapiinternal.UserIdentityMapping{
-		Identity: kapi.ObjectReference{Name: identity.Name},
-		User:     kapi.ObjectReference{Name: user.Name},
+		Identity: corev1.ObjectReference{Name: identity.Name},
+		User:     corev1.ObjectReference{Name: user.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(nil, user)
@@ -312,8 +310,8 @@ func TestCreateMissingUser(t *testing.T) {
 	}
 
 	mapping := &userapiinternal.UserIdentityMapping{
-		Identity: kapi.ObjectReference{Name: identity.Name},
-		User:     kapi.ObjectReference{Name: user.Name},
+		Identity: corev1.ObjectReference{Name: identity.Name},
+		User:     corev1.ObjectReference{Name: user.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(identity)
@@ -339,8 +337,8 @@ func TestCreateUserUpdateError(t *testing.T) {
 	expectedErr := errors.New("UpdateUser error")
 
 	mapping := &userapiinternal.UserIdentityMapping{
-		Identity: kapi.ObjectReference{Name: unassociatedIdentity.Name},
-		User:     kapi.ObjectReference{Name: unassociatedUser.Name},
+		Identity: corev1.ObjectReference{Name: unassociatedIdentity.Name},
+		User:     corev1.ObjectReference{Name: unassociatedUser.Name},
 	}
 
 	actions, userRegistry, _, rest := setupRegistries(unassociatedIdentity, unassociatedUser)
@@ -367,8 +365,8 @@ func TestCreateIdentityUpdateError(t *testing.T) {
 	}
 
 	mapping := &userapiinternal.UserIdentityMapping{
-		Identity: kapi.ObjectReference{Name: unassociatedIdentity.Name},
-		User:     kapi.ObjectReference{Name: unassociatedUser.Name},
+		Identity: corev1.ObjectReference{Name: unassociatedIdentity.Name},
+		User:     corev1.ObjectReference{Name: unassociatedUser.Name},
 	}
 
 	actions, _, identityRegistry, rest := setupRegistries(unassociatedIdentity, unassociatedUser)
@@ -408,8 +406,8 @@ func TestUpdate(t *testing.T) {
 
 	mapping := &userapiinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{ResourceVersion: unassociatedIdentity1.ResourceVersion},
-		Identity:   kapi.ObjectReference{Name: unassociatedIdentity1.Name},
-		User:       kapi.ObjectReference{Name: unassociatedUser2.Name},
+		Identity:   corev1.ObjectReference{Name: unassociatedIdentity1.Name},
+		User:       corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
@@ -439,8 +437,8 @@ func TestUpdateMissingIdentity(t *testing.T) {
 
 	mapping := &userapiinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{ResourceVersion: unassociatedIdentity1.ResourceVersion},
-		Identity:   kapi.ObjectReference{Name: unassociatedIdentity1.Name},
-		User:       kapi.ObjectReference{Name: unassociatedUser2.Name},
+		Identity:   corev1.ObjectReference{Name: unassociatedIdentity1.Name},
+		User:       corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(nil, associatedUser1, unassociatedUser2)
@@ -472,8 +470,8 @@ func TestUpdateMissingUser(t *testing.T) {
 
 	mapping := &userapiinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{ResourceVersion: unassociatedIdentity1.ResourceVersion},
-		Identity:   kapi.ObjectReference{Name: unassociatedIdentity1.Name},
-		User:       kapi.ObjectReference{Name: unassociatedUser2.Name},
+		Identity:   corev1.ObjectReference{Name: unassociatedIdentity1.Name},
+		User:       corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1)
@@ -499,8 +497,8 @@ func TestUpdateOldUserMatches(t *testing.T) {
 
 	mapping := &userapiinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{ResourceVersion: identity.ResourceVersion},
-		Identity:   kapi.ObjectReference{Name: identity.Name},
-		User:       kapi.ObjectReference{Name: user.Name},
+		Identity:   corev1.ObjectReference{Name: identity.Name},
+		User:       corev1.ObjectReference{Name: user.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(identity, user)
@@ -530,8 +528,8 @@ func TestUpdateWithEmptyResourceVersion(t *testing.T) {
 	}
 
 	mapping := &userapiinternal.UserIdentityMapping{
-		Identity: kapi.ObjectReference{Name: unassociatedIdentity1.Name},
-		User:     kapi.ObjectReference{Name: unassociatedUser2.Name},
+		Identity: corev1.ObjectReference{Name: unassociatedIdentity1.Name},
+		User:     corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
@@ -561,8 +559,8 @@ func TestUpdateWithMismatchedResourceVersion(t *testing.T) {
 
 	mapping := &userapiinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{ResourceVersion: "123"},
-		Identity:   kapi.ObjectReference{Name: unassociatedIdentity1.Name},
-		User:       kapi.ObjectReference{Name: unassociatedUser2.Name},
+		Identity:   corev1.ObjectReference{Name: unassociatedIdentity1.Name},
+		User:       corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
 
 	actions, _, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
@@ -602,8 +600,8 @@ func TestUpdateOldUserUpdateError(t *testing.T) {
 
 	mapping := &userapiinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{ResourceVersion: unassociatedIdentity1.ResourceVersion},
-		Identity:   kapi.ObjectReference{Name: unassociatedIdentity1.Name},
-		User:       kapi.ObjectReference{Name: unassociatedUser2.Name},
+		Identity:   corev1.ObjectReference{Name: unassociatedIdentity1.Name},
+		User:       corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
 
 	actions, userRegistry, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
@@ -642,8 +640,8 @@ func TestUpdateUserUpdateError(t *testing.T) {
 
 	mapping := &userapiinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{ResourceVersion: unassociatedIdentity1.ResourceVersion},
-		Identity:   kapi.ObjectReference{Name: unassociatedIdentity1.Name},
-		User:       kapi.ObjectReference{Name: unassociatedUser2.Name},
+		Identity:   corev1.ObjectReference{Name: unassociatedIdentity1.Name},
+		User:       corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
 
 	actions, userRegistry, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
@@ -682,8 +680,8 @@ func TestUpdateIdentityUpdateError(t *testing.T) {
 
 	mapping := &userapiinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{ResourceVersion: unassociatedIdentity1.ResourceVersion},
-		Identity:   kapi.ObjectReference{Name: unassociatedIdentity1.Name},
-		User:       kapi.ObjectReference{Name: unassociatedUser2.Name},
+		Identity:   corev1.ObjectReference{Name: unassociatedIdentity1.Name},
+		User:       corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
 
 	actions, _, identityRegistry, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)

@@ -3,12 +3,13 @@ package oauthclient
 import (
 	"context"
 
-	oauthapi "github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth"
-	"github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth/validation"
+	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
+
+	oauthapi "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth"
+	"github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth/validation"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/registry/rest"
-	"k8s.io/kubernetes/pkg/api/legacyscheme"
 )
 
 // strategy implements behavior for OAuthClient objects
@@ -18,7 +19,7 @@ type strategy struct {
 
 // Strategy is the default logic that applies when creating or updating OAuthClient objects
 // objects via the REST API.
-var Strategy = strategy{legacyscheme.Scheme}
+var Strategy = strategy{serverscheme.Scheme}
 
 var _ rest.GarbageCollectionDeleteStrategy = strategy{}
 

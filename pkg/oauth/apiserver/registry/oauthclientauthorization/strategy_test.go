@@ -4,9 +4,25 @@ import (
 	"testing"
 
 	oauth "github.com/openshift/api/oauth/v1"
-	"github.com/openshift/apiserver-library-go/pkg/authorization/scope"
-	oauthapi "github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth"
+	oauthapi "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// these are constants copied from the apiserver-library-go repo to avoid a transitive on kube for a string const
+const (
+	UserIndicator   = "user:"
+	UserInfo        = UserIndicator + "info"
+	UserAccessCheck = UserIndicator + "check-access"
+
+	// UserListScopedProjects gives explicit permission to see the projects that this token can see.
+	UserListScopedProjects = UserIndicator + "list-scoped-projects"
+
+	// UserListAllProjects gives explicit permission to see the projects a user can see.  This is often used to prime secondary ACL systems
+	// unrelated to openshift and to display projects for selection in a secondary UI.
+	UserListAllProjects = UserIndicator + "list-projects"
+
+	// UserFull includes all permissions of the user
+	UserFull = UserIndicator + "full"
 )
 
 // TestValidateScopeUpdate asserts that a live client lookup only occurs when new scopes are added during an update
@@ -20,32 +36,32 @@ func TestValidateScopeUpdate(t *testing.T) {
 		{
 			name:           "both equal",
 			expectedCalled: false,
-			obj:            []string{scope.UserAccessCheck},
-			old:            []string{scope.UserAccessCheck},
+			obj:            []string{UserAccessCheck},
+			old:            []string{UserAccessCheck},
 		},
 		{
 			name:           "new scopes from empty",
 			expectedCalled: true,
-			obj:            []string{scope.UserFull},
+			obj:            []string{UserFull},
 			old:            []string{},
 		},
 		{
 			name:           "new scopes from non-empty",
 			expectedCalled: true,
-			obj:            []string{scope.UserFull},
-			old:            []string{scope.UserInfo},
+			obj:            []string{UserFull},
+			old:            []string{UserInfo},
 		},
 		{
 			name:           "deleted scopes",
 			expectedCalled: false,
-			obj:            []string{scope.UserFull},
-			old:            []string{scope.UserFull, scope.UserInfo},
+			obj:            []string{UserFull},
+			old:            []string{UserFull, UserInfo},
 		},
 		{
 			name:           "deleted and added scopes",
 			expectedCalled: true,
-			obj:            []string{scope.UserFull, scope.UserAccessCheck},
-			old:            []string{scope.UserFull, scope.UserInfo},
+			obj:            []string{UserFull, UserAccessCheck},
+			old:            []string{UserFull, UserInfo},
 		},
 	} {
 		clientGetter := &wasCalledClientGetter{}
@@ -77,7 +93,7 @@ func TestValidateScopeUpdateFailures(t *testing.T) {
 			name:           "deleted scopes to empty",
 			expectedCalled: true,
 			obj:            []string{},
-			old:            []string{scope.UserFull},
+			old:            []string{UserFull},
 		},
 	} {
 		clientGetter := &wasCalledClientGetter{}

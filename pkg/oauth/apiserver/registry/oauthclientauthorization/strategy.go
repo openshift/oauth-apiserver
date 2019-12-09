@@ -9,12 +9,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/registry/rest"
-	"k8s.io/kubernetes/pkg/api/legacyscheme"
 
 	scopemetadata "github.com/openshift/library-go/pkg/authorization/scopemetadata"
-	oauthapi "github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth"
-	"github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth/validation"
-	"github.com/openshift/openshift-apiserver/pkg/oauth/apiserver/registry/oauthclient"
+	oauthapi "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth"
+	"github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth/validation"
+	"github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthclient"
+	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 )
 
 // strategy implements behavior for OAuthClientAuthorization objects
@@ -25,7 +25,7 @@ type strategy struct {
 }
 
 func NewStrategy(clientGetter oauthclient.Getter) strategy {
-	return strategy{ObjectTyper: legacyscheme.Scheme, clientGetter: clientGetter}
+	return strategy{ObjectTyper: serverscheme.Scheme, clientGetter: clientGetter}
 }
 
 var _ rest.GarbageCollectionDeleteStrategy = strategy{}

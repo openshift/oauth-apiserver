@@ -11,17 +11,23 @@ import (
 
 	userapiv1 "github.com/openshift/api/user/v1"
 	userclient "github.com/openshift/client-go/user/clientset/versioned"
-	groupetcd "github.com/openshift/openshift-apiserver/pkg/user/apiserver/registry/group/etcd"
-	identityetcd "github.com/openshift/openshift-apiserver/pkg/user/apiserver/registry/identity/etcd"
-	useretcd "github.com/openshift/openshift-apiserver/pkg/user/apiserver/registry/user/etcd"
-	"github.com/openshift/openshift-apiserver/pkg/user/apiserver/registry/useridentitymapping"
+	userinstall "github.com/openshift/oauth-apiserver/pkg/user/apis/user/install"
+	groupetcd "github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/group/etcd"
+	identityetcd "github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/identity/etcd"
+	useretcd "github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/user/etcd"
+	"github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/useridentitymapping"
 )
 
-type ExtraConfig struct {
-	// TODO these should all become local eventually
-	Scheme *runtime.Scheme
-	Codecs serializer.CodecFactory
+var (
+	scheme = runtime.NewScheme()
+	codecs = serializer.NewCodecFactory(scheme)
+)
 
+func init() {
+	userinstall.Install(scheme)
+}
+
+type ExtraConfig struct {
 	makeV1Storage sync.Once
 	v1Storage     map[string]rest.Storage
 	v1StorageErr  error
@@ -72,7 +78,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		return nil, err
 	}
 
-	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(userapiv1.GroupName, c.ExtraConfig.Scheme, metav1.ParameterCodec, c.ExtraConfig.Codecs)
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(userapiv1.GroupName, scheme, metav1.ParameterCodec, codecs)
 	apiGroupInfo.VersionedResourcesStorageMap[userapiv1.SchemeGroupVersion.Version] = v1Storage
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
 		return nil, err

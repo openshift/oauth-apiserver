@@ -6,14 +6,14 @@ import (
 	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage"
-	"k8s.io/kubernetes/pkg/printers"
-	printerstorage "k8s.io/kubernetes/pkg/printers/storage"
 
 	"github.com/openshift/api/oauth"
-	oauthapi "github.com/openshift/openshift-apiserver/pkg/oauth/apis/oauth"
-	"github.com/openshift/openshift-apiserver/pkg/oauth/apiserver/registry/oauthclient"
-	"github.com/openshift/openshift-apiserver/pkg/oauth/apiserver/registry/oauthclientauthorization"
-	oauthprinters "github.com/openshift/openshift-apiserver/pkg/oauth/printers/internalversion"
+	oauthapi "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth"
+	"github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthclient"
+	"github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthclientauthorization"
+	oauthprinters "github.com/openshift/oauth-apiserver/pkg/oauth/printers/internalversion"
+	"github.com/openshift/oauth-apiserver/pkg/printers"
+	"github.com/openshift/oauth-apiserver/pkg/printerstorage"
 )
 
 // rest implements a RESTStorage for oauth client authorizations against etcd
