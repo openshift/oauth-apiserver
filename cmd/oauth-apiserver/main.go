@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/openshift/library-go/pkg/serviceability"
-	oauth_apiserver "github.com/openshift/oauth-apiserver/pkg/cmd/auth-apiserver"
+	oauth_apiserver "github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"

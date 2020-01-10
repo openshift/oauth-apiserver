@@ -2,6 +2,7 @@ package oauth_apiserver
 
 import (
 	"io"
+	"time"
 
 	"github.com/spf13/cobra"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
@@ -25,6 +26,8 @@ const (
 
 type OAuthAPIServerOptions struct {
 	RecommendedOptions *genericapiserveroptions.RecommendedOptions
+
+	ShutdownDelayDuration time.Duration
 
 	Output io.Writer
 }
