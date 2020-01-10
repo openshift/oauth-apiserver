@@ -48,7 +48,7 @@ func NewOAuthAPIServerCommand() *cobra.Command {
 			os.Exit(1)
 		},
 	}
-	start := oauth_apiserver.NewOpenShiftAPIServerCommand("start", os.Stdout)
+	start := oauth_apiserver.NewOAuthAPIServerCommand("start", os.Stdout)
 	cmd.AddCommand(start)
 
 	return cmd

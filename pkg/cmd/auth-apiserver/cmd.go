@@ -49,7 +49,7 @@ func (o *OAuthAPIServerOptions) Complete() error {
 	return nil
 }
 
-func NewOpenShiftAPIServerCommand(name string, out io.Writer) *cobra.Command {
+func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 	stopCh := genericapiserver.SetupSignalHandler()
 	o := NewOAuthAPIServerOptions(out)
 
