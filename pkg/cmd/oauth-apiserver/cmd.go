@@ -2,13 +2,11 @@ package oauth_apiserver
 
 import (
 	"io"
-	"time"
 
 	"github.com/spf13/cobra"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
-	utilfeature "k8s.io/apiserver/pkg/util/feature"
 
 	"github.com/openshift/library-go/pkg/serviceability"
 	"github.com/openshift/oauth-apiserver/pkg/apiserver"
@@ -25,15 +23,15 @@ const (
 )
 
 type OAuthAPIServerOptions struct {
-	RecommendedOptions *genericapiserveroptions.RecommendedOptions
-
-	ShutdownDelayDuration time.Duration
+	GenericServerRunOptions *genericapiserveroptions.ServerRunOptions
+	RecommendedOptions      *genericapiserveroptions.RecommendedOptions
 
 	Output io.Writer
 }
 
 func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 	return &OAuthAPIServerOptions{
+		GenericServerRunOptions: genericapiserveroptions.NewServerRunOptions(),
 		RecommendedOptions: genericapiserveroptions.NewRecommendedOptions(
 			etcdStoragePrefix,
 			serverscheme.Codecs.LegacyCodec(serverscheme.Scheme.PrioritizedVersionsAllGroups()...),
@@ -44,6 +42,7 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 
 func (o OAuthAPIServerOptions) Validate(args []string) error {
 	errors := []error{}
+	errors = append(errors, o.GenericServerRunOptions.Validate()...)
 	errors = append(errors, o.RecommendedOptions.Validate()...)
 	return utilerrors.NewAggregate(errors)
 }
@@ -77,8 +76,8 @@ func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
+	o.GenericServerRunOptions.AddUniversalFlags(flags)
 	o.RecommendedOptions.AddFlags(flags)
-	utilfeature.DefaultMutableFeatureGate.AddFlag(flags)
 
 	return cmd
 }
