@@ -3,14 +3,14 @@ package oauth_apiserver
 import (
 	"io"
 
+	"github.com/spf13/cobra"
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	genericapiserver "k8s.io/apiserver/pkg/server"
-
-	"github.com/openshift/oauth-apiserver/pkg/apiserver"
+	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 
 	"github.com/openshift/library-go/pkg/serviceability"
-	"github.com/spf13/cobra"
-	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
-	"k8s.io/klog"
+	"github.com/openshift/oauth-apiserver/pkg/apiserver"
 
 	// to force compiling
 	_ "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
@@ -39,6 +39,16 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 	}
 }
 
+func (o OAuthAPIServerOptions) Validate(args []string) error {
+	errors := []error{}
+	errors = append(errors, o.RecommendedOptions.Validate()...)
+	return utilerrors.NewAggregate(errors)
+}
+
+func (o *OAuthAPIServerOptions) Complete() error {
+	return nil
+}
+
 func NewOpenShiftAPIServerCommand(name string, out io.Writer) *cobra.Command {
 	stopCh := genericapiserver.SetupSignalHandler()
 	o := NewOAuthAPIServerOptions(out)
@@ -46,14 +56,26 @@ func NewOpenShiftAPIServerCommand(name string, out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   name,
 		Short: "Launch OpenShift OAuth API Server",
-		Run: func(c *cobra.Command, args []string) {
+		RunE: func(c *cobra.Command, args []string) error {
 			serviceability.StartProfiler()
 
-			if err := o.Run(stopCh); err != nil {
-				klog.Fatal(err)
+			if err := o.Complete(); err != nil {
+				return err
 			}
+			if err := o.Validate(args); err != nil {
+				return err
+			}
+			if err := o.Run(stopCh); err != nil {
+				return err
+			}
+
+			return nil
 		},
 	}
+
+	flags := cmd.Flags()
+	o.RecommendedOptions.AddFlags(flags)
+	utilfeature.DefaultMutableFeatureGate.AddFlag(flags)
 
 	return cmd
 }
