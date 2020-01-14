@@ -3,6 +3,7 @@ package apiserver
 import (
 	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	restclient "k8s.io/client-go/rest"
 
 	openshiftcontrolplanev1 "github.com/openshift/api/openshiftcontrolplane/v1"
 	oauthapiserver "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
@@ -20,6 +21,7 @@ type OAuthAPIServer struct {
 
 type completedConfig struct {
 	GenericConfig genericapiserver.CompletedConfig
+	ClientConfig  *restclient.Config
 }
 
 // CompletedConfig embeds a private pointer that cannot be instantiated outside of this package.
@@ -37,6 +39,7 @@ func NewConfig() *Config {
 func (cfg *Config) Complete() CompletedConfig {
 	c := completedConfig{
 		GenericConfig: cfg.GenericConfig.Complete(),
+		ClientConfig:  cfg.GenericConfig.ClientConfig,
 	}
 
 	v := version.Get()
@@ -73,7 +76,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 
 func (c *completedConfig) withOAuthAPIServer(delegateAPIServer genericapiserver.DelegationTarget) (genericapiserver.DelegationTarget, error) {
 	cfg := &oauthapiserver.OAuthAPIServerConfig{
-		GenericConfig: &genericapiserver.RecommendedConfig{Config: *c.GenericConfig.Config, SharedInformerFactory: c.GenericConfig.SharedInformerFactory},
+		GenericConfig: &genericapiserver.RecommendedConfig{Config: *c.GenericConfig.Config, SharedInformerFactory: c.GenericConfig.SharedInformerFactory, ClientConfig: c.ClientConfig},
 		ExtraConfig: oauthapiserver.ExtraConfig{
 			// no one is allowed to set this today
 			ServiceAccountMethod: string(openshiftcontrolplanev1.GrantHandlerPrompt),
@@ -90,7 +93,7 @@ func (c *completedConfig) withOAuthAPIServer(delegateAPIServer genericapiserver.
 
 func (c *completedConfig) withUserAPIServer(delegateAPIServer genericapiserver.DelegationTarget) (genericapiserver.DelegationTarget, error) {
 	cfg := &userapiserver.UserConfig{
-		GenericConfig: &genericapiserver.RecommendedConfig{Config: *c.GenericConfig.Config, SharedInformerFactory: c.GenericConfig.SharedInformerFactory},
+		GenericConfig: &genericapiserver.RecommendedConfig{Config: *c.GenericConfig.Config, SharedInformerFactory: c.GenericConfig.SharedInformerFactory, ClientConfig: c.ClientConfig},
 		ExtraConfig:   userapiserver.ExtraConfig{},
 	}
 	config := cfg.Complete()
