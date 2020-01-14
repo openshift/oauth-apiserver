@@ -108,9 +108,12 @@ func StartTestServer(t Logger, instanceOptions *TestServerInstanceOptions, custo
 	}
 	o.RecommendedOptions.SecureServing.ServerCert.FixtureDirectory = path.Join(path.Dir(thisFile), "testdata")
 
-	// use special etcd if specified only
+	// use special etcd if specified only, preserving codecs
 	if storageConfig != nil {
+		orig := o.RecommendedOptions.Etcd.StorageConfig
 		o.RecommendedOptions.Etcd.StorageConfig = *storageConfig
+		o.RecommendedOptions.Etcd.StorageConfig.Codec = orig.Codec
+		o.RecommendedOptions.Etcd.StorageConfig.EncodeVersioner = orig.EncodeVersioner
 	}
 
 	if err := fs.Parse(customFlags); err != nil {
