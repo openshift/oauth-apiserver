@@ -127,6 +127,7 @@ github.com/openshift/client-go/oauth/clientset/versioned/typed/oauth/v1
 github.com/openshift/client-go/route/clientset/versioned/typed/route/v1
 github.com/openshift/client-go/user/clientset/versioned
 github.com/openshift/client-go/user/clientset/versioned/typed/user/v1
+github.com/openshift/client-go/oauth/clientset/versioned
 github.com/openshift/client-go/oauth/clientset/versioned/scheme
 github.com/openshift/client-go/route/clientset/versioned/scheme
 github.com/openshift/client-go/user/clientset/versioned/scheme
@@ -176,20 +177,17 @@ github.com/xiang90/probing
 # go.etcd.io/bbolt v1.3.3
 go.etcd.io/bbolt
 # go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738
-go.etcd.io/etcd/client
 go.etcd.io/etcd/clientv3
+go.etcd.io/etcd/pkg/transport
+go.etcd.io/etcd/client
 go.etcd.io/etcd/etcdserver
 go.etcd.io/etcd/etcdserver/api/etcdhttp
 go.etcd.io/etcd/etcdserver/api/v2http
 go.etcd.io/etcd/integration
 go.etcd.io/etcd/pkg/testutil
-go.etcd.io/etcd/pkg/transport
 go.etcd.io/etcd/pkg/types
 go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes
 go.etcd.io/etcd/mvcc/mvccpb
-go.etcd.io/etcd/pkg/pathutil
-go.etcd.io/etcd/pkg/srv
-go.etcd.io/etcd/version
 go.etcd.io/etcd/auth/authpb
 go.etcd.io/etcd/clientv3/balancer
 go.etcd.io/etcd/clientv3/balancer/picker
@@ -197,6 +195,10 @@ go.etcd.io/etcd/clientv3/balancer/resolver/endpoint
 go.etcd.io/etcd/clientv3/credentials
 go.etcd.io/etcd/etcdserver/etcdserverpb
 go.etcd.io/etcd/pkg/logutil
+go.etcd.io/etcd/pkg/tlsutil
+go.etcd.io/etcd/pkg/pathutil
+go.etcd.io/etcd/pkg/srv
+go.etcd.io/etcd/version
 go.etcd.io/etcd/auth
 go.etcd.io/etcd/etcdserver/api
 go.etcd.io/etcd/etcdserver/api/membership
@@ -235,7 +237,6 @@ go.etcd.io/etcd/etcdserver/api/v3election/v3electionpb
 go.etcd.io/etcd/etcdserver/api/v3lock
 go.etcd.io/etcd/etcdserver/api/v3lock/v3lockpb
 go.etcd.io/etcd/etcdserver/api/v3rpc
-go.etcd.io/etcd/pkg/tlsutil
 go.etcd.io/etcd/proxy/grpcproxy
 go.etcd.io/etcd/proxy/grpcproxy/adapter
 go.etcd.io/etcd/clientv3/balancer/connectivity
@@ -356,12 +357,12 @@ google.golang.org/genproto/googleapis/api/httpbody
 google.golang.org/genproto/protobuf/field_mask
 # google.golang.org/grpc v1.23.1
 google.golang.org/grpc
+google.golang.org/grpc/status
 google.golang.org/grpc/codes
 google.golang.org/grpc/credentials
 google.golang.org/grpc/grpclog
 google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
-google.golang.org/grpc/status
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/connectivity
@@ -385,11 +386,11 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/tap
 google.golang.org/grpc/credentials/internal
-google.golang.org/grpc/health
-google.golang.org/grpc/health/grpc_health_v1
 google.golang.org/grpc/balancer/base
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/internal/syscall
+google.golang.org/grpc/health
+google.golang.org/grpc/health/grpc_health_v1
 # gopkg.in/inf.v0 v0.9.1
 gopkg.in/inf.v0
 # gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -500,7 +501,6 @@ k8s.io/apiserver/pkg/server
 k8s.io/apiserver/pkg/endpoints/openapi
 k8s.io/apiserver/pkg/server/options
 k8s.io/apiserver/pkg/registry/generic/registry
-k8s.io/apiserver/pkg/storage/etcd3/testing
 k8s.io/apiserver/pkg/storage/storagebackend
 k8s.io/apiserver/pkg/authentication/serviceaccount
 k8s.io/apiserver/pkg/registry/rest
@@ -556,12 +556,12 @@ k8s.io/apiserver/plugin/pkg/audit/dynamic/enforced
 k8s.io/apiserver/plugin/pkg/audit/log
 k8s.io/apiserver/plugin/pkg/audit/truncate
 k8s.io/apiserver/plugin/pkg/audit/webhook
+k8s.io/apiserver/pkg/storage/etcd3/testing
 k8s.io/apiserver/pkg/storage/cacher
 k8s.io/apiserver/pkg/storage/errors
 k8s.io/apiserver/pkg/storage/etcd3
 k8s.io/apiserver/pkg/storage/etcd3/metrics
 k8s.io/apiserver/pkg/util/dryrun
-k8s.io/apiserver/pkg/storage/etcd3/testing/testingcert
 k8s.io/apiserver/pkg/storage/value
 k8s.io/apiserver/pkg/storage/names
 k8s.io/apiserver/pkg/admission/configuration
@@ -595,6 +595,7 @@ k8s.io/apiserver/pkg/storage/value/encrypt/secretbox
 k8s.io/apiserver/pkg/apis/audit/install
 k8s.io/apiserver/pkg/audit/util
 k8s.io/apiserver/pkg/audit/event
+k8s.io/apiserver/pkg/storage/etcd3/testing/testingcert
 k8s.io/apiserver/pkg/admission/plugin/webhook/config
 k8s.io/apiserver/pkg/admission/plugin/webhook/namespace
 k8s.io/apiserver/pkg/admission/plugin/webhook/object
