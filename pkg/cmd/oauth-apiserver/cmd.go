@@ -1,15 +1,22 @@
 package oauth_apiserver
 
 import (
+	"fmt"
 	"io"
+	"net"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
 
 	"github.com/openshift/library-go/pkg/serviceability"
+
 	"github.com/openshift/oauth-apiserver/pkg/apiserver"
+	oauthopenapi "github.com/openshift/oauth-apiserver/pkg/openapi"
+	"github.com/openshift/oauth-apiserver/pkg/version"
 
 	// to force compiling
 	_ "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
@@ -30,7 +37,7 @@ type OAuthAPIServerOptions struct {
 }
 
 func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
-	return &OAuthAPIServerOptions{
+	o := &OAuthAPIServerOptions{
 		GenericServerRunOptions: genericapiserveroptions.NewServerRunOptions(),
 		RecommendedOptions: genericapiserveroptions.NewRecommendedOptions(
 			etcdStoragePrefix,
@@ -38,6 +45,13 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 			nil),
 		Output: out,
 	}
+	o.RecommendedOptions.Etcd.StorageConfig.Paging = true
+	return o
+}
+
+func (o *OAuthAPIServerOptions) AddFlags(fs *pflag.FlagSet) {
+	o.GenericServerRunOptions.AddUniversalFlags(fs)
+	o.RecommendedOptions.AddFlags(fs)
 }
 
 func (o OAuthAPIServerOptions) Validate(args []string) error {
@@ -67,30 +81,35 @@ func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 			if err := o.Validate(args); err != nil {
 				return err
 			}
-			if err := o.Run(stopCh); err != nil {
+
+			s, err := o.NewOAuthAPIServer()
+			if err != nil {
 				return err
 			}
-
-			return nil
+			return s.GenericAPIServer.PrepareRun().Run(stopCh)
 		},
 	}
 
 	flags := cmd.Flags()
-	o.GenericServerRunOptions.AddUniversalFlags(flags)
-	o.RecommendedOptions.AddFlags(flags)
+	o.AddFlags(flags)
 
 	return cmd
 }
 
-// Run takes the options, starts the API server and waits until stopCh is closed or initial listening fails.
-func (o *OAuthAPIServerOptions) Run(stopCh <-chan struct{}) error {
+func (o *OAuthAPIServerOptions) NewOAuthAPIServer() (*apiserver.OAuthAPIServer, error) {
+	if err := o.RecommendedOptions.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{net.ParseIP("127.0.0.1")}); err != nil {
+		return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
+	}
+
 	serverConfig := apiserver.NewConfig()
+
+	serverConfig.GenericConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(oauthopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(serverscheme.Scheme))
+	serverConfig.GenericConfig.OpenAPIConfig.Info.Title = "oauth-apiserver"
+	serverConfig.GenericConfig.OpenAPIConfig.Info.Version = version.Get().String()
+
 	if err := o.RecommendedOptions.ApplyTo(serverConfig.GenericConfig); err != nil {
-		return err
+		return nil, err
 	}
-	server, err := serverConfig.Complete().New(genericapiserver.NewEmptyDelegate())
-	if err != nil {
-		return err
-	}
-	return server.GenericAPIServer.PrepareRun().Run(stopCh)
+
+	return serverConfig.Complete().New(genericapiserver.NewEmptyDelegate())
 }
