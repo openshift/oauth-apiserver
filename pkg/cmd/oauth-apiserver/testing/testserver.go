@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -152,7 +153,7 @@ func StartTestServer(t Logger, instanceOptions *TestServerInstanceOptions, custo
 		default:
 		}
 
-		result := client.CoreV1().RESTClient().Get().AbsPath("/healthz").Do()
+		result := client.CoreV1().RESTClient().Get().AbsPath("/healthz").Do(context.TODO())
 		status := 0
 		result.StatusCode(&status)
 		if status == 200 {
