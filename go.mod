@@ -7,6 +7,7 @@ require (
 	github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40 // indirect
 	github.com/getsentry/raven-go v0.2.0 // indirect
 	github.com/go-openapi/spec v0.19.3
+	github.com/google/btree v1.0.0
 	github.com/google/gofuzz v1.1.0
 	github.com/google/uuid v1.1.2
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
@@ -26,6 +27,7 @@ require (
 	k8s.io/client-go v0.20.1
 	k8s.io/code-generator v0.20.1
 	k8s.io/component-base v0.20.1
+	k8s.io/klog/v2 v2.4.0
 	k8s.io/kube-aggregator v0.20.1
 	k8s.io/kube-openapi v0.0.0-20201113171705-d219536bb9fd
 	k8s.io/kubernetes v1.20.1
