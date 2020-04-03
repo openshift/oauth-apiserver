@@ -1,6 +1,7 @@
 package oauth_apiserver_test
 
 import (
+	"context"
 	"testing"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +27,7 @@ func TestServerStartUp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := oauthClient.OauthV1().OAuthAccessTokens().List(metav1.ListOptions{}); err != nil {
+	if _, err := oauthClient.OauthV1().OAuthAccessTokens().List(context.TODO(), metav1.ListOptions{}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -34,7 +35,7 @@ func TestServerStartUp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := userClient.UserV1().Groups().List(metav1.ListOptions{}); err != nil {
+	if _, err := userClient.UserV1().Groups().List(context.TODO(), metav1.ListOptions{}); err != nil {
 		t.Fatal(err)
 	}
 }

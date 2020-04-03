@@ -10,6 +10,7 @@ API rule violation: list_type_missing,github.com/openshift/api/build/v1,BuildSou
 API rule violation: list_type_missing,github.com/openshift/api/build/v1,BuildSource,Images
 API rule violation: list_type_missing,github.com/openshift/api/build/v1,BuildSource,Secrets
 API rule violation: list_type_missing,github.com/openshift/api/build/v1,BuildSpec,TriggeredBy
+API rule violation: list_type_missing,github.com/openshift/api/build/v1,BuildStatus,Conditions
 API rule violation: list_type_missing,github.com/openshift/api/build/v1,BuildStatus,Stages
 API rule violation: list_type_missing,github.com/openshift/api/build/v1,CustomBuildStrategy,Env
 API rule violation: list_type_missing,github.com/openshift/api/build/v1,CustomBuildStrategy,Secrets
@@ -99,6 +100,8 @@ API rule violation: list_type_missing,github.com/openshift/api/config/v1,Schedul
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,ServingInfo,CipherSuites
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,ServingInfo,NamedCertificates
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,TLSProfileSpec,Ciphers
+API rule violation: list_type_missing,github.com/openshift/api/config/v1,featureSetBuilder,forceOff
+API rule violation: list_type_missing,github.com/openshift/api/config/v1,featureSetBuilder,forceOn
 API rule violation: list_type_missing,github.com/openshift/api/oauth/v1,ClusterRoleScopeRestriction,Namespaces
 API rule violation: list_type_missing,github.com/openshift/api/oauth/v1,ClusterRoleScopeRestriction,RoleNames
 API rule violation: list_type_missing,github.com/openshift/api/oauth/v1,OAuthAccessToken,Scopes
@@ -237,6 +240,7 @@ API rule violation: list_type_missing,k8s.io/api/autoscaling/v2beta1,HorizontalP
 API rule violation: list_type_missing,k8s.io/api/autoscaling/v2beta1,HorizontalPodAutoscalerSpec,Metrics
 API rule violation: list_type_missing,k8s.io/api/autoscaling/v2beta1,HorizontalPodAutoscalerStatus,Conditions
 API rule violation: list_type_missing,k8s.io/api/autoscaling/v2beta1,HorizontalPodAutoscalerStatus,CurrentMetrics
+API rule violation: list_type_missing,k8s.io/api/autoscaling/v2beta2,HPAScalingRules,Policies
 API rule violation: list_type_missing,k8s.io/api/autoscaling/v2beta2,HorizontalPodAutoscalerList,Items
 API rule violation: list_type_missing,k8s.io/api/autoscaling/v2beta2,HorizontalPodAutoscalerSpec,Metrics
 API rule violation: list_type_missing,k8s.io/api/autoscaling/v2beta2,HorizontalPodAutoscalerStatus,Conditions
@@ -493,6 +497,7 @@ API rule violation: list_type_missing,k8s.io/api/settings/v1alpha1,PodPresetSpec
 API rule violation: list_type_missing,k8s.io/api/settings/v1alpha1,PodPresetSpec,EnvFrom
 API rule violation: list_type_missing,k8s.io/api/settings/v1alpha1,PodPresetSpec,VolumeMounts
 API rule violation: list_type_missing,k8s.io/api/settings/v1alpha1,PodPresetSpec,Volumes
+API rule violation: list_type_missing,k8s.io/api/storage/v1,CSIDriverList,Items
 API rule violation: list_type_missing,k8s.io/api/storage/v1,CSINodeDriver,TopologyKeys
 API rule violation: list_type_missing,k8s.io/api/storage/v1,CSINodeList,Items
 API rule violation: list_type_missing,k8s.io/api/storage/v1,CSINodeSpec,Drivers
@@ -606,8 +611,12 @@ API rule violation: names_match,github.com/openshift/api/config/v1,IdentityProvi
 API rule violation: names_match,github.com/openshift/api/config/v1,IdentityProviderConfig,HTPasswd
 API rule violation: names_match,github.com/openshift/api/config/v1,InfrastructureStatus,APIServerInternalURL
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformStatus,BareMetal
+API rule violation: names_match,github.com/openshift/api/config/v1,PlatformStatus,IBMCloud
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformStatus,OpenStack
+API rule violation: names_match,github.com/openshift/api/config/v1,PlatformStatus,VSphere
 API rule violation: names_match,github.com/openshift/api/config/v1,RequestHeaderIdentityProvider,ClientCA
+API rule violation: names_match,github.com/openshift/api/config/v1,featureSetBuilder,forceOff
+API rule violation: names_match,github.com/openshift/api/config/v1,featureSetBuilder,forceOn
 API rule violation: names_match,github.com/openshift/api/oauth/v1,ScopeRestriction,ExactValues
 API rule violation: names_match,github.com/openshift/api/osin/v1,IdentityProvider,UseAsChallenger
 API rule violation: names_match,github.com/openshift/api/osin/v1,IdentityProvider,UseAsLogin
@@ -640,7 +649,6 @@ API rule violation: names_match,k8s.io/api/core/v1,RBDVolumeSource,RBDPool
 API rule violation: names_match,k8s.io/api/core/v1,RBDVolumeSource,RadosUser
 API rule violation: names_match,k8s.io/api/core/v1,VolumeSource,CephFS
 API rule violation: names_match,k8s.io/api/core/v1,VolumeSource,StorageOS
-API rule violation: names_match,k8s.io/api/policy/v1beta1,PodDisruptionBudgetStatus,PodDisruptionsAllowed
 API rule violation: names_match,k8s.io/apimachinery/pkg/api/resource,Quantity,Format
 API rule violation: names_match,k8s.io/apimachinery/pkg/api/resource,Quantity,d
 API rule violation: names_match,k8s.io/apimachinery/pkg/api/resource,Quantity,i
