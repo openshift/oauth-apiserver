@@ -2,7 +2,10 @@ reviewers:
   - deads2k
   - mfojtik
   - sttts
+  - stlaz
+  - p0lyn0mial
 approvers:
   - deads2k
   - mfojtik
   - sttts
+component: oauth-apiserver
