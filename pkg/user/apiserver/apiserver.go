@@ -4,31 +4,17 @@ import (
 	"sync"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 
 	userapiv1 "github.com/openshift/api/user/v1"
 	userclient "github.com/openshift/client-go/user/clientset/versioned"
-	userinstall "github.com/openshift/oauth-apiserver/pkg/user/apis/user/install"
+	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 	groupetcd "github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/group/etcd"
 	identityetcd "github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/identity/etcd"
 	useretcd "github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/user/etcd"
 	"github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/useridentitymapping"
 )
-
-var (
-	scheme = runtime.NewScheme()
-	codecs = serializer.NewCodecFactory(scheme)
-)
-
-func init() {
-	metav1.AddToGroupVersion(scheme, metav1.SchemeGroupVersion)
-	metav1.AddToGroupVersion(scheme, schema.GroupVersion{Group: "", Version: "v1"})
-	userinstall.Install(scheme)
-}
 
 type ExtraConfig struct {
 	makeV1Storage sync.Once
@@ -81,7 +67,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		return nil, err
 	}
 
-	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(userapiv1.GroupName, scheme, metav1.ParameterCodec, codecs)
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(userapiv1.GroupName, serverscheme.Scheme, metav1.ParameterCodec, serverscheme.Codecs)
 	apiGroupInfo.VersionedResourcesStorageMap[userapiv1.SchemeGroupVersion.Version] = v1Storage
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
 		return nil, err
