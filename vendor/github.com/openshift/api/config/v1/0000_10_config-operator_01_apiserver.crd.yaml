@@ -40,6 +40,7 @@ spec:
         metadata:
           type: object
         spec:
+          description: spec holds user settable values for configuration
           type: object
           properties:
             additionalCORSAllowedOrigins:
@@ -52,6 +53,25 @@ spec:
               type: array
               items:
                 type: string
+            audit:
+              description: audit specifies the settings for audit configuration to
+                be applied to all OpenShift-provided API servers in the cluster.
+              type: object
+              default:
+                profile: Default
+              properties:
+                profile:
+                  description: "profile specifies the name of the desired audit policy
+                    configuration to be deployed to all OpenShift-provided API servers
+                    in the cluster \n We provide the following profiles - Default
+                    - WriteRequestBodies - AllRequestBodies If unset, the 'Default'
+                    profile is used as the default."
+                  type: string
+                  default: Default
+                  enum:
+                  - Default
+                  - WriteRequestBodies
+                  - AllRequestBodies
             clientCA:
               description: 'clientCA references a ConfigMap containing a certificate
                 bundle for the signers that will be recognized for incoming client
@@ -226,4 +246,6 @@ spec:
                   - Modern
                   - Custom
         status:
+          description: status holds observed values from the cluster. They may not
+            be overridden.
           type: object
