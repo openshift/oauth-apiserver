@@ -44,7 +44,7 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 		RecommendedOptions: genericapiserveroptions.NewRecommendedOptions(
 			etcdStoragePrefix,
 			serverscheme.Codecs.LegacyCodec(serverscheme.Scheme.PrioritizedVersionsAllGroups()...),
-			nil),
+		),
 		Output: out,
 	}
 	o.RecommendedOptions.Etcd.StorageConfig.Paging = true
