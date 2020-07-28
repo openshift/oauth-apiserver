@@ -5,7 +5,6 @@ go 1.13
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40 // indirect
-	github.com/emicklei/go-restful v2.9.5+incompatible
 	github.com/getsentry/raven-go v0.2.0 // indirect
 	github.com/go-openapi/spec v0.19.3
 	github.com/google/gofuzz v1.1.0
