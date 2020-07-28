@@ -14,6 +14,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/registry/generic/registry"
+	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/apiserver/pkg/storage/storagebackend"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -129,20 +130,30 @@ func StartTestServer(t Logger, instanceOptions *TestServerInstanceOptions, custo
 
 	t.Logf("Starting oauth-apiserver on port %d...", o.RecommendedOptions.SecureServing.BindPort)
 
-	server, err := o.NewOAuthAPIServer()
+	serverConfig, err := o.NewOAuthAPIServerConfig()
 	if err != nil {
 		return result, fmt.Errorf("failed to create API server: %v", err)
 	}
+	completedServerConfig := serverConfig.Complete()
+	oauthAPIServer, err := completedServerConfig.New(genericapiserver.NewEmptyDelegate())
+	if err != nil {
+		return result, err
+	}
+	preparedOAuthServer := oauthAPIServer.GenericAPIServer.PrepareRun()
+	if err := completedServerConfig.WithOpenAPIAggregationController(preparedOAuthServer.GenericAPIServer); err != nil {
+		return result, err
+	}
+
 	errCh := make(chan error)
 	go func(stopCh <-chan struct{}) {
-		if err := server.GenericAPIServer.PrepareRun().Run(stopCh); err != nil {
+		if err := preparedOAuthServer.Run(stopCh); err != nil {
 			errCh <- err
 		}
 	}(stopCh)
 
 	t.Logf("Waiting for /healthz to be ok...")
 
-	client, err := kubernetes.NewForConfig(server.GenericAPIServer.LoopbackClientConfig)
+	client, err := kubernetes.NewForConfig(preparedOAuthServer.GenericAPIServer.LoopbackClientConfig)
 	if err != nil {
 		return result, fmt.Errorf("failed to create a client: %v", err)
 	}
@@ -166,7 +177,7 @@ func StartTestServer(t Logger, instanceOptions *TestServerInstanceOptions, custo
 	}
 
 	// from here the caller must call tearDown
-	result.ClientConfig = server.GenericAPIServer.LoopbackClientConfig
+	result.ClientConfig = preparedOAuthServer.GenericAPIServer.LoopbackClientConfig
 	result.TearDownFn = tearDown
 
 	return result, nil

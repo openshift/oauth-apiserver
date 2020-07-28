@@ -1,13 +1,18 @@
 package apiserver
 
 import (
+	genericapiserver "k8s.io/apiserver/pkg/server"
+	restclient "k8s.io/client-go/rest"
+	openapicontroller "k8s.io/kube-aggregator/pkg/controllers/openapi"
+	"k8s.io/kube-aggregator/pkg/controllers/openapi/aggregator"
+
 	openshiftcontrolplanev1 "github.com/openshift/api/openshiftcontrolplane/v1"
+
+	"github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver/openapiconfig"
 	oauthapiserver "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 	userapiserver "github.com/openshift/oauth-apiserver/pkg/user/apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/version"
-	genericapiserver "k8s.io/apiserver/pkg/server"
-	restclient "k8s.io/client-go/rest"
 )
 
 type Config struct {
@@ -102,4 +107,31 @@ func (c *completedConfig) withUserAPIServer(delegateAPIServer genericapiserver.D
 	}
 
 	return server.GenericAPIServer, nil
+}
+
+func (c *completedConfig) WithOpenAPIAggregationController(delegatedAPIServer *genericapiserver.GenericAPIServer) error {
+	// We must remove openapi config-related fields from the head of the delegation chain that we pass to the OpenAPI aggregation controller.
+	// This is necessary in order to prevent conflicts with the aggregation controller, as it expects the apiserver passed to it to have
+	// no openapi config previously set. An alternative to stripping this data away would be to create and append a new apiserver to the head
+	// of the delegation chain altogether, then pass that to the controller. But in the spirit of simplicity, we'll just strip default
+	// openapi fields that may have been previously set.
+	delegatedAPIServer.RemoveOpenAPIData()
+
+	specDownloader := aggregator.NewDownloader()
+	openAPIAggregator, err := aggregator.BuildAndRegisterAggregator(
+		&specDownloader,
+		delegatedAPIServer,
+		delegatedAPIServer.Handler.GoRestfulContainer.RegisteredWebServices(),
+		openapiconfig.DefaultOpenAPIConfig(),
+		delegatedAPIServer.Handler.NonGoRestfulMux)
+	if err != nil {
+		return err
+	}
+	openAPIAggregationController := openapicontroller.NewAggregationController(&specDownloader, openAPIAggregator)
+
+	delegatedAPIServer.AddPostStartHook("apiservice-openapi-controller", func(context genericapiserver.PostStartHookContext) error {
+		go openAPIAggregationController.Run(context.StopCh)
+		return nil
+	})
+	return nil
 }

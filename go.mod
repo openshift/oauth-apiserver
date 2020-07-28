@@ -3,7 +3,9 @@ module github.com/openshift/oauth-apiserver
 go 1.13
 
 require (
+	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40 // indirect
+	github.com/emicklei/go-restful v2.9.5+incompatible
 	github.com/getsentry/raven-go v0.2.0 // indirect
 	github.com/go-openapi/spec v0.19.3
 	github.com/google/gofuzz v1.1.0
@@ -17,11 +19,13 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
 	k8s.io/api v0.18.0
+	k8s.io/apiextensions-apiserver v0.18.0
 	k8s.io/apimachinery v0.18.0
 	k8s.io/apiserver v0.18.0
 	k8s.io/client-go v0.18.0
 	k8s.io/code-generator v0.18.0
 	k8s.io/component-base v0.18.0
+	k8s.io/kube-aggregator v0.18.0
 	k8s.io/kube-openapi v0.0.0-20200121204235-bf4fb3bd569c
 	k8s.io/kubernetes v0.0.0-00010101000000-000000000000
 )

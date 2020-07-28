@@ -1,10 +1,7 @@
-package configprocessing
+package openapiconfig
 
 import (
-	"strings"
-
 	"github.com/MakeNowJust/heredoc"
-	"github.com/emicklei/go-restful"
 	"github.com/go-openapi/spec"
 
 	extensionsapiserver "k8s.io/apiextensions-apiserver/pkg/apiserver"
@@ -13,8 +10,8 @@ import (
 	openapicommon "k8s.io/kube-openapi/pkg/common"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 
-	openapigenerated "github.com/openshift/openshift-apiserver/pkg/openapi"
-	"github.com/openshift/openshift-apiserver/pkg/version"
+	openapigenerated "github.com/openshift/oauth-apiserver/pkg/openapi"
+	"github.com/openshift/oauth-apiserver/pkg/version"
 )
 
 func DefaultOpenAPIConfig() *openapicommon.Config {
@@ -33,37 +30,24 @@ func DefaultOpenAPIConfig() *openapicommon.Config {
 		GetDefinitions:    openapigenerated.GetOpenAPIDefinitions,
 		IgnorePrefixes:    []string{"/swaggerapi", "/healthz", "/controllers", "/metrics", "/version/openshift", "/brokers"},
 		GetDefinitionName: defNamer.GetDefinitionName,
-		GetOperationIDAndTags: func(r *restful.Route) (string, []string, error) {
-			op := r.Operation
-			path := r.Path
-			// DEPRECATED: These endpoints are going to be removed in 1.8 or 1.9 release.
-			if strings.HasPrefix(path, "/apis/template.openshift.io/v1/namespaces/{namespace}/processedtemplates") {
-				op = "createNamespacedProcessedTemplateV1"
-			} else if strings.HasPrefix(path, "/apis/template.openshift.io/v1/processedtemplates") {
-				op = "createProcessedTemplateForAllNamespaces"
-			}
-			if op != r.Operation {
-				return op, []string{}, nil
-			}
-			return apiserverendpointsopenapi.GetOperationIDAndTags(r)
-		},
 		Info: &spec.Info{
 			InfoProps: spec.InfoProps{
-				Title:   "OpenShift API (with Kubernetes)",
+				Title:   "OpenShift OAuth-related APIs",
 				Version: version.Get().String(),
 				License: &spec.License{
 					Name: "Apache 2.0 (ASL2.0)",
 					URL:  "http://www.apache.org/licenses/LICENSE-2.0",
 				},
 				Description: heredoc.Doc(`
-					OpenShift provides builds, application lifecycle, image content management,
-					and administrative policy on top of Kubernetes. The API allows consistent
-					management of those objects.
+					OpenShift OAuth APIs provide access and authorization tokens,
+					users, groups and similar objects required for OpenShift integrated
+					OAuth authentication to work on top of Kubernetes. The API allows
+					consistent management of those objects.
 
-					All API operations are authenticated via an Authorization	bearer token that
+					All API operations are authenticated via an Authorization bearer token that
 					is provided for service accounts as a generated secret (in JWT form) or via
-					the native OAuth endpoint located at /oauth/authorize. Core infrastructure
-					components may use client certificates that require no authentication.
+					the native OAuth access tokens. Core infrastructure components may use client
+					certificates that require no authentication.
 
 					All API operations return a 'resourceVersion' string that represents the
 					version of the object in the underlying storage. The standard LIST operation
