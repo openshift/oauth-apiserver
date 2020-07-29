@@ -7,16 +7,19 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	"github.com/openshift/library-go/pkg/serviceability"
+	"github.com/openshift/oauth-apiserver/pkg/apiserver"
+	oauthopenapi "github.com/openshift/oauth-apiserver/pkg/openapi"
+	"github.com/openshift/oauth-apiserver/pkg/version"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
-
-	"github.com/openshift/library-go/pkg/serviceability"
-
-	"github.com/openshift/oauth-apiserver/pkg/apiserver"
-	oauthopenapi "github.com/openshift/oauth-apiserver/pkg/openapi"
-	"github.com/openshift/oauth-apiserver/pkg/version"
+	"k8s.io/apiserver/pkg/server/options/encryptionconfig"
+	apiserverstorage "k8s.io/apiserver/pkg/server/storage"
+	serverstorage "k8s.io/apiserver/pkg/server/storage"
 
 	// to force compiling
 	_ "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
@@ -111,5 +114,40 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServer() (*apiserver.OAuthAPIServer, 
 		return nil, err
 	}
 
+	o.RecommendedOptions.Etcd.DefaultStorageMediaType = "application/vnd.kubernetes.protobuf"
+
+	storageFactory := apiserverstorage.NewDefaultStorageFactory(
+		o.RecommendedOptions.Etcd.StorageConfig,
+		o.RecommendedOptions.Etcd.DefaultStorageMediaType,
+		serverscheme.Codecs,
+		apiserverstorage.NewDefaultResourceEncodingConfig(serverscheme.Scheme),
+		&serverstorage.ResourceConfig{},
+		specialDefaultResourcePrefixes,
+	)
+
+	if len(o.RecommendedOptions.Etcd.EncryptionProviderConfigFilepath) != 0 {
+		transformerOverrides, err := encryptionconfig.GetTransformerOverrides(o.RecommendedOptions.Etcd.EncryptionProviderConfigFilepath)
+		if err != nil {
+			return nil, err
+		}
+		for groupResource, transformer := range transformerOverrides {
+			storageFactory.SetTransformer(groupResource, transformer)
+		}
+	}
+	if err := o.RecommendedOptions.Etcd.ApplyWithStorageFactoryTo(storageFactory, &serverConfig.GenericConfig.Config); err != nil {
+		return nil, err
+	}
+
 	return serverConfig.Complete().New(genericapiserver.NewEmptyDelegate())
+}
+
+// specialDefaultResourcePrefixes are a custom storage prefixes (we must be backward compatible with OpenShift API)
+var specialDefaultResourcePrefixes = map[schema.GroupResource]string{
+	{Resource: "oauthaccesstokens", Group: "oauth.openshift.io"}:    "oauth/accesstokens",
+	{Resource: "oauthauthorizetokens", Group: "oauth.openshift.io"}: "oauth/authorizetokens",
+
+	{Resource: "oauthclients", Group: "oauth.openshift.io"}:              "oauth/clients",
+	{Resource: "oauthclientauthorizations", Group: "oauth.openshift.io"}: "oauth/clientauthorizations",
+
+	{Resource: "identities", Group: "user.openshift.io"}: "useridentities",
 }

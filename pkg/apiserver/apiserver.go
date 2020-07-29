@@ -1,14 +1,13 @@
 package apiserver
 
 import (
-	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
-	genericapiserver "k8s.io/apiserver/pkg/server"
-	restclient "k8s.io/client-go/rest"
-
 	openshiftcontrolplanev1 "github.com/openshift/api/openshiftcontrolplane/v1"
 	oauthapiserver "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
+	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 	userapiserver "github.com/openshift/oauth-apiserver/pkg/user/apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/version"
+	genericapiserver "k8s.io/apiserver/pkg/server"
+	restclient "k8s.io/client-go/rest"
 )
 
 type Config struct {
