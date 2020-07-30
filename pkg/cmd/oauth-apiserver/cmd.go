@@ -8,22 +8,21 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/openshift/library-go/pkg/serviceability"
-	"github.com/openshift/oauth-apiserver/pkg/apiserver"
-	oauthopenapi "github.com/openshift/oauth-apiserver/pkg/openapi"
-	"github.com/openshift/oauth-apiserver/pkg/version"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-	"k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
 	"k8s.io/apiserver/pkg/server/options/encryptionconfig"
 	apiserverstorage "k8s.io/apiserver/pkg/server/storage"
-	serverstorage "k8s.io/apiserver/pkg/server/storage"
+
+	"github.com/openshift/library-go/pkg/serviceability"
+
+	"github.com/openshift/oauth-apiserver/pkg/apiserver"
+	"github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver/openapiconfig"
+	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 
 	// to force compiling
 	_ "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
-	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 	_ "github.com/openshift/oauth-apiserver/pkg/user/apiserver"
 )
 
@@ -45,7 +44,7 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 		RecommendedOptions: genericapiserveroptions.NewRecommendedOptions(
 			etcdStoragePrefix,
 			serverscheme.Codecs.LegacyCodec(serverscheme.Scheme.PrioritizedVersionsAllGroups()...),
-			nil),
+		),
 		Output: out,
 	}
 	o.RecommendedOptions.Etcd.StorageConfig.Paging = true
@@ -84,12 +83,7 @@ func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 			if err := o.Validate(args); err != nil {
 				return err
 			}
-
-			s, err := o.NewOAuthAPIServer()
-			if err != nil {
-				return err
-			}
-			return s.GenericAPIServer.PrepareRun().Run(stopCh)
+			return RunOAuthAPIServer(o, stopCh)
 		},
 	}
 
@@ -99,16 +93,31 @@ func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func (o *OAuthAPIServerOptions) NewOAuthAPIServer() (*apiserver.OAuthAPIServer, error) {
+func RunOAuthAPIServer(serverOptions *OAuthAPIServerOptions, stopCh <-chan struct{}) error {
+	oauthAPIServerConfig, err := serverOptions.NewOAuthAPIServerConfig()
+	if err != nil {
+		return err
+	}
+	completedOAuthAPIServerConfig := oauthAPIServerConfig.Complete()
+
+	oauthAPIServer, err := completedOAuthAPIServerConfig.New(genericapiserver.NewEmptyDelegate())
+	if err != nil {
+		return err
+	}
+	preparedOAuthServer := oauthAPIServer.GenericAPIServer.PrepareRun()
+	if err := completedOAuthAPIServerConfig.WithOpenAPIAggregationController(preparedOAuthServer.GenericAPIServer); err != nil {
+		return err
+	}
+	return preparedOAuthServer.Run(stopCh)
+}
+
+func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, error) {
 	if err := o.RecommendedOptions.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{net.ParseIP("127.0.0.1")}); err != nil {
 		return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
 	}
 
 	serverConfig := apiserver.NewConfig()
-
-	serverConfig.GenericConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(oauthopenapi.GetOpenAPIDefinitions, openapi.NewDefinitionNamer(serverscheme.Scheme))
-	serverConfig.GenericConfig.OpenAPIConfig.Info.Title = "oauth-apiserver"
-	serverConfig.GenericConfig.OpenAPIConfig.Info.Version = version.Get().String()
+	serverConfig.GenericConfig.OpenAPIConfig = openapiconfig.DefaultOpenAPIConfig()
 
 	if err := o.RecommendedOptions.ApplyTo(serverConfig.GenericConfig); err != nil {
 		return nil, err
@@ -121,7 +130,7 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServer() (*apiserver.OAuthAPIServer, 
 		o.RecommendedOptions.Etcd.DefaultStorageMediaType,
 		serverscheme.Codecs,
 		apiserverstorage.NewDefaultResourceEncodingConfig(serverscheme.Scheme),
-		&serverstorage.ResourceConfig{},
+		&apiserverstorage.ResourceConfig{},
 		specialDefaultResourcePrefixes,
 	)
 
@@ -138,7 +147,7 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServer() (*apiserver.OAuthAPIServer, 
 		return nil, err
 	}
 
-	return serverConfig.Complete().New(genericapiserver.NewEmptyDelegate())
+	return serverConfig, nil
 }
 
 // specialDefaultResourcePrefixes are a custom storage prefixes (we must be backward compatible with OpenShift API)
