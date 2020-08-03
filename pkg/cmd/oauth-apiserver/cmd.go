@@ -123,8 +123,9 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 		return nil, err
 	}
 
+	// the following section overwrites RESTOptionsGetter
+	// note we don't call ApplyWithStorageFactoryTo explicitly to prevent double registration of storage related health checks
 	o.RecommendedOptions.Etcd.DefaultStorageMediaType = "application/vnd.kubernetes.protobuf"
-
 	storageFactory := apiserverstorage.NewDefaultStorageFactory(
 		o.RecommendedOptions.Etcd.StorageConfig,
 		o.RecommendedOptions.Etcd.DefaultStorageMediaType,
@@ -133,7 +134,6 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 		&apiserverstorage.ResourceConfig{},
 		specialDefaultResourcePrefixes,
 	)
-
 	if len(o.RecommendedOptions.Etcd.EncryptionProviderConfigFilepath) != 0 {
 		transformerOverrides, err := encryptionconfig.GetTransformerOverrides(o.RecommendedOptions.Etcd.EncryptionProviderConfigFilepath)
 		if err != nil {
@@ -143,9 +143,7 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 			storageFactory.SetTransformer(groupResource, transformer)
 		}
 	}
-	if err := o.RecommendedOptions.Etcd.ApplyWithStorageFactoryTo(storageFactory, &serverConfig.GenericConfig.Config); err != nil {
-		return nil, err
-	}
+	serverConfig.GenericConfig.RESTOptionsGetter = &genericapiserveroptions.StorageFactoryRestOptionsFactory{Options: *o.RecommendedOptions.Etcd, StorageFactory: storageFactory}
 
 	return serverConfig, nil
 }
