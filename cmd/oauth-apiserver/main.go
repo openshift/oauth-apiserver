@@ -29,6 +29,7 @@ func main() {
 	defer serviceability.Profile(os.Getenv("OPENSHIFT_PROFILE")).Stop()
 
 	if len(os.Getenv("GOMAXPROCS")) == 0 {
+
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
