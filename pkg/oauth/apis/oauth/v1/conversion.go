@@ -16,6 +16,9 @@ func addFieldSelectorKeyConversions(scheme *runtime.Scheme) error {
 	if err := scheme.AddFieldLabelConversionFunc(v1.GroupVersion.WithKind("OAuthClientAuthorization"), oauthClientAuthorizationFieldSelectorKeyConversionFunc); err != nil {
 		return err
 	}
+	if err := scheme.AddFieldLabelConversionFunc(v1.GroupVersion.WithKind("UserOAuthAccessToken"), userOAuthClientAuthorizationFieldSelectorKeyConversionFunc); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -50,6 +53,15 @@ func oauthClientAuthorizationFieldSelectorKeyConversionFunc(label, value string)
 	case "clientName",
 		"userName",
 		"userUID":
+		return label, value, nil
+	default:
+		return runtime.DefaultMetaV1FieldSelectorConversion(label, value)
+	}
+}
+
+func userOAuthClientAuthorizationFieldSelectorKeyConversionFunc(label, value string) (internalLabel, internalValue string, err error) {
+	switch label {
+	case "clientName":
 		return label, value, nil
 	default:
 		return runtime.DefaultMetaV1FieldSelectorConversion(label, value)
