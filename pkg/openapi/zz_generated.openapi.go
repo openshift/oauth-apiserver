@@ -246,6 +246,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/oauth/v1.OAuthRedirectReference":                                        schema_openshift_api_oauth_v1_OAuthRedirectReference(ref),
 		"github.com/openshift/api/oauth/v1.RedirectReference":                                             schema_openshift_api_oauth_v1_RedirectReference(ref),
 		"github.com/openshift/api/oauth/v1.ScopeRestriction":                                              schema_openshift_api_oauth_v1_ScopeRestriction(ref),
+		"github.com/openshift/api/oauth/v1.UserOAuthAccessToken":                                          schema_openshift_api_oauth_v1_UserOAuthAccessToken(ref),
+		"github.com/openshift/api/oauth/v1.UserOAuthAccessTokenList":                                      schema_openshift_api_oauth_v1_UserOAuthAccessTokenList(ref),
 		"github.com/openshift/api/openshiftcontrolplane/v1.BuildControllerConfig":                         schema_openshift_api_openshiftcontrolplane_v1_BuildControllerConfig(ref),
 		"github.com/openshift/api/openshiftcontrolplane/v1.BuildDefaultsConfig":                           schema_openshift_api_openshiftcontrolplane_v1_BuildDefaultsConfig(ref),
 		"github.com/openshift/api/openshiftcontrolplane/v1.BuildOverridesConfig":                          schema_openshift_api_openshiftcontrolplane_v1_BuildOverridesConfig(ref),
@@ -292,6 +294,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/osin/v1.SessionSecret":                                                  schema_openshift_api_osin_v1_SessionSecret(ref),
 		"github.com/openshift/api/osin/v1.SessionSecrets":                                                 schema_openshift_api_osin_v1_SessionSecrets(ref),
 		"github.com/openshift/api/osin/v1.TokenConfig":                                                    schema_openshift_api_osin_v1_TokenConfig(ref),
+		"github.com/openshift/api/project/v1.Project":                                                     schema_openshift_api_project_v1_Project(ref),
+		"github.com/openshift/api/project/v1.ProjectList":                                                 schema_openshift_api_project_v1_ProjectList(ref),
+		"github.com/openshift/api/project/v1.ProjectRequest":                                              schema_openshift_api_project_v1_ProjectRequest(ref),
+		"github.com/openshift/api/project/v1.ProjectSpec":                                                 schema_openshift_api_project_v1_ProjectSpec(ref),
+		"github.com/openshift/api/project/v1.ProjectStatus":                                               schema_openshift_api_project_v1_ProjectStatus(ref),
 		"github.com/openshift/api/route/v1.Route":                                                         schema_openshift_api_route_v1_Route(ref),
 		"github.com/openshift/api/route/v1.RouteIngress":                                                  schema_openshift_api_route_v1_RouteIngress(ref),
 		"github.com/openshift/api/route/v1.RouteIngressCondition":                                         schema_openshift_api_route_v1_RouteIngressCondition(ref),
@@ -7368,7 +7375,7 @@ func schema_openshift_api_config_v1_InfrastructureStatus(ref common.ReferenceCal
 					},
 					"etcdDiscoveryDomain": {
 						SchemaProps: spec.SchemaProps{
-							Description: "etcdDiscoveryDomain is the domain used to fetch the SRV records for discovering etcd servers and clients. For more info: https://github.com/etcd-io/etcd/blob/329be66e8b3f9e2e6af83c123ff89297e49ebd15/Documentation/op-guide/clustering.md#dns-discovery",
+							Description: "etcdDiscoveryDomain is the domain used to fetch the SRV records for discovering etcd servers and clients. For more info: https://github.com/etcd-io/etcd/blob/329be66e8b3f9e2e6af83c123ff89297e49ebd15/Documentation/op-guide/clustering.md#dns-discovery deprecated: as of 4.7, this field is no longer set or honored.  It will be removed in a future release.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -7498,6 +7505,13 @@ func schema_openshift_api_config_v1_IngressSpec(ref common.ReferenceCallback) co
 					"domain": {
 						SchemaProps: spec.SchemaProps{
 							Description: "domain is used to generate a default host name for a route when the route's host name is empty. The generated host name will follow this pattern: \"<route-name>.<route-namespace>.<domain>\".\n\nIt is also used as the default wildcard domain suffix for ingress. The default ingresscontroller domain will follow this pattern: \"*.<domain>\".\n\nOnce set, changing domain is not currently supported.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"appsDomain": {
+						SchemaProps: spec.SchemaProps{
+							Description: "appsDomain is an optional domain to use instead of the one specified in the domain field when a Route is created without specifying an explicit host. If appsDomain is nonempty, this value is used to generate default host values for Route. Unlike domain, appsDomain may be modified after installation. This assumes a new ingresscontroller has been setup with a wildcard certificate.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -9317,6 +9331,25 @@ func schema_openshift_api_config_v1_RegistrySources(ref common.ReferenceCallback
 							},
 						},
 					},
+					"containerRuntimeSearchRegistries": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "containerRuntimeSearchRegistries are registries that will be searched when pulling images that do not have fully qualified domains in their pull specs. Registries will be searched in the order provided in the list. Note: this search list only works with the container runtime, i.e CRI-O. Will NOT work with builds or imagestream imports.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -9621,7 +9654,7 @@ func schema_openshift_api_config_v1_SchedulerSpec(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"policy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "policy is a reference to a ConfigMap containing scheduler policy which has user specified predicates and priorities. If this ConfigMap is not available scheduler will default to use DefaultAlgorithmProvider. The namespace for this configmap is openshift-config.",
+							Description: "DEPRECATED: the scheduler Policy API has been deprecated and will be removed in a future release. policy is a reference to a ConfigMap containing scheduler policy which has user specified predicates and priorities. If this ConfigMap is not available scheduler will default to use DefaultAlgorithmProvider. The namespace for this configmap is openshift-config.",
 							Ref:         ref("github.com/openshift/api/config/v1.ConfigMapNameReference"),
 						},
 					},
@@ -10935,6 +10968,157 @@ func schema_openshift_api_oauth_v1_ScopeRestriction(ref common.ReferenceCallback
 		},
 		Dependencies: []string{
 			"github.com/openshift/api/oauth/v1.ClusterRoleScopeRestriction"},
+	}
+}
+
+func schema_openshift_api_oauth_v1_UserOAuthAccessToken(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UserOAuthAccessToken is a virtual resource to mirror OAuthAccessTokens to the user the access token was issued for",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"clientName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientName references the client that created this token.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"expiresIn": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ExpiresIn is the seconds from CreationTime before this token expires.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"scopes": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Scopes is an array of the requested scopes.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"redirectURI": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RedirectURI is the redirection associated with the token.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"userName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UserName is the user name associated with this token",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"userUID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UserUID is the unique UID associated with this token",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"authorizeToken": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AuthorizeToken contains the token that authorized this token",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"refreshToken": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RefreshToken is the value by which this token can be renewed. Can be blank.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"inactivityTimeoutSeconds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "InactivityTimeoutSeconds is the value in seconds, from the CreationTimestamp, after which this token can no longer be used. The value is automatically incremented when the token is used.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_openshift_api_oauth_v1_UserOAuthAccessTokenList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UserOAuthAccessTokenList is a collection of access tokens issued on behalf of the requesting user",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openshift/api/oauth/v1.UserOAuthAccessToken"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/oauth/v1.UserOAuthAccessToken", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -13357,6 +13541,216 @@ func schema_openshift_api_osin_v1_TokenConfig(ref common.ReferenceCallback) comm
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.Duration"},
+	}
+}
+
+func schema_openshift_api_project_v1_Project(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Projects are the unit of isolation and collaboration in OpenShift. A project has one or more members, a quota on the resources that the project may consume, and the security controls on the resources in the project. Within a project, members may have different roles - project administrators can set membership, editors can create and manage the resources, and viewers can see but not access running containers. In a normal cluster project administrators are not able to alter their quotas - that is restricted to cluster administrators.\n\nListing or watching projects will return only projects the user has the reader role on.\n\nAn OpenShift project is an alternative representation of a Kubernetes namespace. Projects are exposed as editable to end users while namespaces are not. Direct creation of a project is typically restricted to administrators, while end users should use the requestproject resource.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Spec defines the behavior of the Namespace.",
+							Ref:         ref("github.com/openshift/api/project/v1.ProjectSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Status describes the current status of a Namespace",
+							Ref:         ref("github.com/openshift/api/project/v1.ProjectStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/project/v1.ProjectSpec", "github.com/openshift/api/project/v1.ProjectStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_openshift_api_project_v1_ProjectList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ProjectList is a list of Project objects.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Items is the list of projects",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openshift/api/project/v1.Project"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/project/v1.Project", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_openshift_api_project_v1_ProjectRequest(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ProjecRequest is the set of options necessary to fully qualify a project request",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"displayName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DisplayName is the display name to apply to a project",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"description": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Description is the description to apply to a project",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_openshift_api_project_v1_ProjectSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ProjectSpec describes the attributes on a Project",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"finalizers": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Finalizers is an opaque list of values that must be empty to permanently remove object from storage",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_openshift_api_project_v1_ProjectStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ProjectStatus is information about the current status of a Project",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"phase": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Phase is the current lifecycle phase of the project",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "Represents the latest available observations of the project current state.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.NamespaceCondition"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.NamespaceCondition"},
 	}
 }
 
