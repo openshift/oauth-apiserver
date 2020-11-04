@@ -129,6 +129,8 @@ github.com/jteeuwen/go-bindata
 github.com/jteeuwen/go-bindata/go-bindata
 # github.com/konsorten/go-windows-terminal-sequences v1.0.3
 github.com/konsorten/go-windows-terminal-sequences
+# github.com/kubernetes-sigs/kube-storage-version-migrator v0.0.0-20191127225502-51849bc15f17
+## explicit
 # github.com/mailru/easyjson v0.7.0
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
@@ -143,7 +145,7 @@ github.com/modern-go/concurrent
 github.com/modern-go/reflect2
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 github.com/munnerz/goautoneg
-# github.com/openshift/api v0.0.0-20200723134351-89de68875e7c
+# github.com/openshift/api v0.0.0-20201019163320-c6a5ec25f267
 ## explicit
 github.com/openshift/api/build/v1
 github.com/openshift/api/config/v1
@@ -154,7 +156,7 @@ github.com/openshift/api/osin/v1
 github.com/openshift/api/route/v1
 github.com/openshift/api/user
 github.com/openshift/api/user/v1
-# github.com/openshift/build-machinery-go v0.0.0-20200713135615-1f43d26dccc7
+# github.com/openshift/build-machinery-go v0.0.0-20200917070002-f171684f77ab
 ## explicit
 github.com/openshift/build-machinery-go
 github.com/openshift/build-machinery-go/make
@@ -164,7 +166,7 @@ github.com/openshift/build-machinery-go/make/targets/golang
 github.com/openshift/build-machinery-go/make/targets/openshift
 github.com/openshift/build-machinery-go/make/targets/openshift/operator
 github.com/openshift/build-machinery-go/scripts
-# github.com/openshift/client-go v0.0.0-20200722173614-5a1b0aaeff15
+# github.com/openshift/client-go v0.0.0-20201020074620-f8fd44879f7c
 ## explicit
 github.com/openshift/client-go/oauth/clientset/versioned
 github.com/openshift/client-go/oauth/clientset/versioned/scheme
@@ -175,10 +177,11 @@ github.com/openshift/client-go/user/clientset/versioned
 github.com/openshift/client-go/user/clientset/versioned/scheme
 github.com/openshift/client-go/user/clientset/versioned/typed/user/v1
 github.com/openshift/client-go/user/clientset/versioned/typed/user/v1/fake
-# github.com/openshift/library-go v0.0.0-20200724235449-b4f9ae5f0c51
+# github.com/openshift/library-go v0.0.0-20201102091359-c4fa0f5b3a08
 ## explicit
 github.com/openshift/library-go/pkg/authentication/bootstrapauthenticator
 github.com/openshift/library-go/pkg/authorization/scopemetadata
+github.com/openshift/library-go/pkg/network
 github.com/openshift/library-go/pkg/oauth/oauthserviceaccountclient
 github.com/openshift/library-go/pkg/serviceability
 # github.com/pkg/errors v0.9.1
@@ -741,7 +744,7 @@ k8s.io/apiserver/plugin/pkg/audit/truncate
 k8s.io/apiserver/plugin/pkg/audit/webhook
 k8s.io/apiserver/plugin/pkg/authenticator/token/webhook
 k8s.io/apiserver/plugin/pkg/authorizer/webhook
-# k8s.io/client-go v0.19.2 => k8s.io/client-go v0.19.2
+# k8s.io/client-go v0.19.2 => github.com/openshift/kubernetes-client-go v0.0.0-20201104094117-806c7d66cfea
 ## explicit
 k8s.io/client-go/discovery
 k8s.io/client-go/dynamic
@@ -975,7 +978,7 @@ k8s.io/gengo/generator
 k8s.io/gengo/namer
 k8s.io/gengo/parser
 k8s.io/gengo/types
-# k8s.io/klog/v2 v2.2.0
+# k8s.io/klog/v2 v2.3.0
 k8s.io/klog/v2
 # k8s.io/kube-aggregator v0.19.2 => k8s.io/kube-aggregator v0.19.2
 ## explicit
@@ -1026,7 +1029,7 @@ sigs.k8s.io/yaml
 # k8s.io/apimachinery => k8s.io/apimachinery v0.19.2
 # k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20201019143247-401ead4ea686
 # k8s.io/cli-runtime => k8s.io/cli-runtime v0.19.2
-# k8s.io/client-go => k8s.io/client-go v0.19.2
+# k8s.io/client-go => github.com/openshift/kubernetes-client-go v0.0.0-20201104094117-806c7d66cfea
 # k8s.io/cloud-provider => k8s.io/cloud-provider v0.19.2
 # k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.19.2
 # k8s.io/code-generator => k8s.io/code-generator v0.19.2
