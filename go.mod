@@ -10,10 +10,10 @@ require (
 	github.com/google/gofuzz v1.1.0
 	github.com/google/uuid v1.1.1
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
-	github.com/openshift/api v0.0.0-20200723134351-89de68875e7c
-	github.com/openshift/build-machinery-go v0.0.0-20200713135615-1f43d26dccc7
-	github.com/openshift/client-go v0.0.0-20200722173614-5a1b0aaeff15
-	github.com/openshift/library-go v0.0.0-20200724235449-b4f9ae5f0c51
+	github.com/openshift/api v0.0.0-20201019163320-c6a5ec25f267
+	github.com/openshift/build-machinery-go v0.0.0-20200917070002-f171684f77ab
+	github.com/openshift/client-go v0.0.0-20201020074620-f8fd44879f7c
+	github.com/openshift/library-go v0.0.0-20201102091359-c4fa0f5b3a08
 	github.com/pkg/profile v1.4.0 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
@@ -35,7 +35,7 @@ replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.19.2
 	k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20201019143247-401ead4ea686 // points to openshift-apiserver-4.7-kubernetes-1.19.2
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.19.2
-	k8s.io/client-go => k8s.io/client-go v0.19.2
+	k8s.io/client-go => github.com/openshift/kubernetes-client-go v0.0.0-20201104094117-806c7d66cfea
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.19.2
 	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.19.2
 	k8s.io/code-generator => k8s.io/code-generator v0.19.2

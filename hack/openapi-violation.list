@@ -75,6 +75,7 @@ API rule violation: list_type_missing,github.com/openshift/api/config/v1,ProxySp
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,RegistrySources,AllowedRegistries
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,RegistrySources,BlockedRegistries
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,RegistrySources,InsecureRegistries
+API rule violation: list_type_missing,github.com/openshift/api/config/v1,Release,Channels
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,RequestHeaderIdentityProvider,ClientCommonNames
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,RequestHeaderIdentityProvider,EmailHeaders
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,RequestHeaderIdentityProvider,Headers
