@@ -37,3 +37,7 @@ verify:
 	hack/verify-generated-defaulters.sh
 	hack/verify-generated-openapi.sh
 .PHONY: verify
+
+test-e2e:
+	$(warning FIXME: wire e2e tests here!)
+.PHONY: test-e2e
