@@ -21,6 +21,9 @@ import (
 	"github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver/openapiconfig"
 	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 
+	// register api groups
+	_ "github.com/openshift/oauth-apiserver/pkg/api/install"
+
 	// to force compiling
 	_ "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
 	_ "github.com/openshift/oauth-apiserver/pkg/user/apiserver"
