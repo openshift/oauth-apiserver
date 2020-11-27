@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -13,13 +14,13 @@ import (
 	oauthclient "github.com/openshift/client-go/oauth/clientset/versioned/typed/oauth/v1"
 	routeclient "github.com/openshift/client-go/route/clientset/versioned/typed/route/v1"
 	"github.com/openshift/library-go/pkg/oauth/oauthserviceaccountclient"
+
 	accesstokenetcd "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthaccesstoken/etcd"
 	authorizetokenetcd "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthauthorizetoken/etcd"
 	clientetcd "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthclient/etcd"
 	clientauthetcd "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/oauthclientauthorization/etcd"
+	useroauthaccesstokensdelegate "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver/registry/useroauthaccesstokens/delegate"
 	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ExtraConfig struct {
@@ -139,11 +140,16 @@ func (c *completedConfig) newV1RESTStorage() (map[string]rest.Storage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error building REST storage: %v", err)
 	}
+	userOAuthAccessTokensDelegate, err := useroauthaccesstokensdelegate.NewREST(accessTokenStorage)
+	if err != nil {
+		return nil, fmt.Errorf("error building REST storage: %v", err)
+	}
 
 	v1Storage := map[string]rest.Storage{}
 	v1Storage["oAuthAuthorizeTokens"] = authorizeTokenStorage
 	v1Storage["oAuthAccessTokens"] = accessTokenStorage
 	v1Storage["oAuthClients"] = clientStorage
 	v1Storage["oAuthClientAuthorizations"] = clientAuthorizationStorage
+	v1Storage["userOAuthAccessTokens"] = userOAuthAccessTokensDelegate
 	return v1Storage, nil
 }

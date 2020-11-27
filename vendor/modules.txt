@@ -143,7 +143,7 @@ github.com/modern-go/concurrent
 github.com/modern-go/reflect2
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 github.com/munnerz/goautoneg
-# github.com/openshift/api v0.0.0-20201019163320-c6a5ec25f267
+# github.com/openshift/api v0.0.0-20201120165435-072a4cd8ca42
 ## explicit
 github.com/openshift/api/build/v1
 github.com/openshift/api/config/v1
@@ -151,6 +151,7 @@ github.com/openshift/api/oauth
 github.com/openshift/api/oauth/v1
 github.com/openshift/api/openshiftcontrolplane/v1
 github.com/openshift/api/osin/v1
+github.com/openshift/api/project/v1
 github.com/openshift/api/route/v1
 github.com/openshift/api/user
 github.com/openshift/api/user/v1
@@ -164,11 +165,14 @@ github.com/openshift/build-machinery-go/make/targets/golang
 github.com/openshift/build-machinery-go/make/targets/openshift
 github.com/openshift/build-machinery-go/make/targets/openshift/operator
 github.com/openshift/build-machinery-go/scripts
-# github.com/openshift/client-go v0.0.0-20201020074620-f8fd44879f7c
+# github.com/openshift/client-go v0.0.0-20201120192246-6aaf557bace9
 ## explicit
 github.com/openshift/client-go/oauth/clientset/versioned
 github.com/openshift/client-go/oauth/clientset/versioned/scheme
 github.com/openshift/client-go/oauth/clientset/versioned/typed/oauth/v1
+github.com/openshift/client-go/project/clientset/versioned
+github.com/openshift/client-go/project/clientset/versioned/scheme
+github.com/openshift/client-go/project/clientset/versioned/typed/project/v1
 github.com/openshift/client-go/route/clientset/versioned/scheme
 github.com/openshift/client-go/route/clientset/versioned/typed/route/v1
 github.com/openshift/client-go/user/clientset/versioned
@@ -187,6 +191,8 @@ github.com/pkg/errors
 # github.com/pkg/profile v1.4.0
 ## explicit
 github.com/pkg/profile
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
 # github.com/prometheus/client_golang v1.7.1
 github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
@@ -213,6 +219,10 @@ github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 ## explicit
 github.com/spf13/pflag
+# github.com/stretchr/testify v1.4.0
+## explicit
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
 # github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5
 github.com/tmc/grpc-websocket-proxy/wsproxy
 # github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2
@@ -977,6 +987,7 @@ k8s.io/gengo/namer
 k8s.io/gengo/parser
 k8s.io/gengo/types
 # k8s.io/klog/v2 v2.3.0
+## explicit
 k8s.io/klog/v2
 # k8s.io/kube-aggregator v0.19.2 => k8s.io/kube-aggregator v0.19.2
 ## explicit

@@ -16,6 +16,7 @@ import (
 func AddOAuthOpenShiftHandler(h printers.PrintHandler) {
 	addOAuthClient(h)
 	addOAuthAccessToken(h)
+	addUserOAuthAccessToken(h)
 	addOAuthAuthorizeToken(h)
 	addOAuthClientAuthorization(h)
 }
@@ -138,6 +139,23 @@ func addOAuthAccessToken(h printers.PrintHandler) {
 	}
 }
 
+func addUserOAuthAccessToken(h printers.PrintHandler) {
+	userOAuthTokenColumnsDefinitions := []metav1.TableColumnDefinition{
+		{Name: "Name", Type: "string", Format: "name", Description: metav1.ObjectMeta{}.SwaggerDoc()["name"]},
+		{Name: "Client Name", Type: "string", Format: "name", Description: oauthv1.OAuthAccessToken{}.SwaggerDoc()["clientName"]},
+		{Name: "Created", Type: "string", Description: metav1.ObjectMeta{}.SwaggerDoc()["creationTimestamp"]},
+		{Name: "Expires", Type: "string", Description: oauthv1.OAuthAccessToken{}.SwaggerDoc()["expiresIn"]},
+		{Name: "Redirect URI", Type: "string", Description: oauthv1.OAuthAccessToken{}.SwaggerDoc()["redirectURI"]},
+		{Name: "Scopes", Type: "string", Description: oauthv1.OAuthAccessToken{}.SwaggerDoc()["scopes"]},
+	}
+	if err := h.TableHandler(userOAuthTokenColumnsDefinitions, printUserOAuthAccessToken); err != nil {
+		panic(err)
+	}
+	if err := h.TableHandler(userOAuthTokenColumnsDefinitions, printUserOAuthAccessTokenList); err != nil {
+		panic(err)
+	}
+}
+
 func printOAuthAccessToken(oauthAccessToken *oauthapi.OAuthAccessToken, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	row := metav1.TableRow{
 		Object: runtime.RawExtension{Object: oauthAccessToken},
@@ -159,6 +177,26 @@ func printOAuthAccessToken(oauthAccessToken *oauthapi.OAuthAccessToken, options 
 	return []metav1.TableRow{row}, nil
 }
 
+func printUserOAuthAccessToken(personalAccessToken *oauthapi.UserOAuthAccessToken, options printers.GenerateOptions) ([]metav1.TableRow, error) {
+	row := metav1.TableRow{
+		Object: runtime.RawExtension{Object: personalAccessToken},
+	}
+	created := personalAccessToken.CreationTimestamp
+	expires := "never"
+	if personalAccessToken.ExpiresIn > 0 {
+		expires = created.Add(time.Duration(personalAccessToken.ExpiresIn) * time.Second).String()
+	}
+	row.Cells = append(row.Cells,
+		personalAccessToken.Name,
+		personalAccessToken.ClientName,
+		created,
+		expires,
+		personalAccessToken.RedirectURI,
+		strings.Join(personalAccessToken.Scopes, ","),
+	)
+	return []metav1.TableRow{row}, nil
+}
+
 func printOAuthAccessTokenList(oauthAccessTokenList *oauthapi.OAuthAccessTokenList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
 	rows := make([]metav1.TableRow, 0, len(oauthAccessTokenList.Items))
 	for i := range oauthAccessTokenList.Items {
@@ -169,6 +207,19 @@ func printOAuthAccessTokenList(oauthAccessTokenList *oauthapi.OAuthAccessTokenLi
 		rows = append(rows, r...)
 	}
 	return rows, nil
+}
+
+func printUserOAuthAccessTokenList(personalAccessTokenList *oauthapi.UserOAuthAccessTokenList, options printers.GenerateOptions) ([]metav1.TableRow, error) {
+	rows := make([]metav1.TableRow, 0, len(personalAccessTokenList.Items))
+	for i := range personalAccessTokenList.Items {
+		r, err := printUserOAuthAccessToken(&personalAccessTokenList.Items[i], options)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, r...)
+	}
+	return rows, nil
+
 }
 
 func addOAuthAuthorizeToken(h printers.PrintHandler) {

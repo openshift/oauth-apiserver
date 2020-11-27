@@ -224,3 +224,16 @@ type RedirectReference struct {
 	Kind  string
 	Name  string
 }
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type UserOAuthAccessToken OAuthAccessToken
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type UserOAuthAccessTokenList struct {
+	metav1.TypeMeta
+	metav1.ListMeta
+
+	Items []UserOAuthAccessToken
+}
