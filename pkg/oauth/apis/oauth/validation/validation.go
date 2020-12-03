@@ -13,10 +13,10 @@ import (
 	"k8s.io/apiserver/pkg/authentication/serviceaccount"
 
 	routev1 "github.com/openshift/api/route/v1"
+	"github.com/openshift/apiserver-library-go/pkg/apivalidation"
 	bootstrap "github.com/openshift/library-go/pkg/authentication/bootstrapauthenticator"
 	scopemetadata "github.com/openshift/library-go/pkg/authorization/scopemetadata"
 	oauthapi "github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth"
-	uservalidation "github.com/openshift/oauth-apiserver/pkg/user/apis/user/validation"
 )
 
 const (
@@ -342,7 +342,7 @@ func ValidateUserNameField(value string, fldPath *field.Path) field.ErrorList {
 	if value == bootstrap.BootstrapUser {
 		return field.ErrorList{}
 	}
-	if reasons := uservalidation.ValidateUserName(value, false); len(reasons) != 0 {
+	if reasons := apivalidation.ValidateUserName(value, false); len(reasons) != 0 {
 		return field.ErrorList{field.Invalid(fldPath, value, strings.Join(reasons, ", "))}
 	}
 	return field.ErrorList{}
