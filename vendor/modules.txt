@@ -155,6 +155,9 @@ github.com/openshift/api/project/v1
 github.com/openshift/api/route/v1
 github.com/openshift/api/user
 github.com/openshift/api/user/v1
+# github.com/openshift/apiserver-library-go v0.0.0-20201204115753-d48a1b462aa6
+## explicit
+github.com/openshift/apiserver-library-go/pkg/apivalidation
 # github.com/openshift/build-machinery-go v0.0.0-20200917070002-f171684f77ab
 ## explicit
 github.com/openshift/build-machinery-go
@@ -322,7 +325,7 @@ go.mongodb.org/mongo-driver/bson/primitive
 go.mongodb.org/mongo-driver/x/bsonx/bsoncore
 # go.uber.org/atomic v1.4.0
 go.uber.org/atomic
-# go.uber.org/multierr v1.1.0
+# go.uber.org/multierr v1.1.1-0.20180122172545-ddea229ff1df
 go.uber.org/multierr
 # go.uber.org/zap v1.10.0
 go.uber.org/zap
@@ -987,7 +990,6 @@ k8s.io/gengo/namer
 k8s.io/gengo/parser
 k8s.io/gengo/types
 # k8s.io/klog/v2 v2.3.0
-## explicit
 k8s.io/klog/v2
 # k8s.io/kube-aggregator v0.19.2 => k8s.io/kube-aggregator v0.19.2
 ## explicit

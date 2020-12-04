@@ -8,22 +8,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/validation/path"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/openshift/apiserver-library-go/pkg/apivalidation"
 	userapi "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 )
-
-func ValidateUserName(name string, _ bool) []string {
-	if reasons := path.ValidatePathSegmentName(name, false); len(reasons) != 0 {
-		return reasons
-	}
-
-	if strings.Contains(name, ":") {
-		return []string{`may not contain ":"`}
-	}
-	if name == "~" {
-		return []string{`may not equal "~"`}
-	}
-	return nil
-}
 
 func ValidateIdentityName(name string, _ bool) []string {
 	if reasons := path.ValidatePathSegmentName(name, false); len(reasons) != 0 {
@@ -43,20 +30,6 @@ func ValidateIdentityName(name string, _ bool) []string {
 	return nil
 }
 
-func ValidateGroupName(name string, _ bool) []string {
-	if reasons := path.ValidatePathSegmentName(name, false); len(reasons) != 0 {
-		return reasons
-	}
-
-	if strings.Contains(name, ":") {
-		return []string{`may not contain ":"`}
-	}
-	if name == "~" {
-		return []string{`may not equal "~"`}
-	}
-	return nil
-}
-
 // if you change this, update the peer in oauth admission validation.  also, don't change this.
 func ValidateIdentityProviderName(name string) []string {
 	if reasons := path.ValidatePathSegmentName(name, false); len(reasons) != 0 {
@@ -71,11 +44,11 @@ func ValidateIdentityProviderName(name string) []string {
 
 func ValidateIdentityProviderUserName(name string) []string {
 	// Any provider user name must be a valid user name
-	return ValidateUserName(name, false)
+	return apivalidation.ValidateUserName(name, false)
 }
 
 func ValidateGroup(group *userapi.Group) field.ErrorList {
-	allErrs := kvalidation.ValidateObjectMeta(&group.ObjectMeta, false, ValidateGroupName, field.NewPath("metadata"))
+	allErrs := kvalidation.ValidateObjectMeta(&group.ObjectMeta, false, apivalidation.ValidateGroupName, field.NewPath("metadata"))
 
 	userPath := field.NewPath("user")
 	for index, user := range group.Users {
@@ -84,7 +57,7 @@ func ValidateGroup(group *userapi.Group) field.ErrorList {
 			allErrs = append(allErrs, field.Invalid(idxPath, user, "may not be empty"))
 			continue
 		}
-		if reasons := ValidateUserName(user, false); len(reasons) != 0 {
+		if reasons := apivalidation.ValidateUserName(user, false); len(reasons) != 0 {
 			allErrs = append(allErrs, field.Invalid(idxPath, user, strings.Join(reasons, ", ")))
 		}
 	}
@@ -99,7 +72,7 @@ func ValidateGroupUpdate(group *userapi.Group, old *userapi.Group) field.ErrorLi
 }
 
 func ValidateUser(user *userapi.User) field.ErrorList {
-	allErrs := kvalidation.ValidateObjectMeta(&user.ObjectMeta, false, ValidateUserName, field.NewPath("metadata"))
+	allErrs := kvalidation.ValidateObjectMeta(&user.ObjectMeta, false, apivalidation.ValidateUserName, field.NewPath("metadata"))
 	identitiesPath := field.NewPath("identities")
 	for index, identity := range user.Identities {
 		idxPath := identitiesPath.Index(index)
@@ -145,7 +118,7 @@ func ValidateIdentity(identity *userapi.Identity) field.ErrorList {
 	}
 
 	userPath := field.NewPath("user")
-	if reasons := ValidateUserName(identity.User.Name, false); len(reasons) != 0 {
+	if reasons := apivalidation.ValidateUserName(identity.User.Name, false); len(reasons) != 0 {
 		allErrs = append(allErrs, field.Invalid(userPath.Child("name"), identity.User.Name, strings.Join(reasons, ", ")))
 	}
 	if len(identity.User.Name) == 0 && len(identity.User.UID) != 0 {
@@ -184,7 +157,7 @@ func ValidateUserIdentityMapping(mapping *userapi.UserIdentityMapping) field.Err
 
 	if len(mapping.User.Name) == 0 {
 		allErrs = append(allErrs, field.Required(field.NewPath("user", "name"), ""))
-	} else if reasons := ValidateUserName(mapping.User.Name, false); len(reasons) != 0 {
+	} else if reasons := apivalidation.ValidateUserName(mapping.User.Name, false); len(reasons) != 0 {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("user", "name"), mapping.User.Name, strings.Join(reasons, ", ")))
 	}
 
