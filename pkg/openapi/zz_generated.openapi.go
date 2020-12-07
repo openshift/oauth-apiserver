@@ -211,6 +211,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.ProxyStatus":                                                  schema_openshift_api_config_v1_ProxyStatus(ref),
 		"github.com/openshift/api/config/v1.RegistryLocation":                                             schema_openshift_api_config_v1_RegistryLocation(ref),
 		"github.com/openshift/api/config/v1.RegistrySources":                                              schema_openshift_api_config_v1_RegistrySources(ref),
+		"github.com/openshift/api/config/v1.Release":                                                      schema_openshift_api_config_v1_Release(ref),
 		"github.com/openshift/api/config/v1.RemoteConnectionInfo":                                         schema_openshift_api_config_v1_RemoteConnectionInfo(ref),
 		"github.com/openshift/api/config/v1.RequestHeaderIdentityProvider":                                schema_openshift_api_config_v1_RequestHeaderIdentityProvider(ref),
 		"github.com/openshift/api/config/v1.Scheduler":                                                    schema_openshift_api_config_v1_Scheduler(ref),
@@ -2729,7 +2730,7 @@ func schema_openshift_api_build_v1_DockerBuildStrategy(ref common.ReferenceCallb
 					},
 					"dockerfilePath": {
 						SchemaProps: spec.SchemaProps{
-							Description: "dockerfilePath is the path of the Dockerfile that will be used to build the container image, relative to the root of the context (contextDir).",
+							Description: "dockerfilePath is the path of the Dockerfile that will be used to build the container image, relative to the root of the context (contextDir). Defaults to `Dockerfile` if unset.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -4197,7 +4198,7 @@ func schema_openshift_api_config_v1_Audit(ref common.ReferenceCallback) common.O
 				Properties: map[string]spec.Schema{
 					"profile": {
 						SchemaProps: spec.SchemaProps{
-							Description: "profile specifies the name of the desired audit policy configuration to be deployed to all OpenShift-provided API servers in the cluster\n\nWe provide the following profiles - Default - WriteRequestBodies - AllRequestBodies If unset, the 'Default' profile is used as the default.",
+							Description: "profile specifies the name of the desired audit policy configuration to be deployed to all OpenShift-provided API servers in the cluster.\n\nThe following profiles are provided: - Default: the existing default policy. - WriteRequestBodies: like 'Default', but logs request and response HTTP payloads for write requests (create, update, patch). - AllRequestBodies: like 'WriteRequestBodies', but also logs request and response HTTP payloads for read requests (get, list).\n\nIf unset, the 'Default' profile is used as the default.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -4916,13 +4917,13 @@ func schema_openshift_api_config_v1_ClusterNetworkEntry(ref common.ReferenceCall
 					},
 					"hostPrefix": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The size (prefix) of block to allocate to each node.",
+							Description: "The size (prefix) of block to allocate to each node. If this field is not used by the plugin, it can be left unset.",
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
 					},
 				},
-				Required: []string{"cidr", "hostPrefix"},
+				Required: []string{"cidr"},
 			},
 		},
 	}
@@ -5309,7 +5310,7 @@ func schema_openshift_api_config_v1_ClusterVersionStatus(ref common.ReferenceCal
 					"desired": {
 						SchemaProps: spec.SchemaProps{
 							Description: "desired is the version that the cluster is reconciling towards. If the cluster is not yet fully initialized desired will be set with the information available, which may be an image or a tag.",
-							Ref:         ref("github.com/openshift/api/config/v1.Update"),
+							Ref:         ref("github.com/openshift/api/config/v1.Release"),
 						},
 					},
 					"history": {
@@ -5359,7 +5360,7 @@ func schema_openshift_api_config_v1_ClusterVersionStatus(ref common.ReferenceCal
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openshift/api/config/v1.Update"),
+										Ref: ref("github.com/openshift/api/config/v1.Release"),
 									},
 								},
 							},
@@ -5370,7 +5371,7 @@ func schema_openshift_api_config_v1_ClusterVersionStatus(ref common.ReferenceCal
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.ClusterOperatorStatusCondition", "github.com/openshift/api/config/v1.Update", "github.com/openshift/api/config/v1.UpdateHistory"},
+			"github.com/openshift/api/config/v1.ClusterOperatorStatusCondition", "github.com/openshift/api/config/v1.Release", "github.com/openshift/api/config/v1.UpdateHistory"},
 	}
 }
 
@@ -9270,6 +9271,55 @@ func schema_openshift_api_config_v1_RegistrySources(ref common.ReferenceCallback
 	}
 }
 
+func schema_openshift_api_config_v1_Release(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Release represents an OpenShift release image and associated metadata.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Description: "version is a semantic versioning identifying the update version. When this field is part of spec, version is optional if image is specified.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"image": {
+						SchemaProps: spec.SchemaProps{
+							Description: "image is a container image location that contains the update. When this field is part of spec, image is optional if version is specified and the availableUpdates field contains a matching version.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "url contains information about this release. This URL is set by the 'url' metadata property on a release or the metadata returned by the update API and should be displayed as a link in user interfaces. The URL field may not be set for test or nightly releases.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"channels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "channels is the set of Cincinnati channels to which the release currently belongs.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"version", "image"},
+			},
+		},
+	}
+}
+
 func schema_openshift_api_config_v1_RemoteConnectionInfo(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -9901,7 +9951,7 @@ func schema_openshift_api_config_v1_Update(ref common.ReferenceCallback) common.
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Update represents a release of the ClusterVersionOperator, referenced by the Image member.",
+				Description: "Update represents an administrator update request.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"version": {
@@ -13262,7 +13312,7 @@ func schema_openshift_api_route_v1_Route(ref common.ReferenceCallback) common.Op
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "A route allows developers to expose services through an HTTP(S) aware load balancing and proxy layer via a public DNS entry. The route may further specify TLS options and a certificate, or specify a public CNAME that the router should also accept for HTTP and HTTPS traffic. An administrator typically configures their router to be visible outside the cluster firewall, and may also add additional security, caching, or traffic controls on the service content. Routers usually talk directly to the service endpoints.\n\nOnce a route is created, the `host` field may not be changed. Generally, routers use the oldest route with a given host when resolving conflicts.\n\nRouters are subject to additional customization and may support additional controls via the annotations field.\n\nBecause administrators may configure multiple routers, the route status field is used to return information to clients about the names and states of the route under each router. If a client chooses a duplicate name, for instance, the route status conditions are used to indicate the route cannot be chosen.",
+				Description: "A route allows developers to expose services through an HTTP(S) aware load balancing and proxy layer via a public DNS entry. The route may further specify TLS options and a certificate, or specify a public CNAME that the router should also accept for HTTP and HTTPS traffic. An administrator typically configures their router to be visible outside the cluster firewall, and may also add additional security, caching, or traffic controls on the service content. Routers usually talk directly to the service endpoints.\n\nOnce a route is created, the `host` field may not be changed. Generally, routers use the oldest route with a given host when resolving conflicts.\n\nRouters are subject to additional customization and may support additional controls via the annotations field.\n\nBecause administrators may configure multiple routers, the route status field is used to return information to clients about the names and states of the route under each router. If a client chooses a duplicate name, for instance, the route status conditions are used to indicate the route cannot be chosen.\n\nTo enable HTTP/2 ALPN on a route it requires a custom (non-wildcard) certificate. This prevents connection coalescing by clients, notably web browsers. We do not support HTTP/2 ALPN on routes that use the default certificate because of the risk of connection re-use/coalescing. Routes that do not have their own custom certificate will not be HTTP/2 ALPN-enabled on either the frontend or the backend.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
