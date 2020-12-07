@@ -10,9 +10,9 @@ require (
 	github.com/google/gofuzz v1.1.0
 	github.com/google/uuid v1.1.1
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
-	github.com/openshift/api v0.0.0-20200723134351-89de68875e7c
-	github.com/openshift/build-machinery-go v0.0.0-20200713135615-1f43d26dccc7
-	github.com/openshift/client-go v0.0.0-20200722173614-5a1b0aaeff15
+	github.com/openshift/api v0.0.0-20200827090112-c05698d102cf
+	github.com/openshift/build-machinery-go v0.0.0-20200819073603-48aa266c95f7
+	github.com/openshift/client-go v0.0.0-20200827190008-3062137373b5
 	github.com/openshift/library-go v0.0.0-20201123124259-522c6f69be23
 	github.com/pkg/profile v1.4.0 // indirect
 	github.com/spf13/cobra v1.0.0
