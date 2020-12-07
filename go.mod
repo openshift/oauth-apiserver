@@ -13,7 +13,7 @@ require (
 	github.com/openshift/api v0.0.0-20200723134351-89de68875e7c
 	github.com/openshift/build-machinery-go v0.0.0-20200713135615-1f43d26dccc7
 	github.com/openshift/client-go v0.0.0-20200722173614-5a1b0aaeff15
-	github.com/openshift/library-go v0.0.0-20200724235449-b4f9ae5f0c51
+	github.com/openshift/library-go v0.0.0-20201123124259-522c6f69be23
 	github.com/pkg/profile v1.4.0 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
@@ -35,7 +35,7 @@ replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.19.0
 	k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20201207110950-476028df0fd8
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.19.0
-	k8s.io/client-go => k8s.io/client-go v0.19.0
+	k8s.io/client-go => github.com/openshift/kubernetes-client-go v0.0.0-20201207133257-210b92e25f6a
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.19.0
 	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.19.0
 	k8s.io/code-generator => k8s.io/code-generator v0.19.0
