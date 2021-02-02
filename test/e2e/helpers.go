@@ -1,8 +1,10 @@
 package e2e
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"os/exec"
 	"testing"
 	"time"
 
@@ -85,6 +87,36 @@ func waitForSelfSAR(interval, timeout time.Duration, c kubernetes.Interface, sel
 	}
 
 	return nil
+}
+
+// PortForwardSvc forwards a remote service's port to localhost
+// portMapping is a string "localPort:remotePort"
+func PortForwardSvc(t *testing.T, svcNS, svcName, portMapping string) context.CancelFunc {
+	var err error
+	ctx, cancel := context.WithCancel(context.Background())
+	defer func() {
+		if err != nil {
+			cancel()
+		}
+	}()
+
+	portFwdCmd := exec.CommandContext(ctx, "oc", "port-forward", "svc/"+svcName, portMapping, "-n", svcNS)
+
+	stdOut, err := portFwdCmd.StdoutPipe()
+	require.NoError(t, err)
+
+	require.NoError(t, portFwdCmd.Start())
+
+	scanner := bufio.NewScanner(stdOut)
+	scan := scanner.Scan()
+	err = scanner.Err()
+	require.NoError(t, err)
+	require.True(t, scan)
+
+	output := scanner.Text()
+	t.Logf("port-forward command output: %s", output)
+
+	return cancel
 }
 
 // resourceRef is a reference to a specific API resource
