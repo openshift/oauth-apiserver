@@ -1,8 +1,6 @@
 package apiserver
 
 import (
-	"sync"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
@@ -17,9 +15,6 @@ import (
 )
 
 type ExtraConfig struct {
-	makeV1Storage sync.Once
-	v1Storage     map[string]rest.Storage
-	v1StorageErr  error
 }
 
 type UserConfig struct {
@@ -62,7 +57,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		GenericAPIServer: genericServer,
 	}
 
-	v1Storage, err := c.V1RESTStorage()
+	v1Storage, err := c.newV1RESTStorage()
 	if err != nil {
 		return nil, err
 	}
@@ -74,14 +69,6 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 	}
 
 	return s, nil
-}
-
-func (c *completedConfig) V1RESTStorage() (map[string]rest.Storage, error) {
-	c.ExtraConfig.makeV1Storage.Do(func() {
-		c.ExtraConfig.v1Storage, c.ExtraConfig.v1StorageErr = c.newV1RESTStorage()
-	})
-
-	return c.ExtraConfig.v1Storage, c.ExtraConfig.v1StorageErr
 }
 
 func (c *completedConfig) newV1RESTStorage() (map[string]rest.Storage, error) {
