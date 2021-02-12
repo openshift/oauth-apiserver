@@ -143,7 +143,7 @@ func TestAuthenticateTokenTimeout(t *testing.T) {
 		clients: oauthClients,
 	}
 
-	timeouts := NewTimeoutValidator(accessTokenGetter, lister, defaultTimeout, minTimeout)
+	timeouts := NewTimeoutValidator(accessTokenGetter, lister, timeoutAsDuration(defaultTimeout), minTimeout)
 
 	// inject fake clock, which has some interesting properties
 	// 1. A sleep will cause at most one ticker event, regardless of how long the sleep was

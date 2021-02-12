@@ -1,6 +1,9 @@
 package apiserver
 
 import (
+	"time"
+
+	"k8s.io/apiserver/pkg/authentication/authenticator"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	restclient "k8s.io/client-go/rest"
 	openapicontroller "k8s.io/kube-aggregator/pkg/controllers/openapi"
@@ -17,6 +20,15 @@ import (
 
 type Config struct {
 	GenericConfig *genericapiserver.RecommendedConfig
+	ExtraConfig   OAuthAPIExtraConfig
+}
+
+// OAuthAPIExtraConfig is a set of options specific to the OAuth API server
+type OAuthAPIExtraConfig struct {
+	// AccessTokenInactivityTimeout is a time period after which an oauthaccesstoken
+	// is considered invalid unless it gets used again
+	AccessTokenInactivityTimeout time.Duration
+	APIAudiences                 authenticator.Audiences
 }
 
 type OAuthAPIServer struct {
@@ -26,6 +38,7 @@ type OAuthAPIServer struct {
 type completedConfig struct {
 	GenericConfig genericapiserver.CompletedConfig
 	ClientConfig  *restclient.Config
+	ExtraConfig   *OAuthAPIExtraConfig
 }
 
 // CompletedConfig embeds a private pointer that cannot be instantiated outside of this package.
@@ -44,6 +57,8 @@ func (cfg *Config) Complete() CompletedConfig {
 	c := completedConfig{
 		GenericConfig: cfg.GenericConfig.Complete(),
 		ClientConfig:  cfg.GenericConfig.ClientConfig,
+
+		ExtraConfig: &cfg.ExtraConfig,
 	}
 
 	v := version.Get()
@@ -80,10 +95,17 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 
 func (c *completedConfig) withOAuthAPIServer(delegateAPIServer genericapiserver.DelegationTarget) (genericapiserver.DelegationTarget, error) {
 	cfg := &oauthapiserver.OAuthAPIServerConfig{
-		GenericConfig: &genericapiserver.RecommendedConfig{Config: *c.GenericConfig.Config, SharedInformerFactory: c.GenericConfig.SharedInformerFactory, ClientConfig: c.ClientConfig},
+		GenericConfig: &genericapiserver.RecommendedConfig{
+			Config:                *c.GenericConfig.Config,
+			SharedInformerFactory: c.GenericConfig.SharedInformerFactory,
+			ClientConfig:          c.ClientConfig,
+		},
 		ExtraConfig: oauthapiserver.ExtraConfig{
 			// no one is allowed to set this today
 			ServiceAccountMethod: string(openshiftcontrolplanev1.GrantHandlerPrompt),
+
+			AccessTokenInactivityTimeout: c.ExtraConfig.AccessTokenInactivityTimeout,
+			ImplicitAudiences:            c.ExtraConfig.APIAudiences,
 		},
 	}
 	config := cfg.Complete()
