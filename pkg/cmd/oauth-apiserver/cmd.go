@@ -20,6 +20,7 @@ import (
 	"github.com/openshift/oauth-apiserver/pkg/apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver/openapiconfig"
 	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
+	tokenvalidationoptions "github.com/openshift/oauth-apiserver/pkg/tokenvalidation/options"
 
 	// register api groups
 	_ "github.com/openshift/oauth-apiserver/pkg/api/install"
@@ -37,6 +38,7 @@ const (
 type OAuthAPIServerOptions struct {
 	GenericServerRunOptions *genericapiserveroptions.ServerRunOptions
 	RecommendedOptions      *genericapiserveroptions.RecommendedOptions
+	TokenValidationOptions  *tokenvalidationoptions.TokenValidationOptions
 
 	Output io.Writer
 }
@@ -48,7 +50,8 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 			etcdStoragePrefix,
 			serverscheme.Codecs.LegacyCodec(serverscheme.Scheme.PrioritizedVersionsAllGroups()...),
 		),
-		Output: out,
+		TokenValidationOptions: tokenvalidationoptions.NewTokenValidationOptions(),
+		Output:                 out,
 	}
 	o.RecommendedOptions.Etcd.StorageConfig.Paging = true
 	return o
@@ -57,12 +60,14 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 func (o *OAuthAPIServerOptions) AddFlags(fs *pflag.FlagSet) {
 	o.GenericServerRunOptions.AddUniversalFlags(fs)
 	o.RecommendedOptions.AddFlags(fs)
+	o.TokenValidationOptions.AddFlags(fs)
 }
 
 func (o OAuthAPIServerOptions) Validate(args []string) error {
 	errors := []error{}
 	errors = append(errors, o.GenericServerRunOptions.Validate()...)
 	errors = append(errors, o.RecommendedOptions.Validate()...)
+	errors = append(errors, o.TokenValidationOptions.Validate()...)
 	return utilerrors.NewAggregate(errors)
 }
 
@@ -147,6 +152,9 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 		}
 	}
 	serverConfig.GenericConfig.RESTOptionsGetter = &genericapiserveroptions.StorageFactoryRestOptionsFactory{Options: *o.RecommendedOptions.Etcd, StorageFactory: storageFactory}
+
+	serverConfig.ExtraConfig.AccessTokenInactivityTimeout = o.TokenValidationOptions.AccessTokenInactivityTimeout
+	serverConfig.ExtraConfig.APIAudiences = o.TokenValidationOptions.APIAudiences
 
 	return serverConfig, nil
 }
