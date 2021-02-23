@@ -5,29 +5,24 @@ import (
 	"io"
 	"net"
 
+	"github.com/openshift/library-go/pkg/serviceability"
+	"github.com/openshift/oauth-apiserver/pkg/apiserver"
+	"github.com/openshift/oauth-apiserver/pkg/authorization/hardcodedauthorizer"
+	"github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver/openapiconfig"
+	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
+	tokenvalidationoptions "github.com/openshift/oauth-apiserver/pkg/tokenvalidation/options"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/apiserver/pkg/authorization/union"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
 	"k8s.io/apiserver/pkg/server/options/encryptionconfig"
 	apiserverstorage "k8s.io/apiserver/pkg/server/storage"
 
-	"github.com/openshift/library-go/pkg/serviceability"
-
-	"github.com/openshift/oauth-apiserver/pkg/apiserver"
-	"github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver/openapiconfig"
-	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
-	tokenvalidationoptions "github.com/openshift/oauth-apiserver/pkg/tokenvalidation/options"
-
 	// register api groups
 	_ "github.com/openshift/oauth-apiserver/pkg/api/install"
-
-	// to force compiling
-	_ "github.com/openshift/oauth-apiserver/pkg/oauth/apiserver"
-	_ "github.com/openshift/oauth-apiserver/pkg/user/apiserver"
 )
 
 const (
@@ -130,6 +125,14 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 	if err := o.RecommendedOptions.ApplyTo(serverConfig.GenericConfig); err != nil {
 		return nil, err
 	}
+
+	// the oauth-apiserver provides an autentication webhook.  To avoid cyclical authorization checks, we will hardcode
+	// the expected user to a tokenreview permission.  Since this rule could never logically be removed in an openshift
+	// cluster, this is acceptable.
+	serverConfig.GenericConfig.Authorization.Authorizer = union.New(
+		hardcodedauthorizer.NewHardCodedTokenReviewAuthorizer(),
+		serverConfig.GenericConfig.Authorization.Authorizer,
+	)
 
 	// the following section overwrites RESTOptionsGetter
 	// note we don't call ApplyWithStorageFactoryTo explicitly to prevent double registration of storage related health checks
