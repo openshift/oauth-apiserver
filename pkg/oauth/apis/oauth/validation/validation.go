@@ -33,6 +33,7 @@ const (
 const (
 	codeChallengeMethodPlain  = "plain"
 	codeChallengeMethodSHA256 = "S256"
+	sha256Prefix              = "sha256~"
 )
 
 var CodeChallengeMethodsSupported = []string{codeChallengeMethodPlain, codeChallengeMethodSHA256}
@@ -44,6 +45,10 @@ func ValidateTokenName(name string, prefix bool) []string {
 
 	if len(name) < MinTokenLength {
 		return []string{fmt.Sprintf("must be at least %d characters long", MinTokenLength)}
+	}
+
+	if !strings.HasPrefix(name, sha256Prefix) {
+		return []string{fmt.Sprintf("only the new format of tokens (prefixed with sha256~) is allowed")}
 	}
 	return nil
 }

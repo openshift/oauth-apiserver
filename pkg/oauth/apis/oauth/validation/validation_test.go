@@ -287,7 +287,7 @@ func TestValidateClient(t *testing.T) {
 
 func TestValidateAccessTokens(t *testing.T) {
 	errs := ValidateAccessToken(&oauthapi.OAuthAccessToken{
-		ObjectMeta:  metav1.ObjectMeta{Name: "accessTokenNameWithMinimumLength"},
+		ObjectMeta:  metav1.ObjectMeta{Name: "sha256~accessTokenNameWithMinLen"},
 		ClientName:  "myclient",
 		UserName:    "myusername",
 		UserUID:     "myuseruid",
@@ -316,7 +316,7 @@ func TestValidateAccessTokens(t *testing.T) {
 		},
 		"empty redirect uri": {
 			Token: oauthapi.OAuthAccessToken{
-				ObjectMeta: metav1.ObjectMeta{Name: "myperfectTokenWithFullScopeAndStuff"},
+				ObjectMeta: metav1.ObjectMeta{Name: "sha256~myperfectTokenWithFullScopeAndStuff"},
 				ClientName: "myclient",
 				UserName:   "myusername",
 				UserUID:    "myuseruid",
@@ -327,7 +327,7 @@ func TestValidateAccessTokens(t *testing.T) {
 		},
 		"empty scopes": {
 			Token: oauthapi.OAuthAccessToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "myperfectTokenWithFullScopeAndStuff"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~myperfectTokenWithFullScopeAndStuff"},
 				ClientName:  "myclient",
 				UserName:    "myusername",
 				UserUID:     "myuseruid",
@@ -338,7 +338,7 @@ func TestValidateAccessTokens(t *testing.T) {
 		},
 		"disallowed namespace": {
 			Token: oauthapi.OAuthAccessToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "accessTokenNameWithMinimumLength", Namespace: "foo"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~accessTokenNameWithMinLen", Namespace: "foo"},
 				ClientName:  "myclient",
 				UserName:    "myusername",
 				UserUID:     "myuseruid",
@@ -350,7 +350,7 @@ func TestValidateAccessTokens(t *testing.T) {
 		},
 		"no scope handler": {
 			Token: oauthapi.OAuthAccessToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "accessTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~accessTokenNameWithMinLen"},
 				ClientName:  "myclient",
 				UserName:    "myusername",
 				UserUID:     "myuseruid",
@@ -362,7 +362,7 @@ func TestValidateAccessTokens(t *testing.T) {
 		},
 		"bad scope": {
 			Token: oauthapi.OAuthAccessToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "accessTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~accessTokenNameWithMinLen"},
 				ClientName:  "myclient",
 				UserName:    "myusername",
 				UserUID:     "myuseruid",
@@ -374,7 +374,7 @@ func TestValidateAccessTokens(t *testing.T) {
 		},
 		"negative timeout": {
 			Token: oauthapi.OAuthAccessToken{
-				ObjectMeta:               metav1.ObjectMeta{Name: "accessTokenNameWithMinimumLength"},
+				ObjectMeta:               metav1.ObjectMeta{Name: "sha256~accessTokenNameWithMinLen"},
 				ClientName:               "myclient",
 				UserName:                 "myusername",
 				UserUID:                  "myuseruid",
@@ -387,7 +387,7 @@ func TestValidateAccessTokens(t *testing.T) {
 		},
 		"negative expiresIn": {
 			Token: oauthapi.OAuthAccessToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "accessTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~accessTokenNameWithMinLen"},
 				ClientName:  "myclient",
 				UserName:    "myusername",
 				UserUID:     "myuseruid",
@@ -418,7 +418,7 @@ func TestValidateAccessTokens(t *testing.T) {
 
 func TestValidateAuthorizeTokens(t *testing.T) {
 	errs := ValidateAuthorizeToken(&oauthapi.OAuthAuthorizeToken{
-		ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+		ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameMiniLen"},
 		ClientName:  "myclient",
 		ExpiresIn:   86400,
 		UserName:    "myusername",
@@ -449,7 +449,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"zero-length client name": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameMiniLen"},
 				UserName:    "myusername",
 				ExpiresIn:   86400,
 				UserUID:     "myuseruid",
@@ -461,7 +461,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"zero-length user name": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameMiniLen"},
 				ClientName:  "myclient",
 				ExpiresIn:   86400,
 				UserUID:     "myuseruid",
@@ -473,7 +473,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"zero-length user uid": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameMiniLen"},
 				ClientName:  "myclient",
 				ExpiresIn:   86400,
 				UserName:    "myusername",
@@ -485,7 +485,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"empty redirect uri": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta: metav1.ObjectMeta{Name: "myperfectTokenWithFullScopeAndStuff"},
+				ObjectMeta: metav1.ObjectMeta{Name: "sha256~myperfectTokenWithFullScopeAndStuff"},
 				ClientName: "myclient",
 				ExpiresIn:  86400,
 				UserName:   "myusername",
@@ -497,7 +497,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"empty scopes": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "myperfectTokenWithFullScopeAndStuff"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~myperfectTokenWithFullScopeAndStuff"},
 				ClientName:  "myclient",
 				ExpiresIn:   86400,
 				UserName:    "myusername",
@@ -509,7 +509,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"disallowed namespace": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength", Namespace: "foo"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameWithMinimumLength", Namespace: "foo"},
 				ClientName:  "myclient",
 				ExpiresIn:   86400,
 				UserName:    "myusername",
@@ -522,7 +522,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"no scope handler": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameWithMinimumLength"},
 				ClientName:  "myclient",
 				ExpiresIn:   86400,
 				UserName:    "myusername",
@@ -535,7 +535,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"bad scope": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameWithMinimumLength"},
 				ClientName:  "myclient",
 				ExpiresIn:   86400,
 				UserName:    "myusername",
@@ -548,7 +548,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"illegal character": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameWithMinimumLength"},
 				ClientName:  "myclient",
 				ExpiresIn:   86400,
 				UserName:    "myusername",
@@ -561,7 +561,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"zero expiresIn": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameWithMinimumLength"},
 				ClientName:  "myclient",
 				UserName:    "myusername",
 				UserUID:     "myuseruid",
@@ -573,7 +573,7 @@ func TestValidateAuthorizeTokens(t *testing.T) {
 		},
 		"negative expiresIn": {
 			Token: oauthapi.OAuthAuthorizeToken{
-				ObjectMeta:  metav1.ObjectMeta{Name: "authorizeTokenNameWithMinimumLength"},
+				ObjectMeta:  metav1.ObjectMeta{Name: "sha256~authorizeTokenNameWithMinimumLength"},
 				ClientName:  "myclient",
 				ExpiresIn:   -1,
 				UserName:    "myusername",
