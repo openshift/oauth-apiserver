@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
 	github.com/openshift/api v0.0.0-20201216151826-78a19e96f9eb
-	github.com/openshift/apiserver-library-go v0.0.0-20201204115753-d48a1b462aa6
+	github.com/openshift/apiserver-library-go v0.0.0-20210331084747-7da6e575a5ac
 	github.com/openshift/build-machinery-go v0.0.0-20200917070002-f171684f77ab
 	github.com/openshift/client-go v0.0.0-20201214125552-e615e336eb49
 	github.com/openshift/library-go v0.0.0-20210106214821-c4d0b9c8d55f
