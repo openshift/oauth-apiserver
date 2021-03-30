@@ -18,13 +18,17 @@ func ValidateIdentityName(name string, _ bool) []string {
 	}
 
 	parts := strings.Split(name, ":")
-	if len(parts) != 2 {
+	usernameIndex := 1
+	// allow identities in the form "<providerName>:b64:<base64-encoded username>"
+	if len(parts) == 3 && parts[1] == "b64" {
+		usernameIndex++
+	} else if len(parts) != 2 {
 		return []string{`must be in the format <providerName>:<providerUserName>`}
 	}
 	if len(parts[0]) == 0 {
 		return []string{`must be in the format <providerName>:<providerUserName> with a non-empty providerName`}
 	}
-	if len(parts[1]) == 0 {
+	if len(parts[usernameIndex]) == 0 {
 		return []string{`must be in the format <providerName>:<providerUserName> with a non-empty providerUserName`}
 	}
 	return nil
