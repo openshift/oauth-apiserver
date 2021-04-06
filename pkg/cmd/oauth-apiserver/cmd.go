@@ -20,6 +20,7 @@ import (
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
 	"k8s.io/apiserver/pkg/server/options/encryptionconfig"
 	apiserverstorage "k8s.io/apiserver/pkg/server/storage"
+	cliflag "k8s.io/component-base/cli/flag"
 
 	// register api groups
 	_ "github.com/openshift/oauth-apiserver/pkg/api/install"
@@ -86,6 +87,7 @@ func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 			if err := o.Validate(args); err != nil {
 				return err
 			}
+			cliflag.PrintFlags(c.Flags())
 			return RunOAuthAPIServer(o, stopCh)
 		},
 	}
