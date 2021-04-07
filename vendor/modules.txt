@@ -143,7 +143,7 @@ github.com/openshift/api/project/v1
 github.com/openshift/api/route/v1
 github.com/openshift/api/user
 github.com/openshift/api/user/v1
-# github.com/openshift/apiserver-library-go v0.0.0-20201204115753-d48a1b462aa6
+# github.com/openshift/apiserver-library-go v0.0.0-20210331084747-7da6e575a5ac
 ## explicit
 github.com/openshift/apiserver-library-go/pkg/apivalidation
 # github.com/openshift/build-machinery-go v0.0.0-20200917070002-f171684f77ab
