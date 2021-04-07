@@ -45,7 +45,7 @@ func (a *bootstrapAuthenticator) AuthenticateToken(ctx context.Context, name str
 		name = sha256Prefix + base64.RawURLEncoding.EncodeToString(h[0:])
 	}
 
-	token, err := a.tokens.Get(context.TODO(), name, metav1.GetOptions{})
+	token, err := a.tokens.Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return nil, false, errLookup // mask the error so we do not leak token data in logs
 	}

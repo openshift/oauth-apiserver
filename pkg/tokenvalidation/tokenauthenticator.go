@@ -48,12 +48,12 @@ func (a *tokenAuthenticator) AuthenticateToken(ctx context.Context, name string)
 		name = sha256Prefix + base64.RawURLEncoding.EncodeToString(h[0:])
 	}
 
-	token, err := a.tokens.Get(context.TODO(), name, metav1.GetOptions{})
+	token, err := a.tokens.Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return nil, false, errLookup // mask the error so we do not leak token data in logs
 	}
 
-	user, err := a.users.Get(context.TODO(), token.UserName, metav1.GetOptions{})
+	user, err := a.users.Get(ctx, token.UserName, metav1.GetOptions{})
 	if err != nil {
 		return nil, false, err
 	}
