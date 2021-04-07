@@ -21,9 +21,10 @@ import (
 )
 
 func TestAuthenticateTokenInvalidUID(t *testing.T) {
+	token, tokenHash := generateOAuthTokenPair()
 	fakeOAuthClient := oauthfake.NewSimpleClientset(
 		&oauthv1.OAuthAccessToken{
-			ObjectMeta: metav1.ObjectMeta{Name: "token", CreationTimestamp: metav1.Time{Time: time.Now()}},
+			ObjectMeta: metav1.ObjectMeta{Name: tokenHash, CreationTimestamp: metav1.Time{Time: time.Now()}},
 			ExpiresIn:  600, // 10 minutes
 			UserName:   "foo",
 			UserUID:    string("bar1"),
@@ -33,7 +34,7 @@ func TestAuthenticateTokenInvalidUID(t *testing.T) {
 
 	tokenAuthenticator := NewTokenAuthenticator(fakeOAuthClient.OauthV1().OAuthAccessTokens(), fakeUserClient.UserV1().Users(), NoopGroupMapper{}, nil, NewUIDValidator())
 
-	userInfo, found, err := tokenAuthenticator.AuthenticateToken(context.TODO(), "token")
+	userInfo, found, err := tokenAuthenticator.AuthenticateToken(context.TODO(), token)
 	if found {
 		t.Error("Found token, but it should be missing!")
 	}
@@ -50,7 +51,7 @@ func TestAuthenticateTokenNotFoundSuppressed(t *testing.T) {
 	fakeUserClient := userfake.NewSimpleClientset()
 	tokenAuthenticator := NewTokenAuthenticator(fakeOAuthClient.OauthV1().OAuthAccessTokens(), fakeUserClient.UserV1().Users(), NoopGroupMapper{}, nil)
 
-	userInfo, found, err := tokenAuthenticator.AuthenticateToken(context.TODO(), "token")
+	userInfo, found, err := tokenAuthenticator.AuthenticateToken(context.TODO(), "sha256~token")
 	if found {
 		t.Error("Found token, but it should be missing!")
 	}
@@ -70,7 +71,7 @@ func TestAuthenticateTokenOtherGetErrorSuppressed(t *testing.T) {
 	fakeUserClient := userfake.NewSimpleClientset()
 	tokenAuthenticator := NewTokenAuthenticator(fakeOAuthClient.OauthV1().OAuthAccessTokens(), fakeUserClient.UserV1().Users(), NoopGroupMapper{}, nil)
 
-	userInfo, found, err := tokenAuthenticator.AuthenticateToken(context.TODO(), "token")
+	userInfo, found, err := tokenAuthenticator.AuthenticateToken(context.TODO(), "sha256~token")
 	if found {
 		t.Error("Found token, but it should be missing!")
 	}
@@ -103,32 +104,39 @@ func TestAuthenticateTokenTimeout(t *testing.T) {
 	slowClient := oauthv1.OAuthClient{
 		ObjectMeta: metav1.ObjectMeta{Name: "slowClient"},
 	}
+
+	testTokenClear, testTokenHash := generateOAuthTokenPair()
 	testToken := oauthv1.OAuthAccessToken{
-		ObjectMeta:               metav1.ObjectMeta{Name: "testToken", CreationTimestamp: metav1.Time{Time: testClock.Now()}},
+		ObjectMeta:               metav1.ObjectMeta{Name: testTokenHash, CreationTimestamp: metav1.Time{Time: testClock.Now()}},
 		ClientName:               "testClient",
 		ExpiresIn:                600, // 10 minutes
 		UserName:                 "foo",
 		UserUID:                  string("bar"),
 		InactivityTimeoutSeconds: clientTimeout,
 	}
+	quickTokenClear, quickTokenHash := generateOAuthTokenPair()
 	quickToken := oauthv1.OAuthAccessToken{
-		ObjectMeta:               metav1.ObjectMeta{Name: "quickToken", CreationTimestamp: metav1.Time{Time: testClock.Now()}},
+		ObjectMeta:               metav1.ObjectMeta{Name: quickTokenHash, CreationTimestamp: metav1.Time{Time: testClock.Now()}},
 		ClientName:               "quickClient",
 		ExpiresIn:                600, // 10 minutes
 		UserName:                 "foo",
 		UserUID:                  string("bar"),
 		InactivityTimeoutSeconds: minTimeout,
 	}
+
+	slowTokenClear, slowTokenHash := generateOAuthTokenPair()
 	slowToken := oauthv1.OAuthAccessToken{
-		ObjectMeta:               metav1.ObjectMeta{Name: "slowToken", CreationTimestamp: metav1.Time{Time: testClock.Now()}},
+		ObjectMeta:               metav1.ObjectMeta{Name: slowTokenHash, CreationTimestamp: metav1.Time{Time: testClock.Now()}},
 		ClientName:               "slowClient",
 		ExpiresIn:                600, // 10 minutes
 		UserName:                 "foo",
 		UserUID:                  string("bar"),
 		InactivityTimeoutSeconds: defaultTimeout,
 	}
+
+	emergTokenClear, emergTokenHash := generateOAuthTokenPair()
 	emergToken := oauthv1.OAuthAccessToken{
-		ObjectMeta:               metav1.ObjectMeta{Name: "emergToken", CreationTimestamp: metav1.Time{Time: testClock.Now()}},
+		ObjectMeta:               metav1.ObjectMeta{Name: emergTokenHash, CreationTimestamp: metav1.Time{Time: testClock.Now()}},
 		ClientName:               "quickClient",
 		ExpiresIn:                600, // 10 minutes
 		UserName:                 "foo",
@@ -178,20 +186,20 @@ func TestAuthenticateTokenTimeout(t *testing.T) {
 	// TIME: 0 seconds have passed here
 
 	// first time should succeed for all
-	checkToken(t, "testToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, testTokenClear, testTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
-	checkToken(t, "quickToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, quickTokenClear, quickTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
 	wait(t, timeoutsSync) // from emergency flush because quickToken has a short enough timeout
 
-	checkToken(t, "slowToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, slowTokenClear, slowTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
 	// this should cause an emergency flush, if not the next auth will fail,
 	// as the token will be timed out
-	checkToken(t, "emergToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, emergTokenClear, emergTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
 	wait(t, timeoutsSync) // from emergency flush because emergToken has a super short timeout
@@ -205,7 +213,7 @@ func TestAuthenticateTokenTimeout(t *testing.T) {
 	// TIME: 6th second
 
 	// See if emergency flush happened
-	checkToken(t, "emergToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, emergTokenClear, emergTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
 	wait(t, timeoutsSync) // from emergency flush because emergToken has a super short timeout
@@ -231,10 +239,10 @@ func TestAuthenticateTokenTimeout(t *testing.T) {
 	}
 
 	// this should fail, thus no call to wait(t, putTokenSync)
-	checkToken(t, "quickToken", tokenAuthenticator, accessTokenGetter, testClock, false)
+	checkToken(t, quickTokenClear, quickTokenHash, tokenAuthenticator, accessTokenGetter, testClock, false)
 
 	// while this should get updated
-	checkToken(t, "testToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, testTokenClear, quickTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
 	wait(t, timeoutsSync)
@@ -248,18 +256,18 @@ func TestAuthenticateTokenTimeout(t *testing.T) {
 	// TIME: 27th second
 
 	// this should get updated
-	checkToken(t, "slowToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, slowTokenClear, slowTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
 	wait(t, timeoutsSync)
 
 	// while this should not fail
-	checkToken(t, "testToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, testTokenClear, quickTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
 	wait(t, timeoutsSync)
 	// and should be updated to last at least till the 31st second
-	token, err := accessTokenGetter.Get(context.TODO(), "testToken", metav1.GetOptions{})
+	token, err := accessTokenGetter.Get(context.TODO(), testTokenHash, metav1.GetOptions{})
 	if err != nil {
 		t.Error("Failed to get testToken")
 	} else {
@@ -285,13 +293,13 @@ func TestAuthenticateTokenTimeout(t *testing.T) {
 	wait(t, timeoutsSync)
 
 	// while this should not fail
-	checkToken(t, "testToken", tokenAuthenticator, accessTokenGetter, testClock, true)
+	checkToken(t, testTokenClear, testTokenHash, tokenAuthenticator, accessTokenGetter, testClock, true)
 	wait(t, putTokenSync)
 
 	wait(t, timeoutsSync)
 
 	// and should be updated to have a ZERO timeout
-	token, err = accessTokenGetter.Get(context.TODO(), "testToken", metav1.GetOptions{})
+	token, err = accessTokenGetter.Get(context.TODO(), testTokenHash, metav1.GetOptions{})
 	if err != nil {
 		t.Error("Failed to get testToken")
 	} else {
@@ -313,22 +321,22 @@ func (f fakeOAuthClientLister) List(selector labels.Selector) ([]*oauthv1.OAuthC
 	panic("not used")
 }
 
-func checkToken(t *testing.T, name string, authf authenticator.Token, tokens oauthclient.OAuthAccessTokenInterface, current clock.Clock, present bool) {
+func checkToken(t *testing.T, tokenClear, tokenHash string, authf authenticator.Token, tokens oauthclient.OAuthAccessTokenInterface, current clock.Clock, present bool) {
 	t.Helper()
-	userInfo, found, err := authf.AuthenticateToken(context.TODO(), name)
+	userInfo, found, err := authf.AuthenticateToken(context.TODO(), tokenClear)
 	if present {
 		if !found {
-			t.Errorf("Did not find token %s!", name)
+			t.Errorf("Did not find token %s!", tokenClear)
 		}
 		if err != nil {
-			t.Errorf("Unexpected error checking for token %s: %v", name, err)
+			t.Errorf("Unexpected error checking for token %s: %v", tokenClear, err)
 		}
 		if userInfo == nil {
-			t.Errorf("Did not get a user for token %s!", name)
+			t.Errorf("Did not get a user for token %s!", tokenClear)
 		}
 	} else {
 		if found {
-			token, tokenErr := tokens.Get(context.TODO(), name, metav1.GetOptions{})
+			token, tokenErr := tokens.Get(context.TODO(), tokenHash, metav1.GetOptions{})
 			if tokenErr != nil {
 				t.Fatal(tokenErr)
 			}
@@ -336,10 +344,10 @@ func checkToken(t *testing.T, name string, authf authenticator.Token, tokens oau
 				token.CreationTimestamp, token.InactivityTimeoutSeconds, current.Now())
 		}
 		if err != errTimedout {
-			t.Errorf("Unexpected error checking absence of token %s: %v", name, err)
+			t.Errorf("Unexpected error checking absence of token %s: %v", tokenHash, err)
 		}
 		if userInfo != nil {
-			t.Errorf("Unexpected user checking absence of token %s: %v", name, userInfo)
+			t.Errorf("Unexpected user checking absence of token %s: %v", tokenHash, userInfo)
 		}
 	}
 }
