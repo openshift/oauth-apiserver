@@ -17,7 +17,10 @@ import (
 	userclient "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 )
 
-var errLookup = errors.New("token lookup failed")
+var (
+	errLookup    = errors.New("token lookup failed")
+	errOldFormat = errors.New("old, insecure token format")
+)
 
 type tokenAuthenticator struct {
 	tokens       oauthclient.OAuthAccessTokenInterface
@@ -40,20 +43,20 @@ func NewTokenAuthenticator(tokens oauthclient.OAuthAccessTokenInterface, users u
 const sha256Prefix = "sha256~"
 
 func (a *tokenAuthenticator) AuthenticateToken(ctx context.Context, name string) (*kauthenticator.Response, bool, error) {
-	// hash token for new-style sha256~ prefixed token
-	// TODO: reject non-sha256 prefix tokens in 4.7+
-	if strings.HasPrefix(name, sha256Prefix) {
-		withoutPrefix := strings.TrimPrefix(name, sha256Prefix)
-		h := sha256.Sum256([]byte(withoutPrefix))
-		name = sha256Prefix + base64.RawURLEncoding.EncodeToString(h[0:])
+	if !strings.HasPrefix(name, sha256Prefix) {
+		return nil, false, errOldFormat
 	}
 
-	token, err := a.tokens.Get(context.TODO(), name, metav1.GetOptions{})
+	withoutPrefix := strings.TrimPrefix(name, sha256Prefix)
+	h := sha256.Sum256([]byte(withoutPrefix))
+	name = sha256Prefix + base64.RawURLEncoding.EncodeToString(h[0:])
+
+	token, err := a.tokens.Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return nil, false, errLookup // mask the error so we do not leak token data in logs
 	}
 
-	user, err := a.users.Get(context.TODO(), token.UserName, metav1.GetOptions{})
+	user, err := a.users.Get(ctx, token.UserName, metav1.GetOptions{})
 	if err != nil {
 		return nil, false, err
 	}

@@ -158,17 +158,6 @@ func setupTokenStorage(t *testing.T, adminConfig *rest.Config, testNS string) (u
 			UserUID:     string(frantaObj.UID),
 			Scopes:      []string{"user:full"},
 		},
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: testNS + "nonshatoken",
-			},
-			ClientName:  "openshift-challenging-client",
-			ExpiresIn:   10000,
-			RedirectURI: "https://test.testingstuff.test.test",
-			UserName:    "franta",
-			UserUID:     string(frantaObj.UID),
-			Scopes:      []string{"user:full"},
-		},
 	}
 
 	for _, token := range tokens {
@@ -198,8 +187,8 @@ func testUserOAuthAccessAPI(t *testing.T, test userOAuthAccessTokenTestFunc) {
 	testTrashBin.AddResource(corev1.SchemeGroupVersion.WithResource("namespaces"), testNS.GetObjectMeta())
 
 	frantaUID, mirkaUID, frantaTokenString, mirkaTokenString, trashBin, errors := setupTokenStorage(t, adminConfig, testNS.Name)
-	require.Equal(t, len(errors), 0)
 	testTrashBin.Merge(trashBin)
+	require.Equal(t, len(errors), 0, "there were errors creating the tokens: %v", errors)
 
 	test(t, adminConfig, testNS.Name, frantaUID, mirkaUID, frantaTokenString, mirkaTokenString)
 }
@@ -328,12 +317,6 @@ func getTokens(t *testing.T, adminConfig *rest.Config, testNS, _, _, frantaToken
 			name:          "get someone else's token",
 			userToken:     mirkaTokenString,
 			getTokenName:  "sha256~" + testNS + "franta0",
-			expectedError: true,
-		},
-		{
-			name:          "get non-sha256 token",
-			userToken:     frantaTokenString,
-			getTokenName:  testNS + "nonshatoken",
 			expectedError: true,
 		},
 	}
