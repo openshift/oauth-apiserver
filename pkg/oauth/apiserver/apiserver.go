@@ -192,10 +192,7 @@ func (c *completedConfig) newV1RESTStorage(
 	if err != nil {
 		return nil, nil, fmt.Errorf("error building REST storage: %v", err)
 	}
-	tokenReviewStorage, tokenReviewPostStartHooks, err := c.tokenReviewStorage(corev1Client, oauthClient, userClient)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error building REST storage: %v", err)
-	}
+	tokenReviewStorage, tokenReviewPostStartHooks := c.tokenReviewStorage(corev1Client, oauthClient, userClient)
 
 	v1Storage := map[string]rest.Storage{
 		"oAuthAuthorizeTokens":      authorizeTokenStorage,
@@ -212,13 +209,13 @@ func (c *completedConfig) tokenReviewStorage(
 	corev1Client corev1.CoreV1Interface,
 	oauthClient *oauthclients.Clientset,
 	userClient *userclient.Clientset,
-) (rest.Storage, map[string]genericapiserver.PostStartHookFunc, error) {
+) (rest.Storage, map[string]genericapiserver.PostStartHookFunc) {
 	openshiftAuthenticators, postStartHooks := c.getOpenShiftAuthenticators(corev1Client, oauthClient, userClient)
 
 	tokenAuth := bearertoken.New(tokenunion.New(openshiftAuthenticators...))
-	tokenReviewWrapper, err := tokenreviews.NewREST(tokenAuth)
+	tokenReviewWrapper := tokenreviews.NewREST(tokenAuth, c.ExtraConfig.ImplicitAudiences)
 
-	return tokenReviewWrapper, postStartHooks, err
+	return tokenReviewWrapper, postStartHooks
 }
 
 func (c *completedConfig) getOpenShiftAuthenticators(

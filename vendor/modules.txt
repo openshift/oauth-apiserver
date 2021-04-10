@@ -1034,7 +1034,6 @@ k8s.io/kube-openapi/pkg/validation/validate
 k8s.io/kubernetes/pkg/api/legacyscheme
 k8s.io/kubernetes/pkg/apis/authentication
 k8s.io/kubernetes/pkg/apis/authentication/v1
-k8s.io/kubernetes/pkg/registry/authentication/tokenreview
 # k8s.io/utils v0.0.0-20201110183641-67b214c5f920
 k8s.io/utils/buffer
 k8s.io/utils/integer
