@@ -11,7 +11,7 @@ require (
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
 	github.com/openshift/api v0.0.0-20210416104836-15c7ae797f3f
 	github.com/openshift/apiserver-library-go v0.0.0-20210415093535-9176fb31e5dc
-	github.com/openshift/build-machinery-go v0.0.0-20210413112106-60cf6ea633f9
+	github.com/openshift/build-machinery-go v0.0.0-20210423112049-9415d7ebd33e
 	github.com/openshift/client-go v0.0.0-20210409155308-a8e62c60e930
 	github.com/openshift/library-go v0.0.0-20210414082648-6e767630a0dc
 	github.com/pkg/profile v1.4.0 // indirect

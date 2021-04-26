@@ -18,6 +18,8 @@ IMAGE_REGISTRY?=registry.svc.ci.openshift.org
 # It will generate target "image-$(1)" for builing the image an binding it as a prerequisite to target "images".
 $(call build-image,ocp-oauth-apiserver,$(IMAGE_REGISTRY)/ocp/4.3:oauth-apiserver,./images/Dockerfile.rhel7,.)
 
+$(call verify-golang-version,images/Dockerfile.rhel7)
+
 clean:
 	$(RM) ./oauth-apiserver
 .PHONY: clean
@@ -52,4 +54,3 @@ run-e2e-test: GO_TEST_FLAGS += ^${WHAT}$$
 run-e2e-test: GO_TEST_PACKAGES += -count 1
 run-e2e-test: test-unit
 .PHONY: run-e2e-test
-
