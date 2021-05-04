@@ -38,7 +38,13 @@ func NewBootstrapAuthenticator(tokens oauthclient.OAuthAccessTokenInterface, get
 
 func (a *bootstrapAuthenticator) AuthenticateToken(ctx context.Context, name string) (*kauthenticator.Response, bool, error) {
 	if !strings.HasPrefix(name, sha256Prefix) {
-		return nil, false, errOldFormat
+		// only complain about non-sha256 format if the token is really an existing
+		// OAuthAccessToken (and e.g. no service account which also has no sha256 prefix)
+		_, err := a.tokens.Get(ctx, name, metav1.GetOptions{})
+		if err == nil {
+			return nil, false, errOldFormat
+		}
+		return nil, false, errLookup
 	}
 
 	withoutPrefix := strings.TrimPrefix(name, sha256Prefix)
