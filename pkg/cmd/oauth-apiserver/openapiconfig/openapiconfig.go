@@ -12,6 +12,9 @@ import (
 
 	openapigenerated "github.com/openshift/oauth-apiserver/pkg/openapi"
 	"github.com/openshift/oauth-apiserver/pkg/version"
+
+	// make sure our APIs are in the legacyscheme
+	_ "github.com/openshift/oauth-apiserver/pkg/api/install"
 )
 
 func DefaultOpenAPIConfig() *openapicommon.Config {
