@@ -19,7 +19,7 @@ import (
 
 var (
 	errLookup    = errors.New("token lookup failed")
-	errOldFormat = errors.New("old, insecure token format")
+	errOldFormat = errors.New("old and insecure token format")
 )
 
 type tokenAuthenticator struct {
@@ -44,7 +44,13 @@ const sha256Prefix = "sha256~"
 
 func (a *tokenAuthenticator) AuthenticateToken(ctx context.Context, name string) (*kauthenticator.Response, bool, error) {
 	if !strings.HasPrefix(name, sha256Prefix) {
-		return nil, false, errOldFormat
+		// only complain about non-sha256 format if the token is really an existing
+		// OAuthAccessToken (and e.g. no service account which also has no sha256 prefix)
+		_, err := a.tokens.Get(ctx, name, metav1.GetOptions{})
+		if err == nil {
+			return nil, false, errOldFormat
+		}
+		return nil, false, errLookup
 	}
 
 	withoutPrefix := strings.TrimPrefix(name, sha256Prefix)
