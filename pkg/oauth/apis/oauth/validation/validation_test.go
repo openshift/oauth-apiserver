@@ -1,6 +1,8 @@
 package validation
 
 import (
+	"reflect"
+	"strings"
 	"testing"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -744,5 +746,29 @@ func TestValidateAuthorizeTokensUpdate(t *testing.T) {
 				t.Errorf("%s: expected errors to have field %s: %v", k, v.F, errs[i])
 			}
 		}
+	}
+}
+
+func TestValidateUserNameField(t *testing.T) {
+	fieldPath := field.NewPath("metadata", "name")
+	tests := []struct {
+		username string
+		want     field.ErrorList
+	}{
+		{
+			username: "kube:admin",
+			want:     field.ErrorList{},
+		},
+		{
+			username: "system:admin",
+			want:     field.ErrorList{field.Invalid(fieldPath, "system:admin", strings.Join([]string{`usernames that contain ":" must begin with "b64:"`}, ", "))},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.username, func(t *testing.T) {
+			if got := ValidateUserNameField(tt.username, fieldPath); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ValidateUserNameField() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
