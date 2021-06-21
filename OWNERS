@@ -4,8 +4,11 @@ reviewers:
   - sttts
   - stlaz
   - p0lyn0mial
+  - slaskawi
 approvers:
   - deads2k
   - mfojtik
   - sttts
+  - stlaz
+  - s-urbaniak
 component: oauth-apiserver
