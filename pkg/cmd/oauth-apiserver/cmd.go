@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/openshift/library-go/pkg/serviceability"
+	"github.com/openshift/oauth-apiserver/pkg/admission"
 	"github.com/openshift/oauth-apiserver/pkg/apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/authorization/hardcodedauthorizer"
 	"github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver/openapiconfig"
@@ -80,6 +81,7 @@ func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 		Short: "Launch OpenShift OAuth API Server",
 		RunE: func(c *cobra.Command, args []string) error {
 			serviceability.StartProfiler()
+			admission.InstallOauthAdmissionPlugins(o.RecommendedOptions.Admission)
 
 			if err := o.Complete(); err != nil {
 				return err
