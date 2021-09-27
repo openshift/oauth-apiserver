@@ -43,6 +43,7 @@ func NewREST(optsGetter generic.RESTOptionsGetter, clientGetter oauthclient.Gett
 		CreateStrategy: strategy,
 		UpdateStrategy: strategy,
 		DeleteStrategy: strategy,
+		ReturnDeletedObject: true,
 	}
 
 	options := &generic.StoreOptions{
