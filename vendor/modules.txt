@@ -178,6 +178,7 @@ github.com/openshift/client-go/user/listers/user/v1
 github.com/openshift/library-go/pkg/authentication/bootstrapauthenticator
 github.com/openshift/library-go/pkg/authorization/scopemetadata
 github.com/openshift/library-go/pkg/oauth/oauthserviceaccountclient
+github.com/openshift/library-go/pkg/oauth/usercache
 github.com/openshift/library-go/pkg/serviceability
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
