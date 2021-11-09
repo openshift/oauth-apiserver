@@ -238,6 +238,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.NetworkSpec":                                                  schema_openshift_api_config_v1_NetworkSpec(ref),
 		"github.com/openshift/api/config/v1.NetworkStatus":                                                schema_openshift_api_config_v1_NetworkStatus(ref),
 		"github.com/openshift/api/config/v1.OAuth":                                                        schema_openshift_api_config_v1_OAuth(ref),
+		"github.com/openshift/api/config/v1.OAuthAudit":                                                   schema_openshift_api_config_v1_OAuthAudit(ref),
 		"github.com/openshift/api/config/v1.OAuthList":                                                    schema_openshift_api_config_v1_OAuthList(ref),
 		"github.com/openshift/api/config/v1.OAuthRemoteConnectionInfo":                                    schema_openshift_api_config_v1_OAuthRemoteConnectionInfo(ref),
 		"github.com/openshift/api/config/v1.OAuthSpec":                                                    schema_openshift_api_config_v1_OAuthSpec(ref),
@@ -11615,6 +11616,26 @@ func schema_openshift_api_config_v1_OAuth(ref common.ReferenceCallback) common.O
 	}
 }
 
+func schema_openshift_api_config_v1_OAuthAudit(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "OAuthAudit specifies the Audit profile in use.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"profile": {
+						SchemaProps: spec.SchemaProps{
+							Description: "profile is a simple drop in profile type that can be turned off by setting it to \"None\" or it can be turned on by setting it to \"WriteLoginEvents\". By default the profile is set to \"WriteLoginEvents\".",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_openshift_api_config_v1_OAuthList(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -11717,6 +11738,11 @@ func schema_openshift_api_config_v1_OAuthSpec(ref common.ReferenceCallback) comm
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"identityProviders": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "atomic",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "identityProviders is an ordered list of ways for a user to identify themselves. When this list is empty, no identities are provisioned for users.",
 							Type:        []string{"array"},
@@ -11744,12 +11770,19 @@ func schema_openshift_api_config_v1_OAuthSpec(ref common.ReferenceCallback) comm
 							Ref:         ref("github.com/openshift/api/config/v1.OAuthTemplates"),
 						},
 					},
+					"audit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "audit specifies what should be audited in the context of OAuthServer. By default the Audit is turned on.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.OAuthAudit"),
+						},
+					},
 				},
 				Required: []string{"tokenConfig"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.IdentityProvider", "github.com/openshift/api/config/v1.OAuthTemplates", "github.com/openshift/api/config/v1.TokenConfig"},
+			"github.com/openshift/api/config/v1.IdentityProvider", "github.com/openshift/api/config/v1.OAuthAudit", "github.com/openshift/api/config/v1.OAuthTemplates", "github.com/openshift/api/config/v1.TokenConfig"},
 	}
 }
 
@@ -18297,7 +18330,7 @@ func schema_openshift_api_route_v1_TLSConfig(ref common.ReferenceCallback) commo
 					},
 					"certificate": {
 						SchemaProps: spec.SchemaProps{
-							Description: "certificate provides certificate contents",
+							Description: "certificate provides certificate contents. This should be a single serving certificate, not a certificate chain. Do not include a CA certificate.",
 							Type:        []string{"string"},
 							Format:      "",
 						},

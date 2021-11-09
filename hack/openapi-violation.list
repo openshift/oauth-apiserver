@@ -95,7 +95,6 @@ API rule violation: list_type_missing,github.com/openshift/api/config/v1,Network
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,NetworkSpec,ServiceNetwork
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,NetworkStatus,ClusterNetwork
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,NetworkStatus,ServiceNetwork
-API rule violation: list_type_missing,github.com/openshift/api/config/v1,OAuthSpec,IdentityProviders
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,OpenIDIdentityProvider,ExtraScopes
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,OperatorHubSpec,Sources
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,OperatorHubStatus,Sources
