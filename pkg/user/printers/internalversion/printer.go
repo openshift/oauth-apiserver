@@ -51,7 +51,7 @@ func printUser(user *userapi.User, options printers.GenerateOptions) ([]metav1.T
 
 	row.Cells = append(row.Cells,
 		user.Name,
-		user.UID,
+		string(user.UID),
 		user.FullName,
 		strings.Join(user.Identities, ", "),
 	)
