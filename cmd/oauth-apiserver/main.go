@@ -1,30 +1,20 @@
 package main
 
 import (
-	goflag "flag"
-	"fmt"
-	"math/rand"
 	"os"
 	"runtime"
-	"time"
+
+	"github.com/spf13/cobra"
+
+	"k8s.io/component-base/cli"
 
 	"github.com/openshift/library-go/pkg/serviceability"
+
 	oauth_apiserver "github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/version"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-	utilflag "k8s.io/component-base/cli/flag"
-	"k8s.io/component-base/logs"
 )
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
-	pflag.CommandLine.SetNormalizeFunc(utilflag.WordSepNormalizeFunc)
-	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
-
-	logs.InitLogs()
-	defer logs.FlushLogs()
 	defer serviceability.BehaviorOnPanic(os.Getenv("OPENSHIFT_ON_PANIC"), version.Get())()
 	defer serviceability.Profile(os.Getenv("OPENSHIFT_PROFILE")).Stop()
 
@@ -33,10 +23,8 @@ func main() {
 	}
 
 	command := NewOAuthAPIServerCommand()
-	if err := command.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
+	code := cli.Run(command)
+	os.Exit(code)
 }
 
 func NewOAuthAPIServerCommand() *cobra.Command {
