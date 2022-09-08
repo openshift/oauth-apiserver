@@ -8,10 +8,12 @@ package v1
 import (
 	unsafe "unsafe"
 
-	v1 "github.com/openshift/api/user/v1"
-	user "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+
+	v1 "github.com/openshift/api/user/v1"
+
+	user "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 )
 
 func init() {

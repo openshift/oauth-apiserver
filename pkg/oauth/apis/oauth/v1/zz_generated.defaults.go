@@ -6,8 +6,9 @@
 package v1
 
 import (
-	v1 "github.com/openshift/api/oauth/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+
+	v1 "github.com/openshift/api/oauth/v1"
 )
 
 // RegisterDefaults adds defaulters functions to the given scheme.
