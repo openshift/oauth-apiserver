@@ -198,12 +198,12 @@ func (c *completedConfig) newV1RESTStorage(
 	}
 
 	v1Storage := map[string]rest.Storage{
-		"oAuthAuthorizeTokens":      authorizeTokenStorage,
-		"oAuthAccessTokens":         accessTokenStorage,
-		"oAuthClients":              clientStorage,
-		"oAuthClientAuthorizations": clientAuthorizationStorage,
-		"userOAuthAccessTokens":     userOAuthAccessTokensDelegate,
-		"tokenReviews":              tokenReviewStorage,
+		"oauthauthorizetokens":      authorizeTokenStorage,
+		"oauthaccesstokens":         accessTokenStorage,
+		"oauthclients":              clientStorage,
+		"oauthclientauthorizations": clientAuthorizationStorage,
+		"useroauthaccesstokens":     userOAuthAccessTokensDelegate,
+		"tokenreviews":              tokenReviewStorage,
 	}
 	return v1Storage, tokenReviewPostStartHooks, nil
 }
