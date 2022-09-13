@@ -246,7 +246,8 @@ func TestCreate(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(unassociatedIdentity, unassociatedUser)
-	createdMapping, err := rest.Create(apirequest.NewContext(), mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	createdMapping, err := rest.Create(ctx, mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
 
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -268,7 +269,8 @@ func TestCreateExists(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(identity, user)
-	_, err := rest.Create(apirequest.NewContext(), mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, err := rest.Create(ctx, mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error, got none")
@@ -291,7 +293,8 @@ func TestCreateMissingIdentity(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(nil, user)
-	_, err := rest.Create(apirequest.NewContext(), mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, err := rest.Create(ctx, mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error, got none")
@@ -315,7 +318,8 @@ func TestCreateMissingUser(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(identity)
-	_, err := rest.Create(apirequest.NewContext(), mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, err := rest.Create(ctx, mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error, got none")
@@ -343,7 +347,8 @@ func TestCreateUserUpdateError(t *testing.T) {
 
 	actions, userRegistry, _, rest := setupRegistries(unassociatedIdentity, unassociatedUser)
 	userRegistry.UpdateErr[associatedUser.Name] = expectedErr
-	_, err := rest.Create(apirequest.NewContext(), mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, err := rest.Create(ctx, mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error, got none")
@@ -371,7 +376,8 @@ func TestCreateIdentityUpdateError(t *testing.T) {
 
 	actions, _, identityRegistry, rest := setupRegistries(unassociatedIdentity, unassociatedUser)
 	identityRegistry.UpdateErr = errors.New("UpdateUser error")
-	_, err := rest.Create(apirequest.NewContext(), mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, err := rest.Create(ctx, mapping, apiserverrest.ValidateAllObjectFunc, &metav1.CreateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error, got none")
@@ -411,7 +417,8 @@ func TestUpdate(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
-	createdMapping, created, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	createdMapping, created, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -442,7 +449,8 @@ func TestUpdateMissingIdentity(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(nil, associatedUser1, unassociatedUser2)
-	_, _, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, _, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error: %v", err)
@@ -475,7 +483,8 @@ func TestUpdateMissingUser(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1)
-	_, _, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, _, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error: %v", err)
@@ -502,7 +511,8 @@ func TestUpdateOldUserMatches(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(identity, user)
-	createdMapping, created, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	createdMapping, created, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -533,7 +543,8 @@ func TestUpdateWithEmptyResourceVersion(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
-	_, _, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, _, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error")
@@ -564,7 +575,8 @@ func TestUpdateWithMismatchedResourceVersion(t *testing.T) {
 	}
 
 	actions, _, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
-	_, _, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, _, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error")
@@ -606,7 +618,8 @@ func TestUpdateOldUserUpdateError(t *testing.T) {
 
 	actions, userRegistry, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
 	userRegistry.UpdateErr[unassociatedUser1.Name] = expectedErr
-	createdMapping, created, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	createdMapping, created, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	// An error cleaning up the old user shouldn't manifest as an update failure, since the mapping was successfully updated
 	if err != nil {
@@ -646,7 +659,8 @@ func TestUpdateUserUpdateError(t *testing.T) {
 
 	actions, userRegistry, _, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
 	userRegistry.UpdateErr[associatedUser2.Name] = expectedErr
-	_, _, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, _, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error")
@@ -686,7 +700,8 @@ func TestUpdateIdentityUpdateError(t *testing.T) {
 
 	actions, _, identityRegistry, rest := setupRegistries(associatedIdentity1User1, associatedUser1, unassociatedUser2)
 	identityRegistry.UpdateErr = expectedErr
-	_, _, err := rest.Update(apirequest.NewContext(), mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
+	ctx := apirequest.WithNamespace(apirequest.NewContext(), metav1.NamespaceNone)
+	_, _, err := rest.Update(ctx, mapping.Name, kapirest.DefaultUpdatedObjectInfo(mapping), apiserverrest.ValidateAllObjectFunc, apiserverrest.ValidateAllObjectUpdateFunc, false, &metav1.UpdateOptions{})
 
 	if err == nil {
 		t.Errorf("Expected error")
