@@ -7,6 +7,7 @@ import (
 
 	userapiv1 "github.com/openshift/api/user/v1"
 	userclient "github.com/openshift/client-go/user/clientset/versioned"
+
 	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 	groupetcd "github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/group/etcd"
 	identityetcd "github.com/openshift/oauth-apiserver/pkg/user/apiserver/registry/identity/etcd"

@@ -16,6 +16,7 @@ import (
 	kapirest "k8s.io/apiserver/pkg/registry/rest"
 
 	userapi "github.com/openshift/api/user/v1"
+
 	userapiinternal "github.com/openshift/oauth-apiserver/pkg/user/apis/user"
 )
 
