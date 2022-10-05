@@ -572,23 +572,7 @@ func watchTokens(t *testing.T, adminConfig *rest.Config, testNS, frantaUID, mirk
 
 			tokensObserved := []*oauthv1.UserOAuthAccessToken{}
 
-			finished := make(chan bool)
 			timedCtx, timedCtxCancel := context.WithTimeout(context.Background(), 15*time.Second)
-			go func() {
-				tokenChan := tokenWatcher.ResultChan()
-				for {
-					select {
-					case tokenEvent := <-tokenChan:
-						token, ok := tokenEvent.Object.(*oauthv1.UserOAuthAccessToken)
-						require.True(t, ok)
-						require.Equal(t, tc.userName, token.UserName)
-						tokensObserved = append(tokensObserved, token)
-					case <-timedCtx.Done():
-						finished <- true
-						return
-					}
-				}
-			}()
 
 			go func() {
 				if tc.watchActions != nil {
@@ -600,7 +584,20 @@ func watchTokens(t *testing.T, adminConfig *rest.Config, testNS, frantaUID, mirk
 				}
 			}()
 
-			<-finished
+			tokenChan := tokenWatcher.ResultChan()
+
+		forloop:
+			for {
+				select {
+				case tokenEvent := <-tokenChan:
+					token, ok := tokenEvent.Object.(*oauthv1.UserOAuthAccessToken)
+					require.True(t, ok)
+					require.Equal(t, tc.userName, token.UserName)
+					tokensObserved = append(tokensObserved, token)
+				case <-timedCtx.Done():
+					break forloop
+				}
+			}
 
 			require.Equal(t, tc.expectedResults, len(tokensObserved), "unexpected number of results, expected %d, got %d: %v", tc.expectedResults, len(tokensObserved), tokensObserved)
 			oauthTokenClient.OAuthAccessTokens()
