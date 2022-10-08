@@ -94,6 +94,6 @@ func (c *completedConfig) newV1RESTStorage() (map[string]rest.Storage, error) {
 	v1Storage["users"] = userStorage
 	v1Storage["groups"] = groupStorage
 	v1Storage["identities"] = identityStorage
-	v1Storage["userIdentityMappings"] = userIdentityMappingStorage
+	v1Storage["useridentitymappings"] = userIdentityMappingStorage
 	return v1Storage, nil
 }

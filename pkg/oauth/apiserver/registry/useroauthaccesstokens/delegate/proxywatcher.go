@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 
@@ -72,7 +73,11 @@ func (w *OAuthAccessTokenWatcher) Watch(ctx context.Context) {
 			case watch.Error:
 				w.outgoing <- event
 			default:
-				tokenOrig, ok := event.Object.(*oauthapi.OAuthAccessToken)
+				obj := event.Object
+				if cacheable, ok := obj.(runtime.CacheableObject); ok {
+					obj = cacheable.GetObject()
+				}
+				tokenOrig, ok := obj.(*oauthapi.OAuthAccessToken)
 				if !ok {
 					w.outgoing <- createErrorEvent(errors.NewInternalError(fmt.Errorf("failed to convert incoming object to an OAuthAccessToken type")))
 					continue
