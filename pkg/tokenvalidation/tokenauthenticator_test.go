@@ -9,9 +9,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/clock"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	clienttesting "k8s.io/client-go/testing"
+	"k8s.io/utils/clock"
+	clocktesting "k8s.io/utils/clock/testing"
 
 	oauthv1 "github.com/openshift/api/oauth/v1"
 	userv1 "github.com/openshift/api/user/v1"
@@ -87,7 +88,7 @@ func TestAuthenticateTokenTimeout(t *testing.T) {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
-	testClock := clock.NewFakeClock(time.Time{})
+	testClock := clocktesting.NewFakeClock(time.Time{})
 
 	defaultTimeout := int32(30) // 30 seconds
 	clientTimeout := int32(15)  // 15 seconds
