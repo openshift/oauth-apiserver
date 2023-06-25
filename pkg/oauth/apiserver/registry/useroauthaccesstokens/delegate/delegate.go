@@ -37,6 +37,8 @@ var _ rest.Getter = &REST{}
 var _ rest.Watcher = &REST{}
 var _ rest.GracefulDeleter = &REST{}
 var _ rest.Scoper = &REST{}
+var _ rest.SingularNameProvider = &REST{}
+var _ rest.Storage = &REST{}
 
 // NewREST returns a RESTStorage object that will work against access tokens
 func NewREST(accessTokenStorage *accesstokenregistry.REST) (*REST, error) {
@@ -52,6 +54,10 @@ func (r *REST) New() runtime.Object {
 
 func (r *REST) NewList() runtime.Object {
 	return &oauthv1.UserOAuthAccessTokenList{}
+}
+
+func (s *REST) Destroy() {
+	s.accessTokenStorage.Destroy()
 }
 
 func (r *REST) List(ctx context.Context, options *metainternal.ListOptions) (runtime.Object, error) {
@@ -122,6 +128,10 @@ func (r *REST) ConvertToTable(ctx context.Context, object runtime.Object, tableO
 
 func (r *REST) NamespaceScoped() bool {
 	return false
+}
+
+func (r *REST) GetSingularName() string {
+	return "useroauthaccesstoken"
 }
 
 func (r *REST) Delete(ctx context.Context, name string, validateFunc rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {

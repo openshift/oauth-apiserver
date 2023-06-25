@@ -31,6 +31,8 @@ var _ rest.Getter = &REST{}
 var _ rest.CreaterUpdater = &REST{}
 var _ rest.GracefulDeleter = &REST{}
 var _ rest.Scoper = &REST{}
+var _ rest.SingularNameProvider = &REST{}
+var _ rest.Storage = &REST{}
 
 // NewREST returns a new REST.
 func NewREST(userClient userclient.UserInterface, identityClient userclient.IdentityInterface) *REST {
@@ -42,8 +44,14 @@ func (r *REST) New() runtime.Object {
 	return &userinternal.UserIdentityMapping{}
 }
 
+func (s *REST) Destroy() {}
+
 func (s *REST) NamespaceScoped() bool {
 	return false
+}
+
+func (r *REST) GetSingularName() string {
+	return "useridentitymapping"
 }
 
 // GetIdentities returns the mapping for the named identity

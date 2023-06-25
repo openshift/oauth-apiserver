@@ -21,6 +21,7 @@ type REST struct {
 	wrapped *tokenreview.REST
 }
 
+var _ rest.SingularNameProvider = &REST{}
 var _ rest.Storage = &REST{}
 var _ rest.Creater = &REST{}
 
@@ -32,12 +33,20 @@ func NewREST(tokenAuthenticator authenticator.Request) (*REST, error) {
 	return &REST{wrapped: tokenreview.NewREST(tokenAuthenticator, []string{})}, nil
 }
 
+func (r *REST) Destroy() {
+	r.wrapped.Destroy()
+}
+
 func (r *REST) GroupVersionKind(containingGV schema.GroupVersion) schema.GroupVersionKind {
 	return kauthenticationv1.SchemeGroupVersion.WithKind("TokenReview")
 }
 
 func (r *REST) NamespaceScoped() bool {
 	return false
+}
+
+func (r *REST) GetSingularName() string {
+	return r.wrapped.GetSingularName()
 }
 
 func (r *REST) Create(ctx context.Context, obj runtime.Object, validateObj rest.ValidateObjectFunc, createOptions *metav1.CreateOptions) (runtime.Object, error) {

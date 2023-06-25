@@ -28,9 +28,10 @@ var _ rest.StandardStorage = &REST{}
 func NewREST(optsGetter generic.RESTOptionsGetter, clientGetter oauthclient.Getter) (*REST, error) {
 	strategy := oauthaccesstoken.NewStrategy(clientGetter)
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &oauthapi.OAuthAccessToken{} },
-		NewListFunc:              func() runtime.Object { return &oauthapi.OAuthAccessTokenList{} },
-		DefaultQualifiedResource: oauth.Resource("oauthaccesstokens"),
+		NewFunc:                   func() runtime.Object { return &oauthapi.OAuthAccessToken{} },
+		NewListFunc:               func() runtime.Object { return &oauthapi.OAuthAccessTokenList{} },
+		DefaultQualifiedResource:  oauth.Resource("oauthaccesstokens"),
+		SingularQualifiedResource: oauth.Resource("oauthaccesstoken"),
 
 		TableConvertor: printerstorage.TableConvertor{TableGenerator: printers.NewTableGenerator().With(oauthprinters.AddOAuthOpenShiftHandler)},
 
