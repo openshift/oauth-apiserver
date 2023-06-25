@@ -16,6 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apiserver/pkg/authorization/union"
+	"k8s.io/apiserver/pkg/endpoints/discovery/aggregated"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
 	"k8s.io/apiserver/pkg/server/options/encryptionconfig"
@@ -110,7 +111,12 @@ func RunOAuthAPIServer(serverOptions *OAuthAPIServerOptions, stopCh <-chan struc
 		return err
 	}
 	preparedOAuthServer := oauthAPIServer.GenericAPIServer.PrepareRun()
-	if err := completedOAuthAPIServerConfig.WithOpenAPIAggregationController(preparedOAuthServer.GenericAPIServer); err != nil {
+
+	// this **must** be done after PrepareRun() as it sets up the openapi endpoints
+	if err := completedOAuthAPIServerConfig.WithOpenAPIAggregationController(preparedOAuthServer.GenericAPIServer, completedOAuthAPIServerConfig.GenericConfig.OpenAPIConfig); err != nil {
+		return err
+	}
+	if err := completedOAuthAPIServerConfig.WithOpenAPIV3AggregationController(preparedOAuthServer.GenericAPIServer); err != nil {
 		return err
 	}
 	return preparedOAuthServer.Run(stopCh)
@@ -123,6 +129,12 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 
 	serverConfig := apiserver.NewConfig()
 	serverConfig.GenericConfig.OpenAPIConfig = openapiconfig.DefaultOpenAPIConfig()
+	serverConfig.GenericConfig.OpenAPIV3Config = openapiconfig.DefaultOpenAPIConfig()
+	serverConfig.GenericConfig.AggregatedDiscoveryGroupManager = aggregated.NewResourceManager("apis")
+	// do not to install the default OpenAPI handler in the aggregated apiserver
+	// as it will be handled by openapi aggregator (both v2 and v3)
+	// non-root apiservers must set this value to false
+	serverConfig.GenericConfig.Config.SkipOpenAPIInstallation = true
 
 	if err := o.RecommendedOptions.ApplyTo(serverConfig.GenericConfig); err != nil {
 		return nil, err
