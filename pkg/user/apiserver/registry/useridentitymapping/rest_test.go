@@ -32,7 +32,7 @@ func makeUserFromSequence(sequence int) *userapi.User {
 	userResourceVersion := fmt.Sprintf("%d", sequence+100)
 
 	return &userapi.User{
-		ObjectMeta: metav1.ObjectMeta{Name: userName, UID: userUID, ResourceVersion: userResourceVersion},
+		ObjectMeta: metav1.ObjectMeta{Name: userName, UID: userUID, ResourceVersion: userResourceVersion, CreationTimestamp: metav1.Now()},
 	}
 }
 
@@ -49,7 +49,7 @@ func makeIdentityFromSequence(sequence int) *userapi.Identity {
 	identityResourceVersion := fmt.Sprintf("%d", sequence+200)
 
 	return &userapi.Identity{
-		ObjectMeta:       metav1.ObjectMeta{Name: identityName, UID: identityUID, ResourceVersion: identityResourceVersion},
+		ObjectMeta:       metav1.ObjectMeta{Name: identityName, UID: identityUID, ResourceVersion: identityResourceVersion, CreationTimestamp: metav1.Now()},
 		ProviderName:     providerName,
 		ProviderUserName: providerUserName,
 	}
@@ -443,7 +443,7 @@ func TestUpdateMissingIdentity(t *testing.T) {
 	}
 
 	mapping := &userapiinternal.UserIdentityMapping{
-		ObjectMeta: metav1.ObjectMeta{ResourceVersion: unassociatedIdentity1.ResourceVersion},
+		ObjectMeta: metav1.ObjectMeta{ResourceVersion: unassociatedIdentity1.ResourceVersion, CreationTimestamp: metav1.Now()},
 		Identity:   corev1.ObjectReference{Name: unassociatedIdentity1.Name},
 		User:       corev1.ObjectReference{Name: unassociatedUser2.Name},
 	}
