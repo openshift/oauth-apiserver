@@ -22,9 +22,10 @@ type REST struct {
 // NewREST returns a RESTStorage object that will work against groups
 func NewREST(optsGetter generic.RESTOptionsGetter) (*REST, error) {
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &userapi.Group{} },
-		NewListFunc:              func() runtime.Object { return &userapi.GroupList{} },
-		DefaultQualifiedResource: user.Resource("groups"),
+		NewFunc:                   func() runtime.Object { return &userapi.Group{} },
+		NewListFunc:               func() runtime.Object { return &userapi.GroupList{} },
+		DefaultQualifiedResource:  user.Resource("groups"),
+		SingularQualifiedResource: user.Resource("group"),
 
 		TableConvertor: printerstorage.TableConvertor{TableGenerator: printers.NewTableGenerator().With(userprinters.AddUserOpenShiftHandler)},
 

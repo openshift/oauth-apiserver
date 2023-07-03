@@ -3,7 +3,6 @@ package useridentitymapping
 import (
 	"context"
 	"fmt"
-
 	corev1 "k8s.io/api/core/v1"
 	kerrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,6 +30,8 @@ var _ rest.Getter = &REST{}
 var _ rest.CreaterUpdater = &REST{}
 var _ rest.GracefulDeleter = &REST{}
 var _ rest.Scoper = &REST{}
+var _ rest.SingularNameProvider = &REST{}
+var _ rest.Storage = &REST{}
 
 // NewREST returns a new REST.
 func NewREST(userClient userclient.UserInterface, identityClient userclient.IdentityInterface) *REST {
@@ -42,8 +43,14 @@ func (r *REST) New() runtime.Object {
 	return &userinternal.UserIdentityMapping{}
 }
 
+func (s *REST) Destroy() {}
+
 func (s *REST) NamespaceScoped() bool {
 	return false
+}
+
+func (r *REST) GetSingularName() string {
+	return "useridentitymapping"
 }
 
 // GetIdentities returns the mapping for the named identity
@@ -312,9 +319,10 @@ func unsetIdentityUser(identity *userapi.Identity) bool {
 func mappingFor(user *userapi.User, identity *userapi.Identity) (*userinternal.UserIdentityMapping, error) {
 	return &userinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:            identity.Name,
-			ResourceVersion: identity.ResourceVersion,
-			UID:             identity.UID,
+			Name:              identity.Name,
+			ResourceVersion:   identity.ResourceVersion,
+			UID:               identity.UID,
+			CreationTimestamp: identity.CreationTimestamp,
 		},
 		Identity: corev1.ObjectReference{
 			Name: identity.Name,

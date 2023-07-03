@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/clock"
 	"k8s.io/klog/v2"
+	"k8s.io/utils/clock"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -57,7 +57,7 @@ type TimeoutValidator struct {
 	// fields that are used to have a deterministic order of events in unit tests
 	flushHandler    func(flushHorizon time.Time) // allows us to decorate this func during unit tests
 	putTokenHandler func(td *tokenData)          // allows us to decorate this func during unit tests
-	clock           clock.Clock                  // allows us to control time during unit tests
+	clock           clock.WithTicker             // allows us to control time during unit tests
 }
 
 func NewTimeoutValidator(tokens oauthclient.OAuthAccessTokenInterface, oauthClients oauthclientlister.OAuthClientLister, defaultTimeout time.Duration, minValidTimeout int32) *TimeoutValidator {

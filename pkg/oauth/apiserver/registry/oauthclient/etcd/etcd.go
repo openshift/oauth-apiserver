@@ -25,9 +25,10 @@ var _ rest.StandardStorage = &REST{}
 // NewREST returns a RESTStorage object that will work against oauth clients
 func NewREST(optsGetter generic.RESTOptionsGetter) (*REST, error) {
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &oauthapi.OAuthClient{} },
-		NewListFunc:              func() runtime.Object { return &oauthapi.OAuthClientList{} },
-		DefaultQualifiedResource: oauth.Resource("oauthclients"),
+		NewFunc:                   func() runtime.Object { return &oauthapi.OAuthClient{} },
+		NewListFunc:               func() runtime.Object { return &oauthapi.OAuthClientList{} },
+		DefaultQualifiedResource:  oauth.Resource("oauthclients"),
+		SingularQualifiedResource: oauth.Resource("oauthclient"),
 
 		TableConvertor: printerstorage.TableConvertor{TableGenerator: printers.NewTableGenerator().With(oauthprinters.AddOAuthOpenShiftHandler)},
 

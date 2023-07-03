@@ -28,9 +28,10 @@ func NewREST(optsGetter generic.RESTOptionsGetter, clientGetter oauthclient.Gett
 	strategy := oauthclientauthorization.NewStrategy(clientGetter)
 
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &oauthapi.OAuthClientAuthorization{} },
-		NewListFunc:              func() runtime.Object { return &oauthapi.OAuthClientAuthorizationList{} },
-		DefaultQualifiedResource: oauth.Resource("oauthclientauthorizations"),
+		NewFunc:                   func() runtime.Object { return &oauthapi.OAuthClientAuthorization{} },
+		NewListFunc:               func() runtime.Object { return &oauthapi.OAuthClientAuthorizationList{} },
+		DefaultQualifiedResource:  oauth.Resource("oauthclientauthorizations"),
+		SingularQualifiedResource: oauth.Resource("oauthclientauthorization"),
 
 		TableConvertor: printerstorage.TableConvertor{TableGenerator: printers.NewTableGenerator().With(oauthprinters.AddOAuthOpenShiftHandler)},
 

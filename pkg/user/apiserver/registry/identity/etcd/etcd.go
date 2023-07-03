@@ -25,9 +25,10 @@ var _ rest.StandardStorage = &REST{}
 // NewREST returns a RESTStorage object that will work against identites
 func NewREST(optsGetter generic.RESTOptionsGetter) (*REST, error) {
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &userapi.Identity{} },
-		NewListFunc:              func() runtime.Object { return &userapi.IdentityList{} },
-		DefaultQualifiedResource: user.Resource("identities"),
+		NewFunc:                   func() runtime.Object { return &userapi.Identity{} },
+		NewListFunc:               func() runtime.Object { return &userapi.IdentityList{} },
+		DefaultQualifiedResource:  user.Resource("identities"),
+		SingularQualifiedResource: user.Resource("identity"),
 
 		TableConvertor: printerstorage.TableConvertor{TableGenerator: printers.NewTableGenerator().With(userprinters.AddUserOpenShiftHandler)},
 
