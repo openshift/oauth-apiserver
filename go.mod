@@ -55,7 +55,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/cel-go v0.12.6 // indirect
+	github.com/google/cel-go v0.12.7 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
@@ -134,16 +134,11 @@ require (
 )
 
 replace (
-	k8s.io/api => k8s.io/api v0.27.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.27.3
-	k8s.io/apimachinery => k8s.io/apimachinery v0.27.3
-	k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20230525090225-51d24b204b3b // points to openshift-apiserver-4.14-kubernetes-1.27.1
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.27.3
-	k8s.io/client-go => k8s.io/client-go v0.27.3
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.27.3
 	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.27.3
 	k8s.io/code-generator => k8s.io/code-generator v0.27.3
-	k8s.io/component-base => k8s.io/component-base v0.27.3
 	k8s.io/component-helpers => k8s.io/component-helpers v0.27.3
 	k8s.io/controller-manager => k8s.io/controller-manager v0.27.3
 	k8s.io/cri-api => k8s.io/cri-api v0.27.3
@@ -163,4 +158,13 @@ replace (
 	k8s.io/mount-utils => k8s.io/mount-utils v0.27.3
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.27.3
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.27.3
+)
+
+// To address CVE-2023-44487 until k8s 1.27.7 release is out
+replace (
+	k8s.io/api => k8s.io/kubernetes/staging/src/k8s.io/api v0.0.0-20231013002001-0219e706729b
+	k8s.io/apimachinery => k8s.io/kubernetes/staging/src/k8s.io/apimachinery v0.0.0-20231013002001-0219e706729b
+	k8s.io/apiserver => k8s.io/kubernetes/staging/src/k8s.io/apiserver v0.0.0-20231013002001-0219e706729b
+	k8s.io/client-go => k8s.io/kubernetes/staging/src/k8s.io/client-go v0.0.0-20231013002001-0219e706729b
+	k8s.io/component-base => k8s.io/kubernetes/staging/src/k8s.io/component-base v0.0.0-20231013002001-0219e706729b
 )
