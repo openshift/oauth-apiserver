@@ -37,7 +37,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/admission"
 	"k8s.io/apiserver/pkg/audit"
-	"k8s.io/apiserver/pkg/endpoints/filters"
 	"k8s.io/apiserver/pkg/endpoints/handlers/fieldmanager"
 	"k8s.io/apiserver/pkg/endpoints/handlers/finisher"
 	requestmetrics "k8s.io/apiserver/pkg/endpoints/handlers/metrics"
@@ -76,7 +75,7 @@ func createHandler(r rest.NamedCreater, scope *RequestScope, admit admission.Int
 
 		// enforce a timeout of at most requestTimeoutUpperBound (34s) or less if the user-provided
 		// timeout inside the parent context is lower than requestTimeoutUpperBound.
-		ctx, cancel := filters.RequestContextWithUpperBoundOrWorkAroundOurBrokenCaseWhereTimeoutWasNotAppliedYet(req, requestTimeoutUpperBound)
+		ctx, cancel := context.WithTimeout(ctx, requestTimeoutUpperBound)
 		defer cancel()
 		outputMediaType, _, err := negotiation.NegotiateOutputMediaType(req, scope.Serializer, scope)
 		if err != nil {
@@ -192,14 +191,13 @@ func createHandler(r rest.NamedCreater, scope *RequestScope, admit admission.Int
 		// Dedup owner references before updating managed fields
 		dedupOwnerReferencesAndAddWarning(obj, req.Context(), false)
 		result, err := finisher.FinishRequest(ctx, func() (runtime.Object, error) {
-			if scope.FieldManager != nil {
-				liveObj, err := scope.Creater.New(scope.Kind)
-				if err != nil {
-					return nil, fmt.Errorf("failed to create new object (Create for %v): %v", scope.Kind, err)
-				}
-				obj = scope.FieldManager.UpdateNoErrors(liveObj, obj, managerOrUserAgent(options.FieldManager, req.UserAgent()))
-				admit = fieldmanager.NewManagedFieldsValidatingAdmissionController(admit)
+			liveObj, err := scope.Creater.New(scope.Kind)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create new object (Create for %v): %v", scope.Kind, err)
 			}
+			obj = scope.FieldManager.UpdateNoErrors(liveObj, obj, managerOrUserAgent(options.FieldManager, req.UserAgent()))
+			admit = fieldmanager.NewManagedFieldsValidatingAdmissionController(admit)
+
 			if mutatingAdmission, ok := admit.(admission.MutationInterface); ok && mutatingAdmission.Handles(admission.Create) {
 				if err := mutatingAdmission.Admit(ctx, admissionAttributes, scope); err != nil {
 					return nil, err
