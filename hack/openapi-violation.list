@@ -53,7 +53,6 @@ API rule violation: list_type_missing,github.com/openshift/api/config/v1,AWSPlat
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,AWSPlatformStatus,ServiceEndpoints
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,AdmissionConfig,DisabledAdmissionPlugins
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,AdmissionConfig,EnabledAdmissionPlugins
-API rule violation: list_type_missing,github.com/openshift/api/config/v1,AuthenticationSpec,WebhookTokenAuthenticators
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,AzurePlatformStatus,ResourceTags
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,BareMetalPlatformStatus,APIServerInternalIPs
 API rule violation: list_type_missing,github.com/openshift/api/config/v1,BareMetalPlatformStatus,IngressIPs
@@ -141,6 +140,7 @@ API rule violation: list_type_missing,github.com/openshift/api/oauth/v1,OAuthCli
 API rule violation: list_type_missing,github.com/openshift/api/oauth/v1,OAuthClientAuthorization,Scopes
 API rule violation: list_type_missing,github.com/openshift/api/oauth/v1,ScopeRestriction,ExactValues
 API rule violation: list_type_missing,github.com/openshift/api/oauth/v1,UserOAuthAccessToken,Scopes
+API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,APIServers,PerGroupOptions
 API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,BuildDefaultsConfig,Env
 API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,BuildDefaultsConfig,ImageLabels
 API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,BuildOverridesConfig,ImageLabels
@@ -154,6 +154,8 @@ API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolp
 API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,NetworkControllerConfig,ClusterNetworks
 API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,OpenShiftControllerManagerConfig,Controllers
 API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,OpenShiftControllerManagerConfig,FeatureGates
+API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,PerGroupOptions,DisabledVersions
+API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,PerGroupOptions,EnabledVersions
 API rule violation: list_type_missing,github.com/openshift/api/openshiftcontrolplane/v1,ServiceAccountControllerConfig,ManagedNames
 API rule violation: list_type_missing,github.com/openshift/api/osin/v1,GitHubIdentityProvider,Organizations
 API rule violation: list_type_missing,github.com/openshift/api/osin/v1,GitHubIdentityProvider,Teams
@@ -553,6 +555,8 @@ API rule violation: names_match,github.com/openshift/api/config/v1,PlatformStatu
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformStatus,VSphere
 API rule violation: names_match,github.com/openshift/api/config/v1,PromQLClusterCondition,PromQL
 API rule violation: names_match,github.com/openshift/api/config/v1,RequestHeaderIdentityProvider,ClientCA
+API rule violation: names_match,github.com/openshift/api/config/v1,TokenIssuer,CertificateAuthority
+API rule violation: names_match,github.com/openshift/api/config/v1,TokenIssuer,URL
 API rule violation: names_match,github.com/openshift/api/config/v1,VSpherePlatformNodeNetworkingSpec,ExcludeNetworkSubnetCIDR
 API rule violation: names_match,github.com/openshift/api/config/v1,VSpherePlatformNodeNetworkingSpec,NetworkSubnetCIDR
 API rule violation: names_match,github.com/openshift/api/config/v1,VSpherePlatformSpec,VCenters
