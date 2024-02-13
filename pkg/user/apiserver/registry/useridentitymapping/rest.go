@@ -42,6 +42,8 @@ func (r *REST) New() runtime.Object {
 	return &userinternal.UserIdentityMapping{}
 }
 
+func (r *REST) Destroy() {}
+
 func (s *REST) NamespaceScoped() bool {
 	return false
 }

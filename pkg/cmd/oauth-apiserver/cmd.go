@@ -130,7 +130,7 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 	serverConfig := apiserver.NewConfig()
 	serverConfig.GenericConfig.OpenAPIConfig = openapiconfig.DefaultOpenAPIConfig()
 	serverConfig.GenericConfig.OpenAPIV3Config = openapiconfig.DefaultOpenAPIConfig()
-	serverConfig.GenericConfig.AggregatedDiscoveryGroupManager = aggregated.NewResourceManager("apis")
+	serverConfig.GenericConfig.AggregatedDiscoveryGroupManager = aggregated.NewResourceManager()
 	// do not to install the default OpenAPI handler in the aggregated apiserver
 	// as it will be handled by openapi aggregator (both v2 and v3)
 	// non-root apiservers must set this value to false
