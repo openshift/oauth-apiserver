@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/pflag"
 
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/apiserver/pkg/registry/generic/registry"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/apiserver/pkg/storage/storagebackend"
 	"k8s.io/client-go/kubernetes"
@@ -24,12 +23,6 @@ import (
 
 // TearDownFunc is to be called to tear down a test server.
 type TearDownFunc func()
-
-// TestServerInstanceOptions Instance options the TestServer
-type TestServerInstanceOptions struct {
-	// DisableStorageCleanup Disable the automatic storage cleanup
-	DisableStorageCleanup bool
-}
 
 // TestServer is the result of test server startup.
 type TestServer struct {
@@ -45,13 +38,6 @@ type Logger interface {
 	Logf(format string, args ...interface{})
 }
 
-// NewDefaultTestServerOptions Default options for TestServer instances
-func NewDefaultTestServerOptions() *TestServerInstanceOptions {
-	return &TestServerInstanceOptions{
-		DisableStorageCleanup: false,
-	}
-}
-
 // StartTestServer starts a oauth-apiserver. A rest client config and a tear-down func,
 // and location of the tmpdir are returned.
 //
@@ -59,23 +45,9 @@ func NewDefaultTestServerOptions() *TestServerInstanceOptions {
 //
 //	files that because Golang testing's call to os.Exit will not give a stop channel go routine
 //	enough time to remove temporary files.
-func StartTestServer(t Logger, instanceOptions *TestServerInstanceOptions, customFlags []string, storageConfig *storagebackend.Config) (result TestServer, err error) {
-	if instanceOptions == nil {
-		instanceOptions = NewDefaultTestServerOptions()
-	}
-
-	// TODO : Remove TrackStorageCleanup below when PR
-	// https://github.com/kubernetes/kubernetes/pull/50690
-	// merges as that shuts down storage properly
-	if !instanceOptions.DisableStorageCleanup {
-		registry.TrackStorageCleanup()
-	}
-
+func StartTestServer(t Logger, customFlags []string, storageConfig *storagebackend.Config) (result TestServer, err error) {
 	stopCh := make(chan struct{})
 	tearDown := func() {
-		if !instanceOptions.DisableStorageCleanup {
-			registry.CleanupStorage()
-		}
 		close(stopCh)
 		if len(result.TmpDir) != 0 {
 			os.RemoveAll(result.TmpDir)
@@ -185,8 +157,8 @@ func StartTestServer(t Logger, instanceOptions *TestServerInstanceOptions, custo
 }
 
 // StartTestServerOrDie calls StartTestServer t.Fatal if it does not succeed.
-func StartTestServerOrDie(t Logger, instanceOptions *TestServerInstanceOptions, flags []string, storageConfig *storagebackend.Config) *TestServer {
-	result, err := StartTestServer(t, instanceOptions, flags, storageConfig)
+func StartTestServerOrDie(t Logger, flags []string, storageConfig *storagebackend.Config) *TestServer {
+	result, err := StartTestServer(t, flags, storageConfig)
 	if err == nil {
 		return &result
 	}
