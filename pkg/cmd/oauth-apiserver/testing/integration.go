@@ -39,7 +39,7 @@ users:
 `)
 	fakeKubeConfig.Close()
 
-	s, err := StartTestServer(t, nil, append([]string{
+	s, err := StartTestServer(t, append([]string{
 		"--authentication-skip-lookup",
 		"--authentication-kubeconfig", fakeKubeConfig.Name(),
 		"--authorization-kubeconfig", fakeKubeConfig.Name(),

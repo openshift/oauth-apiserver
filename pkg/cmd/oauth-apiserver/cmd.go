@@ -16,9 +16,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apiserver/pkg/authorization/union"
+	"k8s.io/apiserver/pkg/endpoints/discovery/aggregated"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
-	"k8s.io/apiserver/pkg/server/options/encryptionconfig"
 	apiserverstorage "k8s.io/apiserver/pkg/server/storage"
 	cliflag "k8s.io/component-base/cli/flag"
 
@@ -110,7 +110,12 @@ func RunOAuthAPIServer(serverOptions *OAuthAPIServerOptions, stopCh <-chan struc
 		return err
 	}
 	preparedOAuthServer := oauthAPIServer.GenericAPIServer.PrepareRun()
-	if err := completedOAuthAPIServerConfig.WithOpenAPIAggregationController(preparedOAuthServer.GenericAPIServer); err != nil {
+
+	// this **must** be done after PrepareRun() as it sets up the openapi endpoints
+	if err := completedOAuthAPIServerConfig.WithOpenAPIAggregationController(preparedOAuthServer.GenericAPIServer, completedOAuthAPIServerConfig.GenericConfig.OpenAPIConfig); err != nil {
+		return err
+	}
+	if err := completedOAuthAPIServerConfig.WithOpenAPIV3AggregationController(preparedOAuthServer.GenericAPIServer); err != nil {
 		return err
 	}
 	return preparedOAuthServer.Run(stopCh)
@@ -123,6 +128,12 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 
 	serverConfig := apiserver.NewConfig()
 	serverConfig.GenericConfig.OpenAPIConfig = openapiconfig.DefaultOpenAPIConfig()
+	serverConfig.GenericConfig.OpenAPIV3Config = openapiconfig.DefaultOpenAPIConfig()
+	serverConfig.GenericConfig.AggregatedDiscoveryGroupManager = aggregated.NewResourceManager()
+	// do not to install the default OpenAPI handler in the aggregated apiserver
+	// as it will be handled by openapi aggregator (both v2 and v3)
+	// non-root apiservers must set this value to false
+	serverConfig.GenericConfig.Config.SkipOpenAPIInstallation = true
 
 	if err := o.RecommendedOptions.ApplyTo(serverConfig.GenericConfig); err != nil {
 		return nil, err
@@ -147,16 +158,13 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 		&apiserverstorage.ResourceConfig{},
 		specialDefaultResourcePrefixes,
 	)
-	if len(o.RecommendedOptions.Etcd.EncryptionProviderConfigFilepath) != 0 {
-		transformerOverrides, err := encryptionconfig.GetTransformerOverrides(o.RecommendedOptions.Etcd.EncryptionProviderConfigFilepath)
-		if err != nil {
-			return nil, err
-		}
-		for groupResource, transformer := range transformerOverrides {
-			storageFactory.SetTransformer(groupResource, transformer)
-		}
+
+	// ApplyTo was called already which set up etcd health endpoints
+	o.RecommendedOptions.Etcd.SkipHealthEndpoints = true
+	err := o.RecommendedOptions.Etcd.ApplyWithStorageFactoryTo(storageFactory, &serverConfig.GenericConfig.Config)
+	if err != nil {
+		return nil, err
 	}
-	serverConfig.GenericConfig.RESTOptionsGetter = &genericapiserveroptions.StorageFactoryRestOptionsFactory{Options: *o.RecommendedOptions.Etcd, StorageFactory: storageFactory}
 
 	serverConfig.ExtraConfig.AccessTokenInactivityTimeout = o.TokenValidationOptions.AccessTokenInactivityTimeout
 	serverConfig.ExtraConfig.APIAudiences = o.TokenValidationOptions.APIAudiences
