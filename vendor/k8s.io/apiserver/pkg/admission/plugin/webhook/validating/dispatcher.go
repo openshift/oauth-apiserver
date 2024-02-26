@@ -18,6 +18,7 @@ package validating
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -100,27 +101,62 @@ func (d *validatingDispatcher) Dispatch(ctx context.Context, attr admission.Attr
 	}
 
 	wg := sync.WaitGroup{}
-	errCh := make(chan error, len(relevantHooks))
+	errCh := make(chan error, 2*len(relevantHooks)) // double the length to handle extra errors for panics in the gofunc
 	wg.Add(len(relevantHooks))
 	for i := range relevantHooks {
 		go func(invocation *generic.WebhookInvocation, idx int) {
+			ignoreClientCallFailures := false
+			hookName := "unknown"
+			versionedAttr := versionedAttrs[invocation.Kind]
+			// The ordering of these two defers is critical. The wg.Done will release the parent go func to close the errCh
+			// that is used by the second defer to report errors. The recovery and error reporting must be done first.
 			defer wg.Done()
+			defer func() {
+				// HandleCrash has already called the crash handlers and it has been configured to utilruntime.ReallyCrash
+				// This block prevents the second panic from failing our process.
+				// This failure mode for the handler functions properly using the channel below.
+				recover()
+			}()
+			defer utilruntime.HandleCrash(
+				func(r interface{}) {
+					if r == nil {
+						return
+					}
+					if ignoreClientCallFailures {
+						// if failures are supposed to ignored, ignore it
+						klog.Warningf("Panic calling webhook, failing open %v: %v", hookName, r)
+						admissionmetrics.Metrics.ObserveWebhookFailOpen(ctx, hookName, "validating")
+						key := fmt.Sprintf("%sround_0_index_%d", ValidatingAuditAnnotationFailedOpenKeyPrefix, idx)
+						value := hookName
+						if err := versionedAttr.Attributes.AddAnnotation(key, value); err != nil {
+							klog.Warningf("Failed to set admission audit annotation %s to %s for validating webhook %s: %v", key, value, hookName, err)
+						}
+						return
+					}
+					// this ensures that the admission request fails and a message is provided.
+					errCh <- apierrors.NewInternalError(fmt.Errorf("ValidatingAdmissionWebhook/%v has panicked: %v", hookName, r))
+				},
+			)
+
 			hook, ok := invocation.Webhook.GetValidatingWebhook()
 			if !ok {
 				utilruntime.HandleError(fmt.Errorf("validating webhook dispatch requires v1.ValidatingWebhook, but got %T", hook))
 				return
 			}
-			versionedAttr := versionedAttrs[invocation.Kind]
+			hookName = hook.Name
+			ignoreClientCallFailures = hook.FailurePolicy != nil && *hook.FailurePolicy == v1.Ignore
 			t := time.Now()
 			err := d.callHook(ctx, hook, invocation, versionedAttr)
-			ignoreClientCallFailures := hook.FailurePolicy != nil && *hook.FailurePolicy == v1.Ignore
 			rejected := false
 			if err != nil {
 				switch err := err.(type) {
 				case *webhookutil.ErrCallingWebhook:
 					if !ignoreClientCallFailures {
 						rejected = true
-						admissionmetrics.Metrics.ObserveWebhookRejection(ctx, hook.Name, "validating", string(versionedAttr.Attributes.GetOperation()), admissionmetrics.WebhookRejectionCallingWebhookError, int(err.Status.ErrStatus.Code))
+						// Ignore context cancelled from webhook metrics
+						if !errors.Is(err.Reason, context.Canceled) {
+							admissionmetrics.Metrics.ObserveWebhookRejection(ctx, hook.Name, "validating", string(versionedAttr.Attributes.GetOperation()), admissionmetrics.WebhookRejectionCallingWebhookError, int(err.Status.ErrStatus.Code))
+						}
 					}
 					admissionmetrics.Metrics.ObserveWebhook(ctx, hook.Name, time.Since(t), rejected, versionedAttr.Attributes, "validating", int(err.Status.ErrStatus.Code))
 				case *webhookutil.ErrWebhookRejection:
@@ -139,12 +175,17 @@ func (d *validatingDispatcher) Dispatch(ctx context.Context, attr admission.Attr
 
 			if callErr, ok := err.(*webhookutil.ErrCallingWebhook); ok {
 				if ignoreClientCallFailures {
-					klog.Warningf("Failed calling webhook, failing open %v: %v", hook.Name, callErr)
-					admissionmetrics.Metrics.ObserveWebhookFailOpen(ctx, hook.Name, "validating")
-					key := fmt.Sprintf("%sround_0_index_%d", ValidatingAuditAnnotationFailedOpenKeyPrefix, idx)
-					value := hook.Name
-					if err := versionedAttr.Attributes.AddAnnotation(key, value); err != nil {
-						klog.Warningf("Failed to set admission audit annotation %s to %s for validating webhook %s: %v", key, value, hook.Name, err)
+					// Ignore context cancelled from webhook metrics
+					if errors.Is(callErr.Reason, context.Canceled) {
+						klog.Warningf("Context canceled when calling webhook %v", hook.Name)
+					} else {
+						klog.Warningf("Failed calling webhook, failing open %v: %v", hook.Name, callErr)
+						admissionmetrics.Metrics.ObserveWebhookFailOpen(ctx, hook.Name, "validating")
+						key := fmt.Sprintf("%sround_0_index_%d", ValidatingAuditAnnotationFailedOpenKeyPrefix, idx)
+						value := hook.Name
+						if err := versionedAttr.Attributes.AddAnnotation(key, value); err != nil {
+							klog.Warningf("Failed to set admission audit annotation %s to %s for validating webhook %s: %v", key, value, hook.Name, err)
+						}
 					}
 					utilruntime.HandleError(callErr)
 					return

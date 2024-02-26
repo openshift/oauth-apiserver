@@ -59,6 +59,11 @@ import (
 
 const timeFmt = "2006-01-02T15:04:05.999"
 
+const (
+	// priorityLevelMaxSeatsPercent is the percentage of the nominalCL used as max seats allocatable from work estimator
+	priorityLevelMaxSeatsPercent = float64(0.15)
+)
+
 // This file contains a simple local (to the apiserver) controller
 // that digests API Priority and Fairness config objects (FlowSchema
 // and PriorityLevelConfiguration) into the data structure that the
@@ -99,11 +104,11 @@ type RequestDigest struct {
 // this type and cfgMeal follow the convention that the suffix
 // "Locked" means that the caller must hold the configController lock.
 type configController struct {
-	name                  string // varies in tests of fighting controllers
-	clock                 clock.PassiveClock
-	queueSetFactory       fq.QueueSetFactory
-	reqsObsPairGenerator  metrics.RatioedChangeObserverPairGenerator
-	execSeatsObsGenerator metrics.RatioedChangeObserverGenerator
+	name              string // varies in tests of fighting controllers
+	clock             clock.PassiveClock
+	queueSetFactory   fq.QueueSetFactory
+	reqsGaugeVec      metrics.RatioedGaugeVec
+	execSeatsGaugeVec metrics.RatioedGaugeVec
 
 	// How this controller appears in an ObjectMeta ManagedFieldsEntry.Manager
 	asFieldManager string
@@ -136,6 +141,12 @@ type configController struct {
 	// watchTracker implements the necessary WatchTracker interface.
 	WatchTracker
 
+	// MaxSeatsTracker tracks the maximum seats that should be allocatable from the
+	// work estimator for a given priority level. This controller does not enforce
+	// any limits on max seats stored in this tracker, it is up to the work estimator
+	// to set lower/upper limits on max seats (currently min=1, max=10).
+	MaxSeatsTracker
+
 	// the most recent update attempts, ordered by increasing age.
 	// Consumer trims to keep only the last minute's worth of entries.
 	// The controller uses this to limit itself to at most six updates
@@ -143,8 +154,8 @@ type configController struct {
 	// This may only be accessed from the one and only worker goroutine.
 	mostRecentUpdates []updateAttempt
 
-	// This must be locked while accessing flowSchemas or
-	// priorityLevelStates.  A lock for writing is needed
+	// This must be locked while accessing the later fields.
+	// A lock for writing is needed
 	// for writing to any of the following:
 	// - the flowSchemas field
 	// - the slice held in the flowSchemas field
@@ -193,10 +204,10 @@ type priorityLevelState struct {
 	numPending int
 
 	// Observers tracking number of requests waiting, executing
-	reqsObsPair metrics.RatioedChangeObserverPair
+	reqsGaugePair metrics.RatioedGaugePair
 
 	// Observer of number of seats occupied throughout execution
-	execSeatsObs metrics.RatioedChangeObserver
+	execSeatsObs metrics.RatioedGauge
 }
 
 // NewTestableController is extra flexible to facilitate testing
@@ -205,8 +216,8 @@ func newTestableController(config TestableConfig) *configController {
 		name:                   config.Name,
 		clock:                  config.Clock,
 		queueSetFactory:        config.QueueSetFactory,
-		reqsObsPairGenerator:   config.ReqsObsPairGenerator,
-		execSeatsObsGenerator:  config.ExecSeatsObsGenerator,
+		reqsGaugeVec:           config.ReqsGaugeVec,
+		execSeatsGaugeVec:      config.ExecSeatsGaugeVec,
 		asFieldManager:         config.AsFieldManager,
 		foundToDangling:        config.FoundToDangling,
 		serverConcurrencyLimit: config.ServerConcurrencyLimit,
@@ -214,6 +225,7 @@ func newTestableController(config TestableConfig) *configController {
 		flowcontrolClient:      config.FlowcontrolClient,
 		priorityLevelStates:    make(map[string]*priorityLevelState),
 		WatchTracker:           NewWatchTracker(),
+		MaxSeatsTracker:        NewMaxSeatsTracker(),
 	}
 	klog.V(2).Infof("NewTestableController %q with serverConcurrencyLimit=%d, requestWaitLimit=%s, name=%s, asFieldManager=%q", cfgCtlr.name, cfgCtlr.serverConcurrencyLimit, cfgCtlr.requestWaitLimit, cfgCtlr.name, cfgCtlr.asFieldManager)
 	// Start with longish delay because conflicts will be between
@@ -289,23 +301,6 @@ func newTestableController(config TestableConfig) *configController {
 
 		}})
 	return cfgCtlr
-}
-
-// MaintainObservations keeps the observers from
-// metrics.PriorityLevelConcurrencyObserverPairGenerator from falling
-// too far behind
-func (cfgCtlr *configController) MaintainObservations(stopCh <-chan struct{}) {
-	wait.Until(cfgCtlr.updateObservations, 10*time.Second, stopCh)
-}
-
-func (cfgCtlr *configController) updateObservations() {
-	cfgCtlr.lock.RLock()
-	defer cfgCtlr.lock.RUnlock()
-	for _, plc := range cfgCtlr.priorityLevelStates {
-		if plc.queues != nil {
-			plc.queues.UpdateObservations()
-		}
-	}
 }
 
 func (cfgCtlr *configController) Run(stopCh <-chan struct{}) error {
@@ -404,6 +399,8 @@ type cfgMeal struct {
 	// provoking a call into this controller while the lock held
 	// waiting on that request to complete.
 	fsStatusUpdates []fsStatusUpdate
+
+	maxWaitingRequests, maxExecutingRequests int
 }
 
 // A buffered set of status updates for FlowSchemas
@@ -528,7 +525,13 @@ func (cfgCtlr *configController) lockAndDigestConfigObjects(newPLs []*flowcontro
 
 	// The new config has been constructed
 	cfgCtlr.priorityLevelStates = meal.newPLStates
-	klog.V(5).Infof("Switched to new API Priority and Fairness configuration")
+	klog.V(5).InfoS("Switched to new API Priority and Fairness configuration", "maxWaitingRequests", meal.maxWaitingRequests, "maxExecutinRequests", meal.maxExecutingRequests)
+
+	metrics.GetWaitingReadonlyConcurrency().SetDenominator(float64(meal.maxWaitingRequests))
+	metrics.GetWaitingMutatingConcurrency().SetDenominator(float64(meal.maxWaitingRequests))
+	metrics.GetExecutingReadonlyConcurrency().SetDenominator(float64(meal.maxExecutingRequests))
+	metrics.GetExecutingMutatingConcurrency().SetDenominator(float64(meal.maxExecutingRequests))
+
 	return meal.fsStatusUpdates
 }
 
@@ -539,9 +542,9 @@ func (meal *cfgMeal) digestNewPLsLocked(newPLs []*flowcontrol.PriorityLevelConfi
 		state := meal.cfgCtlr.priorityLevelStates[pl.Name]
 		if state == nil {
 			labelValues := []string{pl.Name}
-			state = &priorityLevelState{reqsObsPair: meal.cfgCtlr.reqsObsPairGenerator.Generate(1, 1, labelValues), execSeatsObs: meal.cfgCtlr.execSeatsObsGenerator.Generate(0, 1, labelValues)}
+			state = &priorityLevelState{reqsGaugePair: metrics.RatioedGaugeVecPhasedElementPair(meal.cfgCtlr.reqsGaugeVec, 1, 1, labelValues), execSeatsObs: meal.cfgCtlr.execSeatsGaugeVec.NewForLabelValuesSafe(0, 1, labelValues)}
 		}
-		qsCompleter, err := queueSetCompleterForPL(meal.cfgCtlr.queueSetFactory, state.queues, pl, meal.cfgCtlr.requestWaitLimit, state.reqsObsPair, state.execSeatsObs)
+		qsCompleter, err := queueSetCompleterForPL(meal.cfgCtlr.queueSetFactory, state.queues, pl, meal.cfgCtlr.requestWaitLimit, state.reqsGaugePair, state.execSeatsObs)
 		if err != nil {
 			klog.Warningf("Ignoring PriorityLevelConfiguration object %s because its spec (%s) is broken: %s", pl.Name, fcfmt.Fmt(pl.Spec), err)
 			continue
@@ -637,6 +640,7 @@ func (meal *cfgMeal) processOldPLsLocked() {
 				// draining and no use is coming from another
 				// goroutine
 				klog.V(3).Infof("Removing undesired priority level %q (nilQueues=%v), Type=%v", plName, plState.queues == nil, plState.pl.Spec.Type)
+				meal.cfgCtlr.MaxSeatsTracker.ForgetPriorityLevel(plName)
 				continue
 			}
 			if !plState.quiescing {
@@ -645,7 +649,7 @@ func (meal *cfgMeal) processOldPLsLocked() {
 			}
 		}
 		var err error
-		plState.qsCompleter, err = queueSetCompleterForPL(meal.cfgCtlr.queueSetFactory, plState.queues, plState.pl, meal.cfgCtlr.requestWaitLimit, plState.reqsObsPair, plState.execSeatsObs)
+		plState.qsCompleter, err = queueSetCompleterForPL(meal.cfgCtlr.queueSetFactory, plState.queues, plState.pl, meal.cfgCtlr.requestWaitLimit, plState.reqsGaugePair, plState.execSeatsObs)
 		if err != nil {
 			// This can not happen because queueSetCompleterForPL already approved this config
 			panic(fmt.Sprintf("%s from name=%q spec=%s", err, plName, fcfmt.Fmt(plState.pl.Spec)))
@@ -680,6 +684,23 @@ func (meal *cfgMeal) finishQueueSetReconfigsLocked() {
 		// difference will be negligible.
 		concurrencyLimit := int(math.Ceil(float64(meal.cfgCtlr.serverConcurrencyLimit) * float64(plState.pl.Spec.Limited.AssuredConcurrencyShares) / meal.shareSum))
 		metrics.UpdateSharedConcurrencyLimit(plName, concurrencyLimit)
+		meal.maxExecutingRequests += concurrencyLimit
+		var waitLimit int
+		if qCfg := plState.pl.Spec.Limited.LimitResponse.Queuing; qCfg != nil {
+			waitLimit = int(qCfg.Queues * qCfg.QueueLengthLimit)
+
+			// Max seats allocatable from work estimator is calculated as MAX(1, MIN(0.15 * nominalCL, nominalCL/handSize)).
+			// This is to keep max seats relative to total available concurrency with a minimum value of 1.
+			// 15% of nominal concurrency was chosen since it preserved the previous max seats of 10 for default priority levels
+			// when using apiserver's default total server concurrency of 600 (--max-requests-inflight=400, --max-mutating-requests-inflight=200).
+			// This ensures that clusters with relatively high inflight requests will continue to use a max seats of 10
+			// while clusters with lower inflight requests will use max seats no greater than nominalCL/handSize.
+			// Calculated max seats can return arbitrarily high values but work estimator currently limits max seats at 10.
+			handSize := plState.pl.Spec.Limited.LimitResponse.Queuing.HandSize
+			maxSeats := uint64(math.Max(1, math.Min(math.Ceil(float64(concurrencyLimit)*priorityLevelMaxSeatsPercent), float64(int32(concurrencyLimit)/handSize))))
+			meal.cfgCtlr.MaxSeatsTracker.SetMaxSeats(plName, maxSeats)
+		}
+		meal.maxWaitingRequests += waitLimit
 
 		if plState.queues == nil {
 			klog.V(5).Infof("Introducing queues for priority level %q: config=%s, concurrencyLimit=%d, quiescing=%v (shares=%v, shareSum=%v)", plName, fcfmt.Fmt(plState.pl.Spec), concurrencyLimit, plState.quiescing, plState.pl.Spec.Limited.AssuredConcurrencyShares, meal.shareSum)
@@ -694,7 +715,7 @@ func (meal *cfgMeal) finishQueueSetReconfigsLocked() {
 // given priority level configuration.  Returns nil if that config
 // does not call for limiting.  Returns nil and an error if the given
 // object is malformed in a way that is a problem for this package.
-func queueSetCompleterForPL(qsf fq.QueueSetFactory, queues fq.QueueSet, pl *flowcontrol.PriorityLevelConfiguration, requestWaitLimit time.Duration, reqsIntPair metrics.RatioedChangeObserverPair, execSeatsObs metrics.RatioedChangeObserver) (fq.QueueSetCompleter, error) {
+func queueSetCompleterForPL(qsf fq.QueueSetFactory, queues fq.QueueSet, pl *flowcontrol.PriorityLevelConfiguration, requestWaitLimit time.Duration, reqsIntPair metrics.RatioedGaugePair, execSeatsObs metrics.RatioedGauge) (fq.QueueSetCompleter, error) {
 	if (pl.Spec.Type == flowcontrol.PriorityLevelEnablementExempt) != (pl.Spec.Limited == nil) {
 		return nil, errors.New("broken union structure at the top")
 	}
@@ -769,19 +790,19 @@ func (meal *cfgMeal) presyncFlowSchemaStatus(fs *flowcontrol.FlowSchema, isDangl
 func (meal *cfgMeal) imaginePL(proto *flowcontrol.PriorityLevelConfiguration, requestWaitLimit time.Duration) {
 	klog.V(3).Infof("No %s PriorityLevelConfiguration found, imagining one", proto.Name)
 	labelValues := []string{proto.Name}
-	reqsObsPair := meal.cfgCtlr.reqsObsPairGenerator.Generate(1, 1, labelValues)
-	execSeatsObs := meal.cfgCtlr.execSeatsObsGenerator.Generate(0, 1, labelValues)
-	qsCompleter, err := queueSetCompleterForPL(meal.cfgCtlr.queueSetFactory, nil, proto, requestWaitLimit, reqsObsPair, execSeatsObs)
+	reqsGaugePair := metrics.RatioedGaugeVecPhasedElementPair(meal.cfgCtlr.reqsGaugeVec, 1, 1, labelValues)
+	execSeatsObs := meal.cfgCtlr.execSeatsGaugeVec.NewForLabelValuesSafe(0, 1, labelValues)
+	qsCompleter, err := queueSetCompleterForPL(meal.cfgCtlr.queueSetFactory, nil, proto, requestWaitLimit, reqsGaugePair, execSeatsObs)
 	if err != nil {
 		// This can not happen because proto is one of the mandatory
 		// objects and these are not erroneous
 		panic(err)
 	}
 	meal.newPLStates[proto.Name] = &priorityLevelState{
-		pl:           proto,
-		qsCompleter:  qsCompleter,
-		reqsObsPair:  reqsObsPair,
-		execSeatsObs: execSeatsObs,
+		pl:            proto,
+		qsCompleter:   qsCompleter,
+		reqsGaugePair: reqsGaugePair,
+		execSeatsObs:  execSeatsObs,
 	}
 	if proto.Spec.Limited != nil {
 		meal.shareSum += float64(proto.Spec.Limited.AssuredConcurrencyShares)

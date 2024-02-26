@@ -54,11 +54,13 @@ func (s userIdentityMappingStrategy) PrepareForCreate(ctx context.Context, obj r
 
 	mapping.Identity.Namespace = ""
 	mapping.Identity.Kind = ""
-	mapping.Identity.UID = ""
 
 	mapping.User.Namespace = ""
 	mapping.User.Kind = ""
 	mapping.User.UID = ""
+
+	// needed for rest.BeforeCreate preconditions to pass, these fields will be then overriden with mappingFor
+	rest.FillObjectMetaSystemFields(mapping)
 }
 
 // PrepareForUpdate clears fields that are not allowed to be set by end users on update

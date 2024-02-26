@@ -3,7 +3,6 @@ package useridentitymapping
 import (
 	"context"
 	"fmt"
-
 	corev1 "k8s.io/api/core/v1"
 	kerrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,6 +40,8 @@ func NewREST(userClient userclient.UserInterface, identityClient userclient.Iden
 func (r *REST) New() runtime.Object {
 	return &userinternal.UserIdentityMapping{}
 }
+
+func (r *REST) Destroy() {}
 
 func (s *REST) NamespaceScoped() bool {
 	return false
@@ -312,9 +313,10 @@ func unsetIdentityUser(identity *userapi.Identity) bool {
 func mappingFor(user *userapi.User, identity *userapi.Identity) (*userinternal.UserIdentityMapping, error) {
 	return &userinternal.UserIdentityMapping{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:            identity.Name,
-			ResourceVersion: identity.ResourceVersion,
-			UID:             identity.UID,
+			Name:              identity.Name,
+			ResourceVersion:   identity.ResourceVersion,
+			UID:               identity.UID,
+			CreationTimestamp: identity.CreationTimestamp,
 		},
 		Identity: corev1.ObjectReference{
 			Name: identity.Name,

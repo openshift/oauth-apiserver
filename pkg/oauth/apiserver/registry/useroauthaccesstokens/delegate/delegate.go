@@ -54,6 +54,10 @@ func (r *REST) NewList() runtime.Object {
 	return &oauthv1.UserOAuthAccessTokenList{}
 }
 
+func (s *REST) Destroy() {
+	s.accessTokenStorage.Destroy()
+}
+
 func (r *REST) List(ctx context.Context, options *metainternal.ListOptions) (runtime.Object, error) {
 	ctxUserName, ok := getUserFromContext(ctx)
 	if !ok {

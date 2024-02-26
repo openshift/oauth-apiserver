@@ -32,6 +32,10 @@ func NewREST(tokenAuthenticator authenticator.Request) (*REST, error) {
 	return &REST{wrapped: tokenreview.NewREST(tokenAuthenticator, []string{})}, nil
 }
 
+func (r *REST) Destroy() {
+	r.wrapped.Destroy()
+}
+
 func (r *REST) GroupVersionKind(containingGV schema.GroupVersion) schema.GroupVersionKind {
 	return kauthenticationv1.SchemeGroupVersion.WithKind("TokenReview")
 }
