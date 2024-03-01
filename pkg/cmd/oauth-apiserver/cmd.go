@@ -127,6 +127,11 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 	}
 
 	serverConfig := apiserver.NewConfig()
+
+	if err := o.GenericServerRunOptions.ApplyTo(&serverConfig.GenericConfig.Config); err != nil {
+		return nil, err
+	}
+
 	serverConfig.GenericConfig.OpenAPIConfig = openapiconfig.DefaultOpenAPIConfig()
 	serverConfig.GenericConfig.OpenAPIV3Config = openapiconfig.DefaultOpenAPIConfig()
 	serverConfig.GenericConfig.AggregatedDiscoveryGroupManager = aggregated.NewResourceManager("apis")
