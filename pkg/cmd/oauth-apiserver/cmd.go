@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"time"
 
 	"github.com/openshift/library-go/pkg/serviceability"
 	"github.com/openshift/oauth-apiserver/pkg/apiserver"
@@ -131,6 +132,8 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 	if err := o.GenericServerRunOptions.ApplyTo(&serverConfig.GenericConfig.Config); err != nil {
 		return nil, err
 	}
+
+	serverConfig.GenericConfig.ShutdownDelayDuration = time.Second * 60
 
 	serverConfig.GenericConfig.OpenAPIConfig = openapiconfig.DefaultOpenAPIConfig()
 	serverConfig.GenericConfig.OpenAPIV3Config = openapiconfig.DefaultOpenAPIConfig()
