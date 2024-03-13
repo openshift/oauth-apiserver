@@ -81,7 +81,6 @@ func TestAddFlags(t *testing.T) {
 			JSONPatchMaxCopyBytes:       int64(3 * 1024 * 1024),
 			MaxRequestBodyBytes:         int64(3 * 1024 * 1024),
 			ShutdownSendRetryAfter:      true,
-			EnablePriorityAndFairness:   true,
 		},
 		RecommendedOptions: &genericapiserveroptions.RecommendedOptions{
 			Etcd: &genericapiserveroptions.EtcdOptions{
@@ -177,7 +176,8 @@ func TestAddFlags(t *testing.T) {
 				},
 			},
 			Features: &genericapiserveroptions.FeatureOptions{
-				EnableProfiling: true,
+				EnableProfiling:           true,
+				EnablePriorityAndFairness: true,
 			},
 			CoreAPI: &genericapiserveroptions.CoreAPIOptions{},
 			Admission: &genericapiserveroptions.AdmissionOptions{
@@ -238,6 +238,7 @@ func TestOAuthAPIServerConfig(t *testing.T) {
 		"--shutdown-send-retry-after=true",
 		"--secure-port=0",
 		"--kubeconfig", fakeKubeConfigPath,
+		"--enable-priority-and-fairness=false",
 	}
 
 	// act
@@ -261,5 +262,8 @@ func TestOAuthAPIServerConfig(t *testing.T) {
 	}
 	if !target.GenericConfig.ShutdownSendRetryAfter {
 		t.Fatal("expected target.GenericConfig.ShutdownSendRetryAfter to be true")
+	}
+	if target.GenericConfig.FlowControl != nil {
+		t.Fatal("PriorityAndFairness wasn't disabled")
 	}
 }
