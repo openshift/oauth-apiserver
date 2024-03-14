@@ -49,7 +49,6 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 		TokenValidationOptions: tokenvalidationoptions.NewTokenValidationOptions(),
 		Output:                 out,
 	}
-	o.RecommendedOptions.Etcd.StorageConfig.Paging = true
 	return o
 }
 
@@ -133,7 +132,7 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 	}
 
 	serverConfig.GenericConfig.OpenAPIConfig = openapiconfig.DefaultOpenAPIConfig()
-	serverConfig.GenericConfig.OpenAPIV3Config = openapiconfig.DefaultOpenAPIConfig()
+	serverConfig.GenericConfig.OpenAPIV3Config = openapiconfig.DefaultOpenAPIV3Config()
 	serverConfig.GenericConfig.AggregatedDiscoveryGroupManager = aggregated.NewResourceManager("apis")
 	// do not to install the default OpenAPI handler in the aggregated apiserver
 	// as it will be handled by openapi aggregator (both v2 and v3)
