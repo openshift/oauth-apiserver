@@ -89,7 +89,6 @@ func TestAddFlags(t *testing.T) {
 					Transport: storagebackend.TransportConfig{
 						TracerProvider: oteltrace.NewNoopTracerProvider(),
 					},
-					Paging:                true,
 					Prefix:                "openshift.io",
 					CompactionInterval:    storagebackend.DefaultCompactInterval,
 					CountMetricPollPeriod: time.Minute,
