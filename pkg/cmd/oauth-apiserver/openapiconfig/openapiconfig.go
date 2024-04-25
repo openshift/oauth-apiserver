@@ -19,15 +19,16 @@ import (
 	_ "github.com/openshift/oauth-apiserver/pkg/api/install"
 )
 
-var specInfo = spec.Info{
-	InfoProps: spec.InfoProps{
-		Title:   "OpenShift OAuth-related APIs",
-		Version: version.Get().String(),
-		License: &spec.License{
-			Name: "Apache 2.0 (ASL2.0)",
-			URL:  "http://www.apache.org/licenses/LICENSE-2.0",
-		},
-		Description: heredoc.Doc(`
+var (
+	specInfo = spec.Info{
+		InfoProps: spec.InfoProps{
+			Title:   "OpenShift OAuth-related APIs",
+			Version: version.Get().String(),
+			License: &spec.License{
+				Name: "Apache 2.0 (ASL2.0)",
+				URL:  "http://www.apache.org/licenses/LICENSE-2.0",
+			},
+			Description: heredoc.Doc(`
 			OpenShift OAuth APIs provide access and authorization tokens,
 			users, groups and similar objects required for OpenShift integrated
 			OAuth authentication to work on top of Kubernetes. The API allows
@@ -91,42 +92,38 @@ var specInfo = spec.Info{
 			See the OpenShift documentation at https://docs.openshift.org for more
 			information.
 		`),
-	},
-}
+		},
+	}
+
+	ignorePrefixes = []string{"/swaggerapi", "/healthz", "/controllers", "/metrics", "/version/openshift", "/brokers"}
+)
 
 func DefaultOpenAPIConfig() *openapicommon.Config {
-	securityDefinitions := spec.SecurityDefinitions{}
-	securityDefinitions["BearerToken"] = &spec.SecurityScheme{
-		SecuritySchemeProps: spec.SecuritySchemeProps{
-			Type:        "apiKey",
-			Name:        "authorization",
-			In:          "header",
-			Description: "Bearer Token authentication",
-		},
-	}
 	defNamer := apiserverendpointsopenapi.NewDefinitionNamer(legacyscheme.Scheme, extensionsapiserver.Scheme, aggregatorscheme.Scheme)
-	return &openapicommon.Config{
-		ProtocolList:      []string{"https"},
-		GetDefinitions:    openapigenerated.GetOpenAPIDefinitions,
-		IgnorePrefixes:    []string{"/swaggerapi", "/healthz", "/controllers", "/metrics", "/version/openshift", "/brokers"},
-		GetDefinitionName: defNamer.GetDefinitionName,
-		Info:              &specInfo,
-		DefaultResponse: &spec.Response{
-			ResponseProps: spec.ResponseProps{
-				Description: "Default Response.",
+	cfg := genericapiserver.DefaultOpenAPIConfig(openapigenerated.GetOpenAPIDefinitions, defNamer)
+	cfg.Info = &specInfo
+	cfg.IgnorePrefixes = ignorePrefixes
+	cfg.SecurityDefinitions = &spec.SecurityDefinitions{
+		"BearerToken": &spec.SecurityScheme{
+			SecuritySchemeProps: spec.SecuritySchemeProps{
+				Type:        "apiKey",
+				Name:        "authorization",
+				In:          "header",
+				Description: "Bearer Token authentication",
 			},
 		},
-		SecurityDefinitions: &securityDefinitions,
 	}
+
+	return cfg
 }
 
 func DefaultOpenAPIV3Config() *openapicommon.OpenAPIV3Config {
 	defNamer := apiserverendpointsopenapi.NewDefinitionNamer(legacyscheme.Scheme, extensionsapiserver.Scheme, aggregatorscheme.Scheme)
 	cfg := genericapiserver.DefaultOpenAPIV3Config(openapigenerated.GetOpenAPIDefinitions, defNamer)
 	cfg.Info = &specInfo
-	cfg.IgnorePrefixes = []string{"/swaggerapi", "/healthz", "/controllers", "/metrics", "/version/openshift", "/brokers"}
-	cfg.SecuritySchemes = map[string]*spec3.SecurityScheme{
-		"BearerToken": {
+	cfg.IgnorePrefixes = ignorePrefixes
+	cfg.SecuritySchemes = spec3.SecuritySchemes{
+		"BearerToken": &spec3.SecurityScheme{
 			SecuritySchemeProps: spec3.SecuritySchemeProps{
 				Type:        "apiKey",
 				Name:        "authorization",
