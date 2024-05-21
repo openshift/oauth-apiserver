@@ -8,11 +8,11 @@ require (
 	github.com/google/gofuzz v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
-	github.com/openshift/api v0.0.0-20231101013329-0d0d46454bb7
+	github.com/openshift/api v0.0.0-20231129134630-a782d1c1541c
 	github.com/openshift/apiserver-library-go v0.0.0-20230621110634-a99412818848
 	github.com/openshift/build-machinery-go v0.0.0-20230306181456-d321ffa04533
-	github.com/openshift/client-go v0.0.0-20230607134213-3cd0021bbee3
-	github.com/openshift/library-go v0.0.0-20230808150704-ce4395c85e8c
+	github.com/openshift/client-go v0.0.0-20230926161409-848405da69e1
+	github.com/openshift/library-go v0.0.0-20240502143225-f71afde059ac
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
@@ -27,7 +27,7 @@ require (
 	k8s.io/kube-aggregator v0.28.3
 	k8s.io/kube-openapi v0.0.0-20230717233707-2695361300d9
 	k8s.io/kubernetes v1.28.3
-	k8s.io/utils v0.0.0-20230505201702-9f6742963106
+	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
 )
 
 require (
