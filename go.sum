@@ -176,8 +176,8 @@ github.com/openshift/build-machinery-go v0.0.0-20231128094528-1e9b1b0595c8 h1:cu
 github.com/openshift/build-machinery-go v0.0.0-20231128094528-1e9b1b0595c8/go.mod h1:b1BuldmJlbA/xYtdZvKi+7j5YGB44qJUJDZ9zwiNCfE=
 github.com/openshift/client-go v0.0.0-20240408153607-64bd6feb83ae h1:WzEMf853apLG0ZgkfmKvYXBKBqhzx7nalP306yQP1ck=
 github.com/openshift/client-go v0.0.0-20240408153607-64bd6feb83ae/go.mod h1:YOfx7b9ieudQJImuo95BcVzifosCrCGBErbO/w/njBU=
-github.com/openshift/kubernetes-apiserver v0.0.0-20240410114447-9e7c11c45dab h1:hVEUWx+0XiMkstOLlQ5BiBZTnA7WWJJf80Dc2L2FLyM=
-github.com/openshift/kubernetes-apiserver v0.0.0-20240410114447-9e7c11c45dab/go.mod h1:B0LieKVoyU7ykQvPFm7XSdIHaCHSzCzQWPFa5bqbeMQ=
+github.com/openshift/kubernetes-apiserver v0.0.0-20240918130414-948e927ce0a7 h1:6mEk9WCQrQ0cDqcIlCoastX9oAcZMM9+2ER+oMJGsF4=
+github.com/openshift/kubernetes-apiserver v0.0.0-20240918130414-948e927ce0a7/go.mod h1:B0LieKVoyU7ykQvPFm7XSdIHaCHSzCzQWPFa5bqbeMQ=
 github.com/openshift/library-go v0.0.0-20240408090355-0b298992f8cc h1:wYPToL2tSf8rey0YhdhqgVR1r8ES83o5YuUcJU4znMM=
 github.com/openshift/library-go v0.0.0-20240408090355-0b298992f8cc/go.mod h1:m/HsttSi90vSixwoy5mPUBHcZid2YRw/QbsLErLxF9s=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
