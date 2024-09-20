@@ -1,14 +1,15 @@
 reviewers:
   - deads2k
-  - mfojtik
-  - sttts
-  - stlaz
+  - tkashem
   - p0lyn0mial
-  - slaskawi
+  - benluddy
+  - sanchezl
+  - dgrisonnet
 approvers:
   - deads2k
-  - mfojtik
-  - sttts
-  - stlaz
-  - s-urbaniak
+  - tkashem
+  - p0lyn0mial
+  - benluddy
+  - sanchezl
+  - dgrisonnet
 component: oauth-apiserver
