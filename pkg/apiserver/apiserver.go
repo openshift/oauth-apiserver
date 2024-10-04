@@ -97,7 +97,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 func (c *completedConfig) withOAuthAPIServer(delegateAPIServer genericapiserver.DelegationTarget) (genericapiserver.DelegationTarget, error) {
 	cfg := &oauthapiserver.OAuthAPIServerConfig{
 		GenericConfig: &genericapiserver.RecommendedConfig{
-			Config:                *c.GenericConfig.Config,
+			Config:                shallowCopyAndSanitizeGenericConfig(c.GenericConfig.Config),
 			SharedInformerFactory: c.GenericConfig.SharedInformerFactory,
 			ClientConfig:          c.ClientConfig,
 		},
@@ -122,7 +122,7 @@ func (c *completedConfig) withOAuthAPIServer(delegateAPIServer genericapiserver.
 
 func (c *completedConfig) withUserAPIServer(delegateAPIServer genericapiserver.DelegationTarget) (genericapiserver.DelegationTarget, error) {
 	cfg := &userapiserver.UserConfig{
-		GenericConfig: &genericapiserver.RecommendedConfig{Config: *c.GenericConfig.Config, SharedInformerFactory: c.GenericConfig.SharedInformerFactory, ClientConfig: c.ClientConfig},
+		GenericConfig: &genericapiserver.RecommendedConfig{Config: shallowCopyAndSanitizeGenericConfig(c.GenericConfig.Config), SharedInformerFactory: c.GenericConfig.SharedInformerFactory, ClientConfig: c.ClientConfig},
 		ExtraConfig:   userapiserver.ExtraConfig{},
 	}
 	// server is required to install OpenAPI to register and serve openapi spec for its types
@@ -174,4 +174,16 @@ func (c *completedConfig) WithOpenAPIV3AggregationController(delegatedAPIServer 
 		return nil
 	})
 	return nil
+}
+
+// shallowCopyAndSanitizeGenericConfig makes a shallow copy of the passed config
+// and clears the reference field that should not be shared
+// between multiple apiservers
+func shallowCopyAndSanitizeGenericConfig(config *genericapiserver.Config) genericapiserver.Config {
+	configCopy := *config
+	// post-start-hooks should not be shared
+	// because the server breaks when repeated
+	// hooks are registered
+	configCopy.PostStartHooks = map[string]genericapiserver.PostStartHookConfigEntry{}
+	return configCopy
 }
