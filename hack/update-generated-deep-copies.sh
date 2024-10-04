@@ -10,6 +10,7 @@ verify="${VERIFY:-}"
 go install ./${CODEGEN_PKG}/cmd/deepcopy-gen
 
 function codegen::join() { local IFS="$1"; shift; echo "$*"; }
+function codegen::join_with_space() { local IFS=" "; shift; echo "$*"; }
 
 # enumerate group versions
 ALL_FQ_APIS=(
@@ -18,4 +19,4 @@ ALL_FQ_APIS=(
 )
 
 echo "Generating deepcopy funcs"
-${GOPATH}/bin/deepcopy-gen --input-dirs $(codegen::join , "${ALL_FQ_APIS[@]}") -O zz_generated.deepcopy --bounding-dirs $(codegen::join , "${ALL_FQ_APIS[@]}") --go-header-file ${SCRIPT_ROOT}/hack/boilerplate.txt ${verify} "$@"
+${GOPATH}/bin/deepcopy-gen $(codegen::join_with_space , "${ALL_FQ_APIS[@]}") --output-file zz_generated.deepcopy.go --bounding-dirs $(codegen::join , "${ALL_FQ_APIS[@]}") --go-header-file ${SCRIPT_ROOT}/hack/boilerplate.txt ${verify} "$@"
