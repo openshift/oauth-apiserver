@@ -10,10 +10,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/spf13/pflag"
-	oteltrace "go.opentelemetry.io/otel/trace"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/admission"
+	"k8s.io/apiserver/pkg/apis/apiserver"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
 	"k8s.io/apiserver/pkg/storage/etcd3"
 	etcdtesting "k8s.io/apiserver/pkg/storage/etcd3/testing"
@@ -73,22 +72,22 @@ func TestAddFlags(t *testing.T) {
 	// validate
 	expected := &oauthapiserver.OAuthAPIServerOptions{
 		GenericServerRunOptions: &genericapiserveroptions.ServerRunOptions{
-			MaxRequestsInFlight:         400,
-			MaxMutatingRequestsInFlight: 200,
-			RequestTimeout:              time.Minute,
-			MinRequestTimeout:           1800,
-			ShutdownDelayDuration:       time.Second * 7,
-			JSONPatchMaxCopyBytes:       int64(3 * 1024 * 1024),
-			MaxRequestBodyBytes:         int64(3 * 1024 * 1024),
-			ShutdownSendRetryAfter:      true,
+			MaxRequestsInFlight:          400,
+			MaxMutatingRequestsInFlight:  200,
+			RequestTimeout:               time.Minute,
+			MinRequestTimeout:            1800,
+			StorageInitializationTimeout: time.Second * 60,
+			ShutdownDelayDuration:        time.Second * 7,
+			JSONPatchMaxCopyBytes:        int64(3 * 1024 * 1024),
+			MaxRequestBodyBytes:          int64(3 * 1024 * 1024),
+			ShutdownSendRetryAfter:       true,
+			ComponentName:                "kube",
 		},
 		RecommendedOptions: &genericapiserveroptions.RecommendedOptions{
 			Etcd: &genericapiserveroptions.EtcdOptions{
 				StorageConfig: storagebackend.Config{
-					Type: "",
-					Transport: storagebackend.TransportConfig{
-						TracerProvider: oteltrace.NewNoopTracerProvider(),
-					},
+					Type:                  "",
+					Transport:             storagebackend.TransportConfig{},
 					Prefix:                "openshift.io",
 					CompactionInterval:    storagebackend.DefaultCompactInterval,
 					CountMetricPollPeriod: time.Minute,
@@ -124,6 +123,7 @@ func TestAddFlags(t *testing.T) {
 				},
 				WebhookRetryBackoff: genericapiserveroptions.DefaultAuthWebhookRetryBackoff(),
 				TokenRequestTimeout: time.Second * 10,
+				Anonymous:           &apiserver.AnonymousAuthConfig{Enabled: true},
 			},
 			Authorization: &genericapiserveroptions.DelegatingAuthorizationOptions{
 				AllowCacheTTL:       time.Second * 10,
@@ -193,10 +193,14 @@ func TestAddFlags(t *testing.T) {
 	target.RecommendedOptions.FeatureGate = nil
 	// setting the ExtraAdmissionInitializers to nil since there is no value in comparing a codec instance
 	target.RecommendedOptions.Etcd.StorageConfig.Codec = nil
+	// setting the TracerProvider to nil since there is no value in comparing a tracer provider instance
+	target.RecommendedOptions.Etcd.StorageConfig.Transport.TracerProvider = nil
 	// setting the ExtraAdmissionInitializers to nil since functions can't be compared in go
 	target.RecommendedOptions.ExtraAdmissionInitializers = nil
 	// setting the Decorators to nil since functions can't be compared in go
 	target.RecommendedOptions.Admission.Decorators = nil
+	// setting the ComponentGlobalsRegistry to nil since there is no value in comparing an instance of a global registry
+	target.GenericServerRunOptions.ComponentGlobalsRegistry = nil
 
 	if !cmp.Equal(expected, target, cmpopts.IgnoreUnexported(admission.Plugins{}, *featuregate.NewFeatureGate())) {
 		t.Errorf("unexpected run options,\ndiff:\n%s", cmp.Diff(expected, target, cmpopts.IgnoreUnexported(admission.Plugins{}, *featuregate.NewFeatureGate())))

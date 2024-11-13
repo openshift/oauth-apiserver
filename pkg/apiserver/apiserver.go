@@ -5,6 +5,7 @@ import (
 
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	utilversion "k8s.io/apiserver/pkg/util/version"
 	restclient "k8s.io/client-go/rest"
 	openapicontroller "k8s.io/kube-aggregator/pkg/controllers/openapi"
 	"k8s.io/kube-aggregator/pkg/controllers/openapi/aggregator"
@@ -63,7 +64,7 @@ func (cfg *Config) Complete() CompletedConfig {
 	}
 
 	v := version.Get()
-	c.GenericConfig.Version = &v
+	c.GenericConfig.EffectiveVersion = utilversion.NewEffectiveVersion(v.String())
 
 	return CompletedConfig{&c}
 }
