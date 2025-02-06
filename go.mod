@@ -19,7 +19,6 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/otel/trace v1.28.0
 	k8s.io/api v0.31.1
 	k8s.io/apiextensions-apiserver v0.31.1
 	k8s.io/apimachinery v0.31.1
@@ -105,6 +104,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.27.0 // indirect
 	go.opentelemetry.io/otel/metric v1.28.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.28.0 // indirect
+	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
@@ -141,7 +141,7 @@ replace (
 	k8s.io/api => k8s.io/api v0.31.1
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.31.1
 	k8s.io/apimachinery => k8s.io/apimachinery v0.31.1
-	k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20241112103933-0f10e4260855 // points to openshift-apiserver-4.18-kubernetes-1.31.1
+	k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20250205074533-d8ec43992017 // points to openshift-apiserver-4.18-kubernetes-1.31.1
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.31.1
 	k8s.io/client-go => k8s.io/client-go v0.31.1
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.31.1
