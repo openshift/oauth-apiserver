@@ -34,6 +34,7 @@ import (
 	"time"
 
 	"k8s.io/client-go/util/keyutil"
+	"k8s.io/klog/v2"
 	netutils "k8s.io/utils/net"
 )
 
@@ -94,6 +95,7 @@ func NewSelfSignedCACert(cfg Config, key crypto.Signer) (*x509.Certificate, erro
 // Host may be an IP or a DNS name
 // You may also specify additional subject alt names (either ip or dns names) for the certificate.
 func GenerateSelfSignedCertKey(host string, alternateIPs []net.IP, alternateDNS []string) ([]byte, []byte, error) {
+	klog.Infof("CERT: REPLACEME: calling GenerateSelfSignedCertKeyWithFixtures with empty dir")
 	return GenerateSelfSignedCertKeyWithFixtures(host, alternateIPs, alternateDNS, "")
 }
 
@@ -106,6 +108,7 @@ func GenerateSelfSignedCertKey(host string, alternateIPs []net.IP, alternateDNS 
 // <host>_<ip>-<ip>_<alternateDNS>-<alternateDNS>.key
 // Certs/keys not existing in that directory are created.
 func GenerateSelfSignedCertKeyWithFixtures(host string, alternateIPs []net.IP, alternateDNS []string, fixtureDirectory string) ([]byte, []byte, error) {
+
 	validFrom := time.Now().Add(-time.Hour) // valid an hour earlier to avoid flakes due to clock skew
 	maxAge := time.Hour * 24 * 365          // one year self-signed certs
 
@@ -115,13 +118,18 @@ func GenerateSelfSignedCertKeyWithFixtures(host string, alternateIPs []net.IP, a
 	if len(fixtureDirectory) > 0 {
 		cert, err := os.ReadFile(certFixturePath)
 		if err == nil {
+			klog.Infof("CERT: Read cert from %s", certFixturePath)
 			key, err := os.ReadFile(keyFixturePath)
 			if err == nil {
+				klog.Infof("CERT: Read key from %s", keyFixturePath)
 				return cert, key, nil
 			}
 			return nil, nil, fmt.Errorf("cert %s can be read, but key %s cannot: %v", certFixturePath, keyFixturePath, err)
 		}
 		maxAge = 100 * time.Hour * 24 * 365 // 100 years fixtures
+		klog.Infof("CERT: Existing keys not found, generating self-signed cert in %s", fixtureDirectory)
+	} else {
+		klog.Infof("CERT: Generating self-signed cert in-memory")
 	}
 
 	caKey, err := rsa.GenerateKey(cryptorand.Reader, 2048)
