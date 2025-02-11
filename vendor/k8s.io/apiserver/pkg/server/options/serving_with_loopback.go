@@ -25,7 +25,6 @@ import (
 	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	"k8s.io/client-go/rest"
 	certutil "k8s.io/client-go/util/cert"
-	"k8s.io/klog/v2"
 )
 
 type SecureServingOptionsWithLoopback struct {
@@ -52,8 +51,7 @@ func (s *SecureServingOptionsWithLoopback) ApplyTo(secureServingInfo **server.Se
 
 	// create self-signed cert+key with the fake server.LoopbackClientServerNameOverride and
 	// let the server return it when the loopback client connects.
-	klog.Infof("CERT: REPLACEME: calling GenerateSelfSignedCertKey with empty dir")
-	certPem, keyPem, err := certutil.GenerateSelfSignedCertKey(server.LoopbackClientServerNameOverride, nil, nil)
+	certPem, keyPem, err := certutil.GenerateSelfSignedCertKeyWithFixtures(server.LoopbackClientServerNameOverride, nil, nil, "/var/run/secrets/loopback")
 	if err != nil {
 		return fmt.Errorf("failed to generate self-signed certificate for loopback connection: %v", err)
 	}
