@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 
+	"github.com/openshift/library-go/pkg/crypto"
 	"github.com/openshift/library-go/pkg/serviceability"
 	"github.com/openshift/oauth-apiserver/pkg/apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/authorization/hardcodedauthorizer"
@@ -129,6 +130,12 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 
 	if err := o.GenericServerRunOptions.ApplyTo(&serverConfig.GenericConfig.Config); err != nil {
 		return nil, err
+	}
+
+	if serverConfig.GenericConfig.SecureServing != nil {
+		if serverConfig.GenericConfig.SecureServing.MinTLSVersion == 0 {
+			serverConfig.GenericConfig.SecureServing.MinTLSVersion = crypto.DefaultTLSVersion()
+		}
 	}
 
 	serverConfig.GenericConfig.OpenAPIConfig = openapiconfig.DefaultOpenAPIConfig()
