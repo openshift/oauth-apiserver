@@ -114,13 +114,13 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 	}
 	postStartHooks := map[string]genericapiserver.PostStartHookFunc{}
 	postStartHooks["openshift.io-StartUserInformer"] = func(ctx genericapiserver.PostStartHookContext) error {
-		go c.ExtraConfig.UserInformers.Start(ctx.StopCh)
+		go c.ExtraConfig.UserInformers.Start(ctx.Done())
 		return nil
 	}
 
 	c.ExtraConfig.OAuthInformers = oauthinformer.NewSharedInformerFactory(oauthClient, defaultInformerResyncPeriod)
 	postStartHooks["openshift.io-StartOAuthInformer"] = func(ctx genericapiserver.PostStartHookContext) error {
-		go c.ExtraConfig.OAuthInformers.Start(ctx.StopCh)
+		go c.ExtraConfig.OAuthInformers.Start(ctx.Done())
 		return nil
 	}
 
@@ -239,7 +239,7 @@ func (c *completedConfig) getOpenShiftAuthenticators(
 
 	postStartHooks := map[string]genericapiserver.PostStartHookFunc{}
 	postStartHooks["openshift.io-StartTokenTimeoutUpdater"] = func(ctx genericapiserver.PostStartHookContext) error {
-		go timeoutValidator.Run(ctx.StopCh)
+		go timeoutValidator.Run(ctx.Done())
 		return nil
 	}
 
