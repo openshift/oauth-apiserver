@@ -1,6 +1,6 @@
 module github.com/openshift/oauth-apiserver
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
@@ -11,7 +11,7 @@ require (
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
 	github.com/openshift/api v0.0.0-20240410131754-6e4793fb6a4b
 	github.com/openshift/apiserver-library-go v0.0.0-20240313131158-facc40cc7688
-	github.com/openshift/build-machinery-go v0.0.0-20231128094528-1e9b1b0595c8
+	github.com/openshift/build-machinery-go v0.0.0-20250602125535-1b6d00b8c37c
 	github.com/openshift/client-go v0.0.0-20240408153607-64bd6feb83ae
 	github.com/openshift/library-go v0.0.0-20240408090355-0b298992f8cc
 	github.com/spf13/cobra v1.8.0
