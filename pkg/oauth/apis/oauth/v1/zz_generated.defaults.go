@@ -6,7 +6,7 @@
 package v1
 
 import (
-	v1 "github.com/openshift/api/oauth/v1"
+	oauthv1 "github.com/openshift/api/oauth/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -14,16 +14,18 @@ import (
 // Public to allow building arbitrary schemes.
 // All generated defaulters are covering - they call all nested defaulters.
 func RegisterDefaults(scheme *runtime.Scheme) error {
-	scheme.AddTypeDefaultingFunc(&v1.OAuthAuthorizeToken{}, func(obj interface{}) { SetObjectDefaults_OAuthAuthorizeToken(obj.(*v1.OAuthAuthorizeToken)) })
-	scheme.AddTypeDefaultingFunc(&v1.OAuthAuthorizeTokenList{}, func(obj interface{}) { SetObjectDefaults_OAuthAuthorizeTokenList(obj.(*v1.OAuthAuthorizeTokenList)) })
+	scheme.AddTypeDefaultingFunc(&oauthv1.OAuthAuthorizeToken{}, func(obj interface{}) { SetObjectDefaults_OAuthAuthorizeToken(obj.(*oauthv1.OAuthAuthorizeToken)) })
+	scheme.AddTypeDefaultingFunc(&oauthv1.OAuthAuthorizeTokenList{}, func(obj interface{}) {
+		SetObjectDefaults_OAuthAuthorizeTokenList(obj.(*oauthv1.OAuthAuthorizeTokenList))
+	})
 	return nil
 }
 
-func SetObjectDefaults_OAuthAuthorizeToken(in *v1.OAuthAuthorizeToken) {
+func SetObjectDefaults_OAuthAuthorizeToken(in *oauthv1.OAuthAuthorizeToken) {
 	SetDefaults_OAuthAuthorizeToken(in)
 }
 
-func SetObjectDefaults_OAuthAuthorizeTokenList(in *v1.OAuthAuthorizeTokenList) {
+func SetObjectDefaults_OAuthAuthorizeTokenList(in *oauthv1.OAuthAuthorizeTokenList) {
 	for i := range in.Items {
 		a := &in.Items[i]
 		SetObjectDefaults_OAuthAuthorizeToken(a)

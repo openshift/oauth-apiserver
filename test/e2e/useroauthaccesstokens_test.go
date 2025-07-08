@@ -502,7 +502,7 @@ func watchTokens(t *testing.T, adminConfig *rest.Config, testNS, frantaUID, mirk
 			name:          "invalid field selector taken from oauthaccesstokens to match another username",
 			userToken:     frantaTokenString,
 			fieldSelector: fields.OneTermEqualSelector("userName", "pepa"),
-			expectedError: "rejected our request",
+			expectedError: `"userName" is not a known field selector`,
 		},
 		{
 			name:            "single-equal field selector to get own tokens by client",

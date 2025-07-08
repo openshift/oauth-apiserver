@@ -5,8 +5,8 @@ import (
 
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	genericapiserver "k8s.io/apiserver/pkg/server"
-	utilversion "k8s.io/apiserver/pkg/util/version"
 	restclient "k8s.io/client-go/rest"
+	utilversion "k8s.io/component-base/version"
 	openapicontroller "k8s.io/kube-aggregator/pkg/controllers/openapi"
 	"k8s.io/kube-aggregator/pkg/controllers/openapi/aggregator"
 	openapiv3controller "k8s.io/kube-aggregator/pkg/controllers/openapiv3"
@@ -151,7 +151,7 @@ func (c *completedConfig) WithOpenAPIAggregationController(delegatedAPIServer *g
 	openAPIAggregationController := openapicontroller.NewAggregationController(&specDownloader, openAPIAggregator)
 
 	delegatedAPIServer.AddPostStartHook("apiservice-openapi-controller", func(context genericapiserver.PostStartHookContext) error {
-		go openAPIAggregationController.Run(context.StopCh)
+		go openAPIAggregationController.Run(context.Done())
 		return nil
 	})
 	return nil
@@ -171,7 +171,7 @@ func (c *completedConfig) WithOpenAPIV3AggregationController(delegatedAPIServer 
 	openAPIV3AggregationController := openapiv3controller.NewAggregationController(openAPIV3Aggregator)
 
 	delegatedAPIServer.AddPostStartHook("apiservice-openapiv3-controller", func(context genericapiserver.PostStartHookContext) error {
-		go openAPIV3AggregationController.Run(context.StopCh)
+		go openAPIV3AggregationController.Run(context.Done())
 		return nil
 	})
 	return nil
