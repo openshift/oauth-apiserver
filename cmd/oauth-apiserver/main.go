@@ -6,6 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	clientfeatures "k8s.io/client-go/features"
 	"k8s.io/component-base/cli"
 
 	"github.com/openshift/library-go/pkg/serviceability"
@@ -13,6 +16,12 @@ import (
 	oauth_apiserver "github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/version"
 )
+
+func init() {
+	ca := &clientAdapter{utilfeature.DefaultMutableFeatureGate}
+	utilruntime.Must(clientfeatures.AddFeaturesToExistingFeatureGates(ca))
+	clientfeatures.ReplaceFeatureGates(ca)
+}
 
 func main() {
 	defer serviceability.BehaviorOnPanic(os.Getenv("OPENSHIFT_ON_PANIC"), version.Get())()
