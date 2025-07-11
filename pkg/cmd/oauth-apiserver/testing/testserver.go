@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/apiserver/pkg/storage/storagebackend"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 
@@ -65,7 +66,7 @@ func StartTestServer(t Logger, customFlags []string, storageConfig *storagebacke
 	}
 
 	fs := pflag.NewFlagSet("test", pflag.PanicOnError)
-	o := oauthapiservercmd.NewOAuthAPIServerOptions(os.Stdout)
+	o := oauthapiservercmd.NewOAuthAPIServerOptions(os.Stdout, utilfeature.DefaultMutableFeatureGate)
 	o.AddFlags(fs)
 
 	// use dynamic port
@@ -94,7 +95,7 @@ func StartTestServer(t Logger, customFlags []string, storageConfig *storagebacke
 	if err := fs.Parse(customFlags); err != nil {
 		return result, err
 	}
-	if err := o.Complete(); err != nil {
+	if err := o.Complete(utilfeature.DefaultMutableFeatureGate); err != nil {
 		return result, fmt.Errorf("failed to set default options: %v", err)
 	}
 	if err := o.Validate(customFlags); err != nil {

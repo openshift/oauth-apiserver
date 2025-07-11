@@ -1,10 +1,13 @@
 package oauth_apiserver
 
 import (
+	goflag "flag"
 	"fmt"
 	"io"
 	"net"
 
+	apifeatures "github.com/openshift/api/features"
+	"github.com/openshift/library-go/pkg/features"
 	"github.com/openshift/library-go/pkg/serviceability"
 	"github.com/openshift/oauth-apiserver/pkg/apiserver"
 	"github.com/openshift/oauth-apiserver/pkg/authorization/hardcodedauthorizer"
@@ -20,7 +23,9 @@ import (
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
 	apiserverstorage "k8s.io/apiserver/pkg/server/storage"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	cliflag "k8s.io/component-base/cli/flag"
+	"k8s.io/component-base/featuregate"
 
 	// register api groups
 	_ "github.com/openshift/oauth-apiserver/pkg/api/install"
@@ -36,10 +41,14 @@ type OAuthAPIServerOptions struct {
 	RecommendedOptions      *genericapiserveroptions.RecommendedOptions
 	TokenValidationOptions  *tokenvalidationoptions.TokenValidationOptions
 
+	// TODO: The operator needs to be able to filter the feature gate names that are supported
+	// by this component and pass only those.
+	FeatureGateOptions *features.FeatureGateOptions
+
 	Output io.Writer
 }
 
-func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
+func NewOAuthAPIServerOptions(out io.Writer, featureGate featuregate.MutableFeatureGate) *OAuthAPIServerOptions {
 	o := &OAuthAPIServerOptions{
 		GenericServerRunOptions: genericapiserveroptions.NewServerRunOptions(),
 		RecommendedOptions: genericapiserveroptions.NewRecommendedOptions(
@@ -47,13 +56,25 @@ func NewOAuthAPIServerOptions(out io.Writer) *OAuthAPIServerOptions {
 			serverscheme.Codecs.LegacyCodec(serverscheme.Scheme.PrioritizedVersionsAllGroups()...),
 		),
 		TokenValidationOptions: tokenvalidationoptions.NewTokenValidationOptions(),
+		FeatureGateOptions:     features.NewFeatureGateOptionsOrDie(featureGate, apifeatures.SelfManaged),
 		Output:                 out,
 	}
 	return o
 }
 
 func (o *OAuthAPIServerOptions) AddFlags(fs *pflag.FlagSet) {
-	o.GenericServerRunOptions.AddUniversalFlags(fs)
+	// FeatureGateOptions wants a stdlib *flag.FlagSet, not a *pflag.FlagSet.
+	gfs := goflag.NewFlagSet("", goflag.ContinueOnError)
+	o.FeatureGateOptions.AddFlagsToGoFlagSet(gfs)
+	fs.AddGoFlagSet(gfs)
+
+	// Taking advantage of the contract of (*pflag.FlagSet).AddFlagSet, which skips flags that
+	// are already registered in the destination set, to make sure our filtered --feature-gates
+	// flag is the one that takes effect.
+	tmp := pflag.NewFlagSet("", pflag.ContinueOnError)
+	o.GenericServerRunOptions.AddUniversalFlags(tmp)
+	fs.AddFlagSet(tmp)
+
 	o.RecommendedOptions.AddFlags(fs)
 	o.TokenValidationOptions.AddFlags(fs)
 }
@@ -66,13 +87,14 @@ func (o OAuthAPIServerOptions) Validate(args []string) error {
 	return utilerrors.NewAggregate(errors)
 }
 
-func (o *OAuthAPIServerOptions) Complete() error {
-	return nil
+func (o *OAuthAPIServerOptions) Complete(featureGates featuregate.MutableFeatureGate) error {
+	_, err := o.FeatureGateOptions.ApplyTo(featureGates)
+	return err
 }
 
 func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 	stopCh := genericapiserver.SetupSignalHandler()
-	o := NewOAuthAPIServerOptions(out)
+	o := NewOAuthAPIServerOptions(out, utilfeature.DefaultMutableFeatureGate)
 
 	cmd := &cobra.Command{
 		Use:   name,
@@ -80,7 +102,7 @@ func NewOAuthAPIServerCommand(name string, out io.Writer) *cobra.Command {
 		RunE: func(c *cobra.Command, args []string) error {
 			serviceability.StartProfiler()
 
-			if err := o.Complete(); err != nil {
+			if err := o.Complete(utilfeature.DefaultMutableFeatureGate); err != nil {
 				return err
 			}
 			if err := o.Validate(args); err != nil {
