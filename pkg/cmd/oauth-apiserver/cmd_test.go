@@ -59,15 +59,28 @@ func TestServerStartUp(t *testing.T) {
 func TestAddFlags(t *testing.T) {
 	// test data
 	fs := pflag.NewFlagSet("addflagstest", pflag.PanicOnError)
-	target := oauthapiserver.NewOAuthAPIServerOptions(nil)
+	fg := featuregate.NewFeatureGate()
+	if err := fg.Add(map[featuregate.Feature]featuregate.FeatureSpec{
+		"ExampleFeature": {PreRelease: featuregate.Beta},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	target := oauthapiserver.NewOAuthAPIServerOptions(nil, fg)
 	target.AddFlags(fs)
 	args := []string{
 		"--shutdown-delay-duration=7s",
 		"--shutdown-send-retry-after=true",
+		"--feature-gates=ExampleFeature=true,NonexistentFeature=false",
 	}
 
 	// act
 	fs.Parse(args)
+
+	target.FeatureGateOptions.ApplyTo(fg)
+
+	if !fg.Enabled("ExampleFeature") {
+		t.Error("feature not enabled via --feature-gates")
+	}
 
 	// validate
 	expected := &oauthapiserver.OAuthAPIServerOptions{
@@ -201,9 +214,10 @@ func TestAddFlags(t *testing.T) {
 	target.RecommendedOptions.Admission.Decorators = nil
 	// setting the ComponentGlobalsRegistry to nil since there is no value in comparing an instance of a global registry
 	target.GenericServerRunOptions.ComponentGlobalsRegistry = nil
+	target.FeatureGateOptions = nil
 
-	if !cmp.Equal(expected, target, cmpopts.IgnoreUnexported(admission.Plugins{}, *featuregate.NewFeatureGate())) {
-		t.Errorf("unexpected run options,\ndiff:\n%s", cmp.Diff(expected, target, cmpopts.IgnoreUnexported(admission.Plugins{}, *featuregate.NewFeatureGate())))
+	if diff := cmp.Diff(expected, target, cmpopts.IgnoreUnexported(admission.Plugins{})); diff != "" {
+		t.Errorf("unexpected run options,\ndiff:\n%s", diff)
 	}
 }
 
@@ -230,7 +244,7 @@ users:
 func TestOAuthAPIServerConfig(t *testing.T) {
 	// test data
 	fs := pflag.NewFlagSet("addflagstest", pflag.PanicOnError)
-	o := oauthapiserver.NewOAuthAPIServerOptions(nil)
+	o := oauthapiserver.NewOAuthAPIServerOptions(nil, featuregate.NewFeatureGate())
 	o.AddFlags(fs)
 	fakeKubeConfigPath := filepath.Join(t.TempDir(), "kubeconfig")
 	if err := os.WriteFile(fakeKubeConfigPath, []byte(fakeKubeConfigYAML), 0644); err != nil {
