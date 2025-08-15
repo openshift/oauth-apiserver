@@ -12,3 +12,4 @@
 *.out
 
 /oauth-apiserver
+/oauth-apiserver-tests-ext

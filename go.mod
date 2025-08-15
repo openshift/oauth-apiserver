@@ -9,6 +9,9 @@ require (
 	github.com/google/gofuzz v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
+	github.com/onsi/ginkgo/v2 v2.23.4
+	github.com/onsi/gomega v1.38.0
+	github.com/openshift-eng/openshift-tests-extension v0.0.0-20250804142706-7b3ab438a292
 	github.com/openshift/api v0.0.0-20250425163235-9b80d67473bc
 	github.com/openshift/apiserver-library-go v0.0.0-20241021160823-f6d544efa1ab
 	github.com/openshift/build-machinery-go v0.0.0-20240613134303-8359781da660
@@ -159,6 +162,7 @@ replace (
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.32.3
 	k8s.io/metrics => k8s.io/metrics v0.32.3
 	k8s.io/mount-utils => k8s.io/mount-utils v0.32.3
+	github.com/onsi/ginkgo/v2 => github.com/openshift/onsi-ginkgo/v2 v2.6.1-0.20241205171354-8006f302fd12 // This replace is required for we use the OCP fork of Ginkgo
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.32.3
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.32.3
 )
