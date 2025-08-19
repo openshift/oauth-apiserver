@@ -6,7 +6,6 @@ require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/google/btree v1.1.3
 	github.com/google/go-cmp v0.7.0
-	github.com/google/gofuzz v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
 	github.com/onsi/ginkgo/v2 v2.24.0
@@ -32,6 +31,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20250318190949-c8a335a9a2ff
 	k8s.io/kubernetes v1.33.3
 	k8s.io/utils v0.0.0-20241210054802-24370beab758
+	sigs.k8s.io/randfill v1.0.0
 )
 
 require (
@@ -135,7 +135,6 @@ require (
 	k8s.io/kms v0.33.3 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.31.2 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
-	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.6.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
