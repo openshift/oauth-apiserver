@@ -1,6 +1,6 @@
 [
   {
-    "name": "[Jira:openshift-apiserver][sig-api-machinery] sanity test should always pass [Suite:openshift/oauth-apiserver/conformance/parallel]",
+    "name": "[Jira:oauth-apiserver][sig-api-machinery] sanity test should always pass [Suite:openshift/oauth-apiserver/conformance/parallel]",
     "labels": {},
     "resources": {
       "isolation": {}

@@ -5,7 +5,7 @@ import (
 	o "github.com/onsi/gomega"
 )
 
-var _ = g.Describe("[Jira:openshift-apiserver][sig-api-machinery] sanity test", func() {
+var _ = g.Describe("[Jira:oauth-apiserver][sig-api-machinery] sanity test", func() {
 	g.It("should always pass [Suite:openshift/oauth-apiserver/conformance/parallel]", func() {
 		o.Expect(true).To(o.BeTrue())
 	})
