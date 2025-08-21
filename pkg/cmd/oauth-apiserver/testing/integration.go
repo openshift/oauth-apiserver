@@ -38,7 +38,7 @@ users:
     username: test
 `)
 	fakeKubeConfig.Close()
-
+	storageConfig.EventsHistoryWindow = max(storageConfig.EventsHistoryWindow, storagebackend.DefaultEventsHistoryWindow)
 	s, err := StartTestServer(t, append([]string{
 		"--authentication-skip-lookup",
 		"--authentication-kubeconfig", fakeKubeConfig.Name(),
