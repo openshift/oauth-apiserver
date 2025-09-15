@@ -19,7 +19,6 @@ package main
 
 import (
 	"flag"
-	"slices"
 
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
@@ -47,8 +46,6 @@ func main() {
 			inputPkgs = append(inputPkgs, v.Package)
 		}
 	}
-	// ensure stable code generation output
-	slices.Sort(inputPkgs)
 
 	if err := args.Validate(); err != nil {
 		klog.Fatalf("Error: %v", err)

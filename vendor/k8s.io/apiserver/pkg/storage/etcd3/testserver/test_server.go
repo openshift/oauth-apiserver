@@ -22,7 +22,6 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"sync"
 	"testing"
 	"time"
 
@@ -80,8 +79,6 @@ func NewTestConfig(t testing.TB) *embed.Config {
 	return cfg
 }
 
-var autoPortLock sync.Mutex
-
 // RunEtcd starts an embedded etcd server with the provided config
 // (or NewTestConfig(t) if nil), and returns a client connected to the server.
 // The server is terminated when the test ends.
@@ -89,9 +86,6 @@ func RunEtcd(t testing.TB, cfg *embed.Config) *kubernetes.Client {
 	t.Helper()
 
 	if cfg == nil {
-		// if we have to autopick free ports, lock until we successfully start the server on the ports we chose
-		autoPortLock.Lock()
-		defer autoPortLock.Unlock()
 		cfg = NewTestConfig(t)
 	}
 

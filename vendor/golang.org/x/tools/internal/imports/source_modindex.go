@@ -15,10 +15,6 @@ import (
 // This code is here rather than in the modindex package
 // to avoid import loops
 
-// TODO(adonovan): this code is only used by a test in this package.
-// Can we delete it? Or is there a plan to call NewIndexSource from
-// cmd/goimports?
-
 // implements Source using modindex, so only for module cache.
 //
 // this is perhaps over-engineered. A new Index is read at first use.
@@ -26,8 +22,8 @@ import (
 // is read if the index changed. It is not clear the Mutex is needed.
 type IndexSource struct {
 	modcachedir string
-	mu          sync.Mutex
-	index       *modindex.Index // (access via getIndex)
+	mutex       sync.Mutex
+	ix          *modindex.Index
 	expires     time.Time
 }
 
@@ -43,14 +39,13 @@ func (s *IndexSource) LoadPackageNames(ctx context.Context, srcDir string, paths
 }
 
 func (s *IndexSource) ResolveReferences(ctx context.Context, filename string, missing References) ([]*Result, error) {
-	index, err := s.getIndex()
-	if err != nil {
+	if err := s.maybeReadIndex(); err != nil {
 		return nil, err
 	}
 	var cs []modindex.Candidate
 	for pkg, nms := range missing {
 		for nm := range nms {
-			x := index.Lookup(pkg, nm, false)
+			x := s.ix.Lookup(pkg, nm, false)
 			cs = append(cs, x...)
 		}
 	}
@@ -79,22 +74,30 @@ func (s *IndexSource) ResolveReferences(ctx context.Context, filename string, mi
 	return ans, nil
 }
 
-func (s *IndexSource) getIndex() (*modindex.Index, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (s *IndexSource) maybeReadIndex() error {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
-	// (s.index = nil => s.expires is zero,
-	// so the first condition is strictly redundant.
-	// But it makes the postcondition very clear.)
-	if s.index == nil || time.Now().After(s.expires) {
-		index, err := modindex.Update(s.modcachedir)
+	var readIndex bool
+	if time.Now().After(s.expires) {
+		ok, err := modindex.Update(s.modcachedir)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		s.index = index
-		s.expires = index.ValidAt.Add(15 * time.Minute) // (refresh period)
+		if ok {
+			readIndex = true
+		}
 	}
-	// Inv: s.index != nil
 
-	return s.index, nil
+	if readIndex || s.ix == nil {
+		ix, err := modindex.ReadIndex(s.modcachedir)
+		if err != nil {
+			return err
+		}
+		s.ix = ix
+		// for now refresh every 15 minutes
+		s.expires = time.Now().Add(time.Minute * 15)
+	}
+
+	return nil
 }

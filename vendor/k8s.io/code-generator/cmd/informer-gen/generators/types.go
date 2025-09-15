@@ -29,8 +29,7 @@ var (
 	cacheNewSharedIndexInformer = types.Name{Package: "k8s.io/client-go/tools/cache", Name: "NewSharedIndexInformer"}
 	cacheSharedIndexInformer    = types.Name{Package: "k8s.io/client-go/tools/cache", Name: "SharedIndexInformer"}
 	cacheTransformFunc          = types.Name{Package: "k8s.io/client-go/tools/cache", Name: "TransformFunc"}
-	contextBackgroundFunc       = types.Name{Package: "context", Name: "Background"}
-	contextContext              = types.Name{Package: "context", Name: "Context"}
+	contextTODOFunc             = types.Name{Package: "context", Name: "TODO"}
 	fmtErrorfFunc               = types.Name{Package: "fmt", Name: "Errorf"}
 	listOptions                 = types.Name{Package: "k8s.io/kubernetes/pkg/apis/core", Name: "ListOptions"}
 	reflectType                 = types.Name{Package: "reflect", Name: "Type"}

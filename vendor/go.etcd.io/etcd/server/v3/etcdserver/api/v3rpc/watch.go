@@ -345,17 +345,11 @@ func (sws *serverWatchStream) recvLoop() error {
 				id := uv.CancelRequest.WatchId
 				err := sws.watchStream.Cancel(mvcc.WatchID(id))
 				if err == nil {
-					wr := &pb.WatchResponse{
+					sws.ctrlStream <- &pb.WatchResponse{
 						Header:   sws.newResponseHeader(sws.watchStream.Rev()),
 						WatchId:  id,
 						Canceled: true,
 					}
-					select {
-					case sws.ctrlStream <- wr:
-					case <-sws.closec:
-						return nil
-					}
-
 					sws.mu.Lock()
 					delete(sws.progress, mvcc.WatchID(id))
 					delete(sws.prevKV, mvcc.WatchID(id))
@@ -453,7 +447,6 @@ func (sws *serverWatchStream) sendLoop() {
 			sws.mu.RUnlock()
 
 			var serr error
-			// gofail: var beforeSendWatchResponse struct{}
 			if !fragmented && !ok {
 				serr = sws.gRPCStream.Send(wr)
 			} else {

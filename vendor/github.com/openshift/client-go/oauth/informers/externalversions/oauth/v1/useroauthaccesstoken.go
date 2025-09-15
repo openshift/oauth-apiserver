@@ -45,25 +45,13 @@ func NewFilteredUserOAuthAccessTokenInformer(client versioned.Interface, resyncP
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.OauthV1().UserOAuthAccessTokens().List(context.Background(), options)
+				return client.OauthV1().UserOAuthAccessTokens().List(context.TODO(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.OauthV1().UserOAuthAccessTokens().Watch(context.Background(), options)
-			},
-			ListWithContextFunc: func(ctx context.Context, options metav1.ListOptions) (runtime.Object, error) {
-				if tweakListOptions != nil {
-					tweakListOptions(&options)
-				}
-				return client.OauthV1().UserOAuthAccessTokens().List(ctx, options)
-			},
-			WatchFuncWithContext: func(ctx context.Context, options metav1.ListOptions) (watch.Interface, error) {
-				if tweakListOptions != nil {
-					tweakListOptions(&options)
-				}
-				return client.OauthV1().UserOAuthAccessTokens().Watch(ctx, options)
+				return client.OauthV1().UserOAuthAccessTokens().Watch(context.TODO(), options)
 			},
 		},
 		&apioauthv1.UserOAuthAccessToken{},

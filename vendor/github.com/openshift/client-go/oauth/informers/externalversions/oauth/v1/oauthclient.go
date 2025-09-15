@@ -45,25 +45,13 @@ func NewFilteredOAuthClientInformer(client versioned.Interface, resyncPeriod tim
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.OauthV1().OAuthClients().List(context.Background(), options)
+				return client.OauthV1().OAuthClients().List(context.TODO(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.OauthV1().OAuthClients().Watch(context.Background(), options)
-			},
-			ListWithContextFunc: func(ctx context.Context, options metav1.ListOptions) (runtime.Object, error) {
-				if tweakListOptions != nil {
-					tweakListOptions(&options)
-				}
-				return client.OauthV1().OAuthClients().List(ctx, options)
-			},
-			WatchFuncWithContext: func(ctx context.Context, options metav1.ListOptions) (watch.Interface, error) {
-				if tweakListOptions != nil {
-					tweakListOptions(&options)
-				}
-				return client.OauthV1().OAuthClients().Watch(ctx, options)
+				return client.OauthV1().OAuthClients().Watch(context.TODO(), options)
 			},
 		},
 		&apioauthv1.OAuthClient{},

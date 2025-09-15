@@ -10,13 +10,11 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"iter"
 	"os"
 	"path/filepath"
 	"runtime"
 	"slices"
 	"strings"
-	"sync"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -32,69 +30,45 @@ import (
 type symbol struct {
 	pkg  string // name of the symbols's package
 	name string // declared name
-	kind string // T, C, V, or F, followed by D if deprecated
+	kind string // T, C, V, or F, follwed by D if deprecated
 	sig  string // signature information, for F
 }
 
-// extractSymbols returns a (new, unordered) array of Entries, one for
-// each provided package directory, describing its exported symbols.
-func extractSymbols(cwd string, dirs iter.Seq[directory]) []Entry {
-	var (
-		mu      sync.Mutex
-		entries []Entry
-	)
-
+// find the symbols for the best directories
+func getSymbols(cd Abspath, dirs map[string][]*directory) {
 	var g errgroup.Group
 	g.SetLimit(max(2, runtime.GOMAXPROCS(0)/2))
-	for dir := range dirs {
+	for _, vv := range dirs {
+		// throttling some day?
+		d := vv[0]
 		g.Go(func() error {
-			thedir := filepath.Join(cwd, string(dir.path))
+			thedir := filepath.Join(string(cd), string(d.path))
 			mode := parser.SkipObjectResolution | parser.ParseComments
 
-			// Parse all Go files in dir and extract symbols.
-			dirents, err := os.ReadDir(thedir)
+			fi, err := os.ReadDir(thedir)
 			if err != nil {
 				return nil // log this someday?
 			}
-			var syms []symbol
-			for _, dirent := range dirents {
-				if !strings.HasSuffix(dirent.Name(), ".go") ||
-					strings.HasSuffix(dirent.Name(), "_test.go") {
+			for _, fx := range fi {
+				if !strings.HasSuffix(fx.Name(), ".go") || strings.HasSuffix(fx.Name(), "_test.go") {
 					continue
 				}
-				fname := filepath.Join(thedir, dirent.Name())
+				fname := filepath.Join(thedir, fx.Name())
 				tr, err := parser.ParseFile(token.NewFileSet(), fname, nil, mode)
 				if err != nil {
 					continue // ignore errors, someday log them?
 				}
-				syms = append(syms, getFileExports(tr)...)
+				d.syms = append(d.syms, getFileExports(tr)...)
 			}
-
-			// Create an entry for the package.
-			pkg, names := processSyms(syms)
-			if pkg != "" {
-				mu.Lock()
-				defer mu.Unlock()
-				entries = append(entries, Entry{
-					PkgName:    pkg,
-					Dir:        dir.path,
-					ImportPath: dir.importPath,
-					Version:    dir.version,
-					Names:      names,
-				})
-			}
-
 			return nil
 		})
 	}
-	g.Wait() // ignore error
-
-	return entries
+	g.Wait()
 }
 
 func getFileExports(f *ast.File) []symbol {
 	pkg := f.Name.Name
-	if pkg == "main" || pkg == "" {
+	if pkg == "main" {
 		return nil
 	}
 	var ans []symbol
@@ -136,7 +110,7 @@ func getFileExports(f *ast.File) []symbol {
 				// The only place a $ can occur seems to be in a struct tag, which
 				// can be an arbitrary string literal, and ExprString does not presently
 				// print struct tags. So for this to happen the type of a formal parameter
-				// has to be a explicit struct, e.g. foo(x struct{a int "$"}) and ExprString
+				// has to be a explict struct, e.g. foo(x struct{a int "$"}) and ExprString
 				// would have to show the struct tag. Even testing for this case seems
 				// a waste of effort, but let's remember the possibility
 				if strings.Contains(tp, "$") {
@@ -228,18 +202,17 @@ func processSyms(syms []symbol) (string, []string) {
 	pkg := syms[0].pkg
 	var names []string
 	for _, s := range syms {
-		if s.pkg != pkg {
-			// Symbols came from two files in same dir
-			// with different package declarations.
-			continue
-		}
 		var nx string
-		if s.sig != "" {
-			nx = fmt.Sprintf("%s %s %s", s.name, s.kind, s.sig)
+		if s.pkg == pkg {
+			if s.sig != "" {
+				nx = fmt.Sprintf("%s %s %s", s.name, s.kind, s.sig)
+			} else {
+				nx = fmt.Sprintf("%s %s", s.name, s.kind)
+			}
+			names = append(names, nx)
 		} else {
-			nx = fmt.Sprintf("%s %s", s.name, s.kind)
+			continue // PJW: do we want to keep track of these?
 		}
-		names = append(names, nx)
 	}
 	return pkg, names
 }

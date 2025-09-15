@@ -27,11 +27,6 @@ set -o pipefail
 
 KUBE_CODEGEN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
-# Callers which want a specific tag of the k8s.io/code-generator repo should
-# set the KUBE_CODEGEN_TAG to the tag name, e.g. KUBE_CODEGEN_TAG="release-1.32"
-# before sourcing this file.
-CODEGEN_VERSION_SPEC="${KUBE_CODEGEN_TAG:+"@${KUBE_CODEGEN_TAG}"}"
-
 function kube::codegen::internal::findz() {
     # We use `find` rather than `git ls-files` because sometimes external
     # projects use this across repos.  This is an imperfect wrapper of find,
@@ -48,7 +43,7 @@ function kube::codegen::internal::grep() {
         --exclude-dir vendor
 }
 
-# Generate tagged helper code: conversions, deepcopy, defaults and validations
+# Generate tagged helper code: conversions, deepcopy, and defaults
 #
 # USAGE: kube::codegen::gen_helpers [FLAGS] <input-dir>
 #
@@ -108,10 +103,9 @@ function kube::codegen::gen_helpers() {
         # and then install with forced module mode on and fully qualified name.
         cd "${KUBE_CODEGEN_ROOT}"
         BINS=(
-            conversion-gen"${CODEGEN_VERSION_SPEC}"
-            deepcopy-gen"${CODEGEN_VERSION_SPEC}"
-            defaulter-gen"${CODEGEN_VERSION_SPEC}"
-            validation-gen"${CODEGEN_VERSION_SPEC}"
+            conversion-gen
+            deepcopy-gen
+            defaulter-gen
         )
         # shellcheck disable=2046 # printf word-splitting is intentional
         GO111MODULE=on go install $(printf "k8s.io/code-generator/cmd/%s " "${BINS[@]}")
@@ -147,38 +141,6 @@ function kube::codegen::gen_helpers() {
         "${gobin}/deepcopy-gen" \
             -v "${v}" \
             --output-file zz_generated.deepcopy.go \
-            --go-header-file "${boilerplate}" \
-            "${input_pkgs[@]}"
-    fi
-
-    # Validations
-    #
-    local input_pkgs=()
-    while read -r dir; do
-        pkg="$(cd "${dir}" && GO111MODULE=on go list -find .)"
-        input_pkgs+=("${pkg}")
-    done < <(
-        ( kube::codegen::internal::grep -l --null \
-            -e '^\s*//\s*+k8s:validation-gen=' \
-            -r "${in_dir}" \
-            --include '*.go' \
-            || true \
-        ) | while read -r -d $'\0' F; do dirname "${F}"; done \
-          | LC_ALL=C sort -u
-    )
-
-    if [ "${#input_pkgs[@]}" != 0 ]; then
-        echo "Generating validation code for ${#input_pkgs[@]} targets"
-
-        kube::codegen::internal::findz \
-            "${in_dir}" \
-            -type f \
-            -name zz_generated.validations.go \
-            | xargs -0 rm -f
-
-        "${gobin}/validation-gen" \
-            -v "${v}" \
-            --output-file zz_generated.validations.go \
             --go-header-file "${boilerplate}" \
             "${input_pkgs[@]}"
     fi
@@ -362,7 +324,7 @@ function kube::codegen::gen_openapi() {
         # and then install with forced module mode on and fully qualified name.
         cd "${KUBE_CODEGEN_ROOT}"
         BINS=(
-            openapi-gen"${CODEGEN_VERSION_SPEC}"
+            openapi-gen
         )
         # shellcheck disable=2046 # printf word-splitting is intentional
         GO111MODULE=on go install $(printf "k8s.io/kube-openapi/cmd/%s " "${BINS[@]}")
@@ -592,10 +554,10 @@ function kube::codegen::gen_client() {
         # and then install with forced module mode on and fully qualified name.
         cd "${KUBE_CODEGEN_ROOT}"
         BINS=(
-            applyconfiguration-gen"${CODEGEN_VERSION_SPEC}"
-            client-gen"${CODEGEN_VERSION_SPEC}"
-            informer-gen"${CODEGEN_VERSION_SPEC}"
-            lister-gen"${CODEGEN_VERSION_SPEC}"
+            applyconfiguration-gen
+            client-gen
+            informer-gen
+            lister-gen
         )
         # shellcheck disable=2046 # printf word-splitting is intentional
         GO111MODULE=on go install $(printf "k8s.io/code-generator/cmd/%s " "${BINS[@]}")
@@ -767,7 +729,7 @@ function kube::codegen::gen_register() {
         # and then install with forced module mode on and fully qualified name.
         cd "${KUBE_CODEGEN_ROOT}"
         BINS=(
-            register-gen"${CODEGEN_VERSION_SPEC}"
+            register-gen
         )
         # shellcheck disable=2046 # printf word-splitting is intentional
         GO111MODULE=on go install $(printf "k8s.io/code-generator/cmd/%s " "${BINS[@]}")

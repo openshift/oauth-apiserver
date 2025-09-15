@@ -54,6 +54,9 @@ func unsafeSaveMemberToBackend(lg *zap.Logger, be backend.Backend, m *Member) er
 	tx := be.BatchTx()
 	tx.LockInsideApply()
 	defer tx.Unlock()
+	if unsafeMemberExists(tx, mkey) {
+		return errMemberAlreadyExist
+	}
 	tx.UnsafePut(buckets.Members, mkey, mvalue)
 	return nil
 }

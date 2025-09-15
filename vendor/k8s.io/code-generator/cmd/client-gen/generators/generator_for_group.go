@@ -169,7 +169,9 @@ var newClientForConfigTemplate = `
 // where httpClient was generated with rest.HTTPClientFor(c).
 func NewForConfig(c *$.restConfig|raw$) (*$.GroupGoName$$.Version$Client, error) {
 	config := *c
-	setConfigDefaults(&config)
+	if err := setConfigDefaults(&config); err != nil {
+		return nil, err
+	}
 	httpClient, err := $.RESTHTTPClientFor|raw$(&config)
 	if err != nil {
 		return nil, err
@@ -183,7 +185,9 @@ var newClientForConfigAndClientTemplate = `
 // Note the http client provided takes precedence over the configured transport values.
 func NewForConfigAndClient(c *$.restConfig|raw$, h *$.httpClient|raw$) (*$.GroupGoName$$.Version$Client, error) {
 	config := *c
-	setConfigDefaults(&config)
+	if err := setConfigDefaults(&config); err != nil {
+		return nil, err
+	}
 	client, err := $.restRESTClientForConfigAndClient|raw$(&config, h)
 	if err != nil {
 		return nil, err
@@ -223,7 +227,7 @@ func New(c $.restRESTClientInterface|raw$) *$.GroupGoName$$.Version$Client {
 `
 
 var setInternalVersionClientDefaultsTemplate = `
-func setConfigDefaults(config *$.restConfig|raw$) {
+func setConfigDefaults(config *$.restConfig|raw$) error {
 	config.APIPath = $.apiPath$
 	if config.UserAgent == "" {
 		config.UserAgent = $.restDefaultKubernetesUserAgent|raw$()
@@ -240,11 +244,13 @@ func setConfigDefaults(config *$.restConfig|raw$) {
 	if config.Burst == 0 {
 		config.Burst = 10
 	}
+
+	return nil
 }
 `
 
 var setClientDefaultsTemplate = `
-func setConfigDefaults(config *$.restConfig|raw$) {
+func setConfigDefaults(config *$.restConfig|raw$) error {
 	gv := $.SchemeGroupVersion|raw$
 	config.GroupVersion =  &gv
 	config.APIPath = $.apiPath$
@@ -253,5 +259,7 @@ func setConfigDefaults(config *$.restConfig|raw$) {
 	if config.UserAgent == "" {
 		config.UserAgent = $.restDefaultKubernetesUserAgent|raw$()
 	}
+
+	return nil
 }
 `
