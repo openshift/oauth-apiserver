@@ -32,13 +32,15 @@ type REST struct {
 }
 
 // we only allow retrieving the tokens => no Create() or Update()
-var _ rest.Lister = &REST{}
-var _ rest.Getter = &REST{}
-var _ rest.Watcher = &REST{}
-var _ rest.GracefulDeleter = &REST{}
-var _ rest.Scoper = &REST{}
-var _ rest.SingularNameProvider = &REST{}
-var _ rest.Storage = &REST{}
+var (
+	_ rest.Lister               = &REST{}
+	_ rest.Getter               = &REST{}
+	_ rest.Watcher              = &REST{}
+	_ rest.GracefulDeleter      = &REST{}
+	_ rest.Scoper               = &REST{}
+	_ rest.SingularNameProvider = &REST{}
+	_ rest.Storage              = &REST{}
+)
 
 // NewREST returns a RESTStorage object that will work against access tokens
 func NewREST(accessTokenStorage *accesstokenregistry.REST) (*REST, error) {
@@ -163,7 +165,14 @@ func (r *REST) Delete(ctx context.Context, name string, validateFunc rest.Valida
 		newOpts.Preconditions.UID = &deletedTyped.UID
 	}
 
-	return r.accessTokenStorage.Delete(ctx, name, validateFunc, newOpts)
+	return r.accessTokenStorage.Delete(
+		ctx,
+		name,
+		func(ctx context.Context, obj runtime.Object) error {
+			return validateFunc(ctx, (*oauthapi.UserOAuthAccessToken)(obj.(*oauthapi.OAuthAccessToken)))
+		},
+		newOpts,
+	)
 }
 
 func getUserFromContext(ctx context.Context) (string, bool) {
