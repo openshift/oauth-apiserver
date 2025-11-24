@@ -5,7 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -54,7 +54,7 @@ func TestTokenReviews(t *testing.T) {
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
-	respBodyBytes, err := ioutil.ReadAll(resp.Body)
+	respBodyBytes, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
 	tokenReviewResp := &kauthenticationv1.TokenReview{}
@@ -69,7 +69,7 @@ func TestTokenReviews(t *testing.T) {
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
-	respBodyBytes, err = ioutil.ReadAll(resp.Body)
+	respBodyBytes, err = io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
 	tokenReviewResp = &kauthenticationv1.TokenReview{}

@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -14,7 +13,7 @@ import (
 // StartDefaultTestServer starts a test server with default test flags.
 func StartDefaultTestServer(t Logger, storageConfig *storagebackend.Config, flags ...string) (func(), *rest.Config, error) {
 	// create kubeconfig which will not actually be used. But authz/authn needs it to startup.
-	fakeKubeConfig, err := ioutil.TempFile("", "kubeconfig")
+	fakeKubeConfig, err := os.CreateTemp("", "kubeconfig")
 	if err != nil {
 		return nil, nil, err
 	}
