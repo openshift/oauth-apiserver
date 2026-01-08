@@ -10,6 +10,7 @@ import (
 
 	otecmd "github.com/openshift-eng/openshift-tests-extension/pkg/cmd"
 	oteextension "github.com/openshift-eng/openshift-tests-extension/pkg/extension"
+	oteginkgo "github.com/openshift-eng/openshift-tests-extension/pkg/ginkgo"
 	"github.com/openshift/oauth-apiserver/pkg/version"
 )
 
@@ -51,13 +52,32 @@ func newOperatorTestCommand() (*cobra.Command, error) {
 	return cmd, nil
 }
 
+// prepareOperatorTestsRegistry creates the OTE registry for this component.
+//
+// Note:
+//
+// This method must be called before adding the registry to the OTE framework.
 func prepareOperatorTestsRegistry() (*oteextension.Registry, error) {
 	registry := oteextension.NewRegistry()
 	extension := oteextension.NewExtension("openshift", "payload", "oauth-apiserver")
 
-	// Note: Test package imports and oteginkgo.BuildExtensionTestSpecsFromOpenShiftGinkgoSuite()
-	// will be added in subsequent PRs when actual tests are migrated to the OTE framework.
+	// The following suite runs tests that verify the component's behaviour.
+	// This suite is executed only on pull requests targeting this repository.
+	// Tests tagged with both [Component] and [Serial] are included in this suite.
+	extension.AddSuite(oteextension.Suite{
+		Name:        "openshift/oauth-apiserver/component/serial",
+		Parallelism: 1,
+		Qualifiers: []string{
+			`name.contains("[Component]") && name.contains("[Serial]")`,
+		},
+	})
 
+	specs, err := oteginkgo.BuildExtensionTestSpecsFromOpenShiftGinkgoSuite()
+	if err != nil {
+		return nil, fmt.Errorf("couldn't build extension test specs from ginkgo: %w", err)
+	}
+
+	extension.AddSpecs(specs)
 	registry.Register(extension)
 	return registry, nil
 }
