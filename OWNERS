@@ -1,14 +1,9 @@
 reviewers:
-  - deads2k
-  - mfojtik
-  - sttts
-  - stlaz
   - p0lyn0mial
-  - slaskawi
+  - benluddy
+  - sanchezl
 approvers:
-  - deads2k
-  - mfojtik
-  - sttts
-  - stlaz
-  - s-urbaniak
+  - p0lyn0mial
+  - benluddy
+  - sanchezl
 component: oauth-apiserver
