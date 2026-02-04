@@ -107,6 +107,8 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/envoyproxy/protoc-gen-validate v0.10.1 h1:c0g45+xCJhdgFGw7a5QAfdS4byAbud7miNWJ1WwEVf8=
 github.com/evanphx/json-patch v4.12.0+incompatible h1:4onqiflcdA9EOZ4RxV643DvftH5pOlLGNtQ5lPWQu84=
 github.com/evanphx/json-patch v4.12.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
+github.com/everettraven/openshift-kubernetes-apiserver v0.0.0-20260204184445-9db58893b64b h1:pW348trZMQ9Dw+FohRT3Xvdp2XFLoyVsNrWXxd2K1tQ=
+github.com/everettraven/openshift-kubernetes-apiserver v0.0.0-20260204184445-9db58893b64b/go.mod h1:OrLG9RwCOerutAlo8QJW5EHzUG9Dad7k6rgcDUNSO/w=
 github.com/felixge/httpsnoop v1.0.3 h1:s/nj+GCswXYzN5v2DpNMuMQYe+0DDwt5WVCU6CWBdXk=
 github.com/felixge/httpsnoop v1.0.3/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
@@ -295,8 +297,6 @@ github.com/openshift/client-go v0.0.0-20230607134213-3cd0021bbee3 h1:uVCq/Sx2y4U
 github.com/openshift/client-go v0.0.0-20230607134213-3cd0021bbee3/go.mod h1:M+VUIcqx5IvgzejcbgmQnxETPrXRYlcufHpw2bAgz9Y=
 github.com/openshift/kubernetes v0.0.0-20240123031621-28ed2d70d51c h1:q+PoxKr6HHRzut22yWOBOwf2jUQ5AxQW/ddsKbFgBWQ=
 github.com/openshift/kubernetes v0.0.0-20240123031621-28ed2d70d51c/go.mod h1:8PLRUTUKvVHgTx0fyYE33pRcFJcXGoZHJND/uG+kP2o=
-github.com/openshift/kubernetes-apiserver v0.0.0-20240112180301-bc101dc8b952 h1:bnMz+L8IjuURKTZHCmCBz3LS1jbTIU67pXGP3yi/sQc=
-github.com/openshift/kubernetes-apiserver v0.0.0-20240112180301-bc101dc8b952/go.mod h1:OrLG9RwCOerutAlo8QJW5EHzUG9Dad7k6rgcDUNSO/w=
 github.com/openshift/library-go v0.0.0-20230620084201-504ca4bd5a83 h1:z7tTnbZ2bzPtXjVnWHWCtUCBYrZYeKJitkV1rffmMY8=
 github.com/openshift/library-go v0.0.0-20230620084201-504ca4bd5a83/go.mod h1:PegtilvJPBJXjJG3AV8uL1a0SAnBr6K67ShNiWVb40M=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
