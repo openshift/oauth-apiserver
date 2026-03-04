@@ -15,6 +15,7 @@ function codegen::join() { local IFS="$1"; shift; echo "$*"; }
 ALL_FQ_APIS=(
     github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth
     github.com/openshift/oauth-apiserver/pkg/user/apis/user
+    github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/apis/apiserver/v1
 )
 
 echo "Generating deepcopy funcs"
