@@ -217,6 +217,9 @@ type jwtAuthenticator struct {
 	requiredClaims map[string]string
 
 	healthCheck atomic.Pointer[errorHolder]
+
+	// externalSourceResolver is used to resolve externally sourced claims.
+	externalSourceResolver *externalClaimsResolver
 }
 
 // idTokenVerifier is a wrapper around oidc.IDTokenVerifier. It uses the oidc.IDTokenVerifier
@@ -393,6 +396,15 @@ func New(lifecycleCtx context.Context, opts Options) (AuthenticatorTokenWithHeal
 	authn.healthCheck.Store(&errorHolder{
 		err: fmt.Errorf("oidc: authenticator for issuer %q is not initialized", authn.jwtAuthenticator.Issuer.URL),
 	})
+
+	if len(opts.JWTAuthenticator.ExternalClaimsSources) > 0 {
+		externalSourceResolver, err := NewExternalClaimsResolver(compiler, opts.JWTAuthenticator.ExternalClaimsSources...)
+		if err != nil {
+			return nil, fmt.Errorf("building new external claims resolver: %w", err)
+		}
+
+		authn.externalSourceResolver = externalSourceResolver
+	}
 
 	issuerURL := opts.JWTAuthenticator.Issuer.URL
 	if opts.KeySet != nil {
@@ -842,6 +854,10 @@ func (a *jwtAuthenticator) AuthenticateToken(ctx context.Context, token string) 
 		}
 	}
 
+	if a.externalSourceResolver != nil {
+		a.externalSourceResolver.expand(ctx, token, c)
+	}
+
 	var claimsValue *lazy.MapValue
 	// Convert the claims to traits.Mapper so that we can evaluate the CEL expressions
 	// against the claims. This is done once here so that we don't have to convert
@@ -1204,6 +1220,14 @@ func convertCELValueToStringList(val ref.Val) ([]string, error) {
 				if len(out) == 0 {
 					continue
 				}
+				result = append(result, out)
+			}
+		case []string:
+			for _, out := range val.Value().([]string) {
+				if len(out) == 0 {
+					continue
+				}
+
 				result = append(result, out)
 			}
 		case []ref.Val:

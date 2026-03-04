@@ -21,6 +21,16 @@ func init() {
 // RegisterConversions adds conversion functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterConversions(s *runtime.Scheme) error {
+	if err := s.AddGeneratedConversionFunc((*Authentication)(nil), (*apiserver.Authentication)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_Authentication_To_apiserver_Authentication(a.(*Authentication), b.(*apiserver.Authentication), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*apiserver.Authentication)(nil), (*Authentication)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_apiserver_Authentication_To_v1_Authentication(a.(*apiserver.Authentication), b.(*Authentication), scope)
+	}); err != nil {
+		return err
+	}
 	if err := s.AddGeneratedConversionFunc((*AuthenticationConfiguration)(nil), (*apiserver.AuthenticationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_v1_AuthenticationConfiguration_To_apiserver_AuthenticationConfiguration(a.(*AuthenticationConfiguration), b.(*apiserver.AuthenticationConfiguration), scope)
 	}); err != nil {
@@ -58,6 +68,26 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}
 	if err := s.AddGeneratedConversionFunc((*apiserver.ClaimValidationRule)(nil), (*ClaimValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_apiserver_ClaimValidationRule_To_v1_ClaimValidationRule(a.(*apiserver.ClaimValidationRule), b.(*ClaimValidationRule), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ExternalClaimsSource)(nil), (*apiserver.ExternalClaimsSource)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_ExternalClaimsSource_To_apiserver_ExternalClaimsSource(a.(*ExternalClaimsSource), b.(*apiserver.ExternalClaimsSource), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*apiserver.ExternalClaimsSource)(nil), (*ExternalClaimsSource)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_apiserver_ExternalClaimsSource_To_v1_ExternalClaimsSource(a.(*apiserver.ExternalClaimsSource), b.(*ExternalClaimsSource), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ExternalSourceCondition)(nil), (*apiserver.ExternalSourceCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_ExternalSourceCondition_To_apiserver_ExternalSourceCondition(a.(*ExternalSourceCondition), b.(*apiserver.ExternalSourceCondition), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*apiserver.ExternalSourceCondition)(nil), (*ExternalSourceCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_apiserver_ExternalSourceCondition_To_v1_ExternalSourceCondition(a.(*apiserver.ExternalSourceCondition), b.(*ExternalSourceCondition), scope)
 	}); err != nil {
 		return err
 	}
@@ -101,6 +131,36 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}); err != nil {
 		return err
 	}
+	if err := s.AddGeneratedConversionFunc((*SourceURL)(nil), (*apiserver.SourceURL)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_SourceURL_To_apiserver_SourceURL(a.(*SourceURL), b.(*apiserver.SourceURL), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*apiserver.SourceURL)(nil), (*SourceURL)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_apiserver_SourceURL_To_v1_SourceURL(a.(*apiserver.SourceURL), b.(*SourceURL), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*SourcedClaimMapping)(nil), (*apiserver.SourcedClaimMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_SourcedClaimMapping_To_apiserver_SourcedClaimMapping(a.(*SourcedClaimMapping), b.(*apiserver.SourcedClaimMapping), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*apiserver.SourcedClaimMapping)(nil), (*SourcedClaimMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_apiserver_SourcedClaimMapping_To_v1_SourcedClaimMapping(a.(*apiserver.SourcedClaimMapping), b.(*SourcedClaimMapping), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*TLS)(nil), (*apiserver.TLS)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_TLS_To_apiserver_TLS(a.(*TLS), b.(*apiserver.TLS), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*apiserver.TLS)(nil), (*TLS)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_apiserver_TLS_To_v1_TLS(a.(*apiserver.TLS), b.(*TLS), scope)
+	}); err != nil {
+		return err
+	}
 	if err := s.AddGeneratedConversionFunc((*UserValidationRule)(nil), (*apiserver.UserValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_v1_UserValidationRule_To_apiserver_UserValidationRule(a.(*UserValidationRule), b.(*apiserver.UserValidationRule), scope)
 	}); err != nil {
@@ -112,6 +172,26 @@ func RegisterConversions(s *runtime.Scheme) error {
 		return err
 	}
 	return nil
+}
+
+func autoConvert_v1_Authentication_To_apiserver_Authentication(in *Authentication, out *apiserver.Authentication, s conversion.Scope) error {
+	out.Type = (*apiserver.AuthenticationType)(unsafe.Pointer(in.Type))
+	return nil
+}
+
+// Convert_v1_Authentication_To_apiserver_Authentication is an autogenerated conversion function.
+func Convert_v1_Authentication_To_apiserver_Authentication(in *Authentication, out *apiserver.Authentication, s conversion.Scope) error {
+	return autoConvert_v1_Authentication_To_apiserver_Authentication(in, out, s)
+}
+
+func autoConvert_apiserver_Authentication_To_v1_Authentication(in *apiserver.Authentication, out *Authentication, s conversion.Scope) error {
+	out.Type = (*AuthenticationType)(unsafe.Pointer(in.Type))
+	return nil
+}
+
+// Convert_apiserver_Authentication_To_v1_Authentication is an autogenerated conversion function.
+func Convert_apiserver_Authentication_To_v1_Authentication(in *apiserver.Authentication, out *Authentication, s conversion.Scope) error {
+	return autoConvert_apiserver_Authentication_To_v1_Authentication(in, out, s)
 }
 
 func autoConvert_v1_AuthenticationConfiguration_To_apiserver_AuthenticationConfiguration(in *AuthenticationConfiguration, out *apiserver.AuthenticationConfiguration, s conversion.Scope) error {
@@ -240,6 +320,54 @@ func Convert_apiserver_ClaimValidationRule_To_v1_ClaimValidationRule(in *apiserv
 	return autoConvert_apiserver_ClaimValidationRule_To_v1_ClaimValidationRule(in, out, s)
 }
 
+func autoConvert_v1_ExternalClaimsSource_To_apiserver_ExternalClaimsSource(in *ExternalClaimsSource, out *apiserver.ExternalClaimsSource, s conversion.Scope) error {
+	out.Authentication = (*apiserver.Authentication)(unsafe.Pointer(in.Authentication))
+	out.TLS = (*apiserver.TLS)(unsafe.Pointer(in.TLS))
+	out.URL = (*apiserver.SourceURL)(unsafe.Pointer(in.URL))
+	out.Mappings = *(*[]apiserver.SourcedClaimMapping)(unsafe.Pointer(&in.Mappings))
+	out.Conditions = *(*[]apiserver.ExternalSourceCondition)(unsafe.Pointer(&in.Conditions))
+	return nil
+}
+
+// Convert_v1_ExternalClaimsSource_To_apiserver_ExternalClaimsSource is an autogenerated conversion function.
+func Convert_v1_ExternalClaimsSource_To_apiserver_ExternalClaimsSource(in *ExternalClaimsSource, out *apiserver.ExternalClaimsSource, s conversion.Scope) error {
+	return autoConvert_v1_ExternalClaimsSource_To_apiserver_ExternalClaimsSource(in, out, s)
+}
+
+func autoConvert_apiserver_ExternalClaimsSource_To_v1_ExternalClaimsSource(in *apiserver.ExternalClaimsSource, out *ExternalClaimsSource, s conversion.Scope) error {
+	out.Authentication = (*Authentication)(unsafe.Pointer(in.Authentication))
+	out.TLS = (*TLS)(unsafe.Pointer(in.TLS))
+	out.URL = (*SourceURL)(unsafe.Pointer(in.URL))
+	out.Mappings = *(*[]SourcedClaimMapping)(unsafe.Pointer(&in.Mappings))
+	out.Conditions = *(*[]ExternalSourceCondition)(unsafe.Pointer(&in.Conditions))
+	return nil
+}
+
+// Convert_apiserver_ExternalClaimsSource_To_v1_ExternalClaimsSource is an autogenerated conversion function.
+func Convert_apiserver_ExternalClaimsSource_To_v1_ExternalClaimsSource(in *apiserver.ExternalClaimsSource, out *ExternalClaimsSource, s conversion.Scope) error {
+	return autoConvert_apiserver_ExternalClaimsSource_To_v1_ExternalClaimsSource(in, out, s)
+}
+
+func autoConvert_v1_ExternalSourceCondition_To_apiserver_ExternalSourceCondition(in *ExternalSourceCondition, out *apiserver.ExternalSourceCondition, s conversion.Scope) error {
+	out.Expression = (*string)(unsafe.Pointer(in.Expression))
+	return nil
+}
+
+// Convert_v1_ExternalSourceCondition_To_apiserver_ExternalSourceCondition is an autogenerated conversion function.
+func Convert_v1_ExternalSourceCondition_To_apiserver_ExternalSourceCondition(in *ExternalSourceCondition, out *apiserver.ExternalSourceCondition, s conversion.Scope) error {
+	return autoConvert_v1_ExternalSourceCondition_To_apiserver_ExternalSourceCondition(in, out, s)
+}
+
+func autoConvert_apiserver_ExternalSourceCondition_To_v1_ExternalSourceCondition(in *apiserver.ExternalSourceCondition, out *ExternalSourceCondition, s conversion.Scope) error {
+	out.Expression = (*string)(unsafe.Pointer(in.Expression))
+	return nil
+}
+
+// Convert_apiserver_ExternalSourceCondition_To_v1_ExternalSourceCondition is an autogenerated conversion function.
+func Convert_apiserver_ExternalSourceCondition_To_v1_ExternalSourceCondition(in *apiserver.ExternalSourceCondition, out *ExternalSourceCondition, s conversion.Scope) error {
+	return autoConvert_apiserver_ExternalSourceCondition_To_v1_ExternalSourceCondition(in, out, s)
+}
+
 func autoConvert_v1_ExtraMapping_To_apiserver_ExtraMapping(in *ExtraMapping, out *apiserver.ExtraMapping, s conversion.Scope) error {
 	out.Key = in.Key
 	out.ValueExpression = in.ValueExpression
@@ -303,6 +431,7 @@ func autoConvert_v1_JWTAuthenticator_To_apiserver_JWTAuthenticator(in *JWTAuthen
 		return err
 	}
 	out.UserValidationRules = *(*[]apiserver.UserValidationRule)(unsafe.Pointer(&in.UserValidationRules))
+	out.ExternalClaimsSources = *(*[]apiserver.ExternalClaimsSource)(unsafe.Pointer(&in.ExternalClaimsSources))
 	return nil
 }
 
@@ -320,6 +449,7 @@ func autoConvert_apiserver_JWTAuthenticator_To_v1_JWTAuthenticator(in *apiserver
 		return err
 	}
 	out.UserValidationRules = *(*[]UserValidationRule)(unsafe.Pointer(&in.UserValidationRules))
+	out.ExternalClaimsSources = *(*[]ExternalClaimsSource)(unsafe.Pointer(&in.ExternalClaimsSources))
 	return nil
 }
 
@@ -350,6 +480,70 @@ func autoConvert_apiserver_PrefixedClaimOrExpression_To_v1_PrefixedClaimOrExpres
 // Convert_apiserver_PrefixedClaimOrExpression_To_v1_PrefixedClaimOrExpression is an autogenerated conversion function.
 func Convert_apiserver_PrefixedClaimOrExpression_To_v1_PrefixedClaimOrExpression(in *apiserver.PrefixedClaimOrExpression, out *PrefixedClaimOrExpression, s conversion.Scope) error {
 	return autoConvert_apiserver_PrefixedClaimOrExpression_To_v1_PrefixedClaimOrExpression(in, out, s)
+}
+
+func autoConvert_v1_SourceURL_To_apiserver_SourceURL(in *SourceURL, out *apiserver.SourceURL, s conversion.Scope) error {
+	out.Hostname = (*string)(unsafe.Pointer(in.Hostname))
+	out.PathExpression = (*string)(unsafe.Pointer(in.PathExpression))
+	return nil
+}
+
+// Convert_v1_SourceURL_To_apiserver_SourceURL is an autogenerated conversion function.
+func Convert_v1_SourceURL_To_apiserver_SourceURL(in *SourceURL, out *apiserver.SourceURL, s conversion.Scope) error {
+	return autoConvert_v1_SourceURL_To_apiserver_SourceURL(in, out, s)
+}
+
+func autoConvert_apiserver_SourceURL_To_v1_SourceURL(in *apiserver.SourceURL, out *SourceURL, s conversion.Scope) error {
+	out.Hostname = (*string)(unsafe.Pointer(in.Hostname))
+	out.PathExpression = (*string)(unsafe.Pointer(in.PathExpression))
+	return nil
+}
+
+// Convert_apiserver_SourceURL_To_v1_SourceURL is an autogenerated conversion function.
+func Convert_apiserver_SourceURL_To_v1_SourceURL(in *apiserver.SourceURL, out *SourceURL, s conversion.Scope) error {
+	return autoConvert_apiserver_SourceURL_To_v1_SourceURL(in, out, s)
+}
+
+func autoConvert_v1_SourcedClaimMapping_To_apiserver_SourcedClaimMapping(in *SourcedClaimMapping, out *apiserver.SourcedClaimMapping, s conversion.Scope) error {
+	out.Name = (*string)(unsafe.Pointer(in.Name))
+	out.Expression = (*string)(unsafe.Pointer(in.Expression))
+	return nil
+}
+
+// Convert_v1_SourcedClaimMapping_To_apiserver_SourcedClaimMapping is an autogenerated conversion function.
+func Convert_v1_SourcedClaimMapping_To_apiserver_SourcedClaimMapping(in *SourcedClaimMapping, out *apiserver.SourcedClaimMapping, s conversion.Scope) error {
+	return autoConvert_v1_SourcedClaimMapping_To_apiserver_SourcedClaimMapping(in, out, s)
+}
+
+func autoConvert_apiserver_SourcedClaimMapping_To_v1_SourcedClaimMapping(in *apiserver.SourcedClaimMapping, out *SourcedClaimMapping, s conversion.Scope) error {
+	out.Name = (*string)(unsafe.Pointer(in.Name))
+	out.Expression = (*string)(unsafe.Pointer(in.Expression))
+	return nil
+}
+
+// Convert_apiserver_SourcedClaimMapping_To_v1_SourcedClaimMapping is an autogenerated conversion function.
+func Convert_apiserver_SourcedClaimMapping_To_v1_SourcedClaimMapping(in *apiserver.SourcedClaimMapping, out *SourcedClaimMapping, s conversion.Scope) error {
+	return autoConvert_apiserver_SourcedClaimMapping_To_v1_SourcedClaimMapping(in, out, s)
+}
+
+func autoConvert_v1_TLS_To_apiserver_TLS(in *TLS, out *apiserver.TLS, s conversion.Scope) error {
+	out.CertificateAuthority = (*string)(unsafe.Pointer(in.CertificateAuthority))
+	return nil
+}
+
+// Convert_v1_TLS_To_apiserver_TLS is an autogenerated conversion function.
+func Convert_v1_TLS_To_apiserver_TLS(in *TLS, out *apiserver.TLS, s conversion.Scope) error {
+	return autoConvert_v1_TLS_To_apiserver_TLS(in, out, s)
+}
+
+func autoConvert_apiserver_TLS_To_v1_TLS(in *apiserver.TLS, out *TLS, s conversion.Scope) error {
+	out.CertificateAuthority = (*string)(unsafe.Pointer(in.CertificateAuthority))
+	return nil
+}
+
+// Convert_apiserver_TLS_To_v1_TLS is an autogenerated conversion function.
+func Convert_apiserver_TLS_To_v1_TLS(in *apiserver.TLS, out *TLS, s conversion.Scope) error {
+	return autoConvert_apiserver_TLS_To_v1_TLS(in, out, s)
 }
 
 func autoConvert_v1_UserValidationRule_To_apiserver_UserValidationRule(in *UserValidationRule, out *apiserver.UserValidationRule, s conversion.Scope) error {

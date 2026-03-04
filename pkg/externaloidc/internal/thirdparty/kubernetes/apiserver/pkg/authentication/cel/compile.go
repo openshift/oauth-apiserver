@@ -38,8 +38,9 @@ import (
 )
 
 const (
-	claimsVarName = "claims"
-	userVarName   = "user"
+	claimsVarName   = "claims"
+	userVarName     = "user"
+	responseVarName = "response"
 )
 
 // compiler implements the Compiler interface.
@@ -73,6 +74,12 @@ func (c compiler) CompileClaimsExpression(expressionAccessor ExpressionAccessor)
 // The user CEL variable is available to the expression.
 func (c compiler) CompileUserExpression(expressionAccessor ExpressionAccessor) (CompilationResult, error) {
 	return c.compile(expressionAccessor, userVarName)
+}
+
+// CompileExternalSourceExpression compiles the given expressionAccessor into a CEL program that can be evaluated.
+// The response CEL variable is available to the expression.
+func (c compiler) CompileExternalSourceExpression(expressionAccessor ExpressionAccessor) (CompilationResult, error) {
+	return c.compile(expressionAccessor, responseVarName)
 }
 
 func (c compiler) compile(expressionAccessor ExpressionAccessor, envVarName string) (CompilationResult, error) {
@@ -163,10 +170,12 @@ func mustBuildEnvs(baseEnv *environment.EnvSet) map[string]*environment.EnvSet {
 
 	userType := buildUserType()
 	claimsType := apiservercel.NewMapType(apiservercel.StringType, apiservercel.AnyType, -1)
+	responseType := apiservercel.NewMapType(apiservercel.StringType, apiservercel.DynType, -1)
 
 	envs := make(map[string]*environment.EnvSet, 2) // build two environments, one for claims and one for user
 	envs[claimsVarName] = buildEnvSet([]cel.EnvOption{cel.Variable(claimsVarName, claimsType.CelType())}, []*apiservercel.DeclType{claimsType})
 	envs[userVarName] = buildEnvSet([]cel.EnvOption{cel.Variable(userVarName, userType.CelType())}, []*apiservercel.DeclType{userType})
+	envs[responseVarName] = buildEnvSet([]cel.EnvOption{cel.Variable(responseVarName, responseType.CelType())}, []*apiservercel.DeclType{responseType})
 
 	return envs
 }
