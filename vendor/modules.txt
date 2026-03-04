@@ -1620,6 +1620,7 @@ k8s.io/kubernetes/pkg/api/legacyscheme
 k8s.io/kubernetes/pkg/apis/authentication
 k8s.io/kubernetes/pkg/apis/authentication/v1
 k8s.io/kubernetes/pkg/registry/authentication/tokenreview
+k8s.io/kubernetes/pkg/util/filesystem
 # k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 ## explicit; go 1.18
 k8s.io/utils/buffer
