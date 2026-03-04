@@ -14,6 +14,7 @@ import (
 	"github.com/openshift/library-go/pkg/serviceability"
 
 	oauth_apiserver "github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver"
+	externaloidccmd "github.com/openshift/oauth-apiserver/pkg/externaloidc/cmd"
 	"github.com/openshift/oauth-apiserver/pkg/version"
 )
 
@@ -47,6 +48,7 @@ func NewOAuthAPIServerCommand() *cobra.Command {
 	}
 	start := oauth_apiserver.NewOAuthAPIServerCommand("start", os.Stdout)
 	cmd.AddCommand(start)
+	cmd.AddCommand(externaloidccmd.NewExternalOIDCCommand())
 
 	return cmd
 }
