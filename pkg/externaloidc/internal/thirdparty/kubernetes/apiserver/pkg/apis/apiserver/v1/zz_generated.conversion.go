@@ -21,46 +21,6 @@ func init() {
 // RegisterConversions adds conversion functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterConversions(s *runtime.Scheme) error {
-	if err := s.AddGeneratedConversionFunc((*AdmissionConfiguration)(nil), (*apiserver.AdmissionConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_AdmissionConfiguration_To_apiserver_AdmissionConfiguration(a.(*AdmissionConfiguration), b.(*apiserver.AdmissionConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.AdmissionConfiguration)(nil), (*AdmissionConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_AdmissionConfiguration_To_v1_AdmissionConfiguration(a.(*apiserver.AdmissionConfiguration), b.(*AdmissionConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*AdmissionPluginConfiguration)(nil), (*apiserver.AdmissionPluginConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_AdmissionPluginConfiguration_To_apiserver_AdmissionPluginConfiguration(a.(*AdmissionPluginConfiguration), b.(*apiserver.AdmissionPluginConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.AdmissionPluginConfiguration)(nil), (*AdmissionPluginConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_AdmissionPluginConfiguration_To_v1_AdmissionPluginConfiguration(a.(*apiserver.AdmissionPluginConfiguration), b.(*AdmissionPluginConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*AnonymousAuthCondition)(nil), (*apiserver.AnonymousAuthCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_AnonymousAuthCondition_To_apiserver_AnonymousAuthCondition(a.(*AnonymousAuthCondition), b.(*apiserver.AnonymousAuthCondition), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.AnonymousAuthCondition)(nil), (*AnonymousAuthCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_AnonymousAuthCondition_To_v1_AnonymousAuthCondition(a.(*apiserver.AnonymousAuthCondition), b.(*AnonymousAuthCondition), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*AnonymousAuthConfig)(nil), (*apiserver.AnonymousAuthConfig)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_AnonymousAuthConfig_To_apiserver_AnonymousAuthConfig(a.(*AnonymousAuthConfig), b.(*apiserver.AnonymousAuthConfig), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.AnonymousAuthConfig)(nil), (*AnonymousAuthConfig)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_AnonymousAuthConfig_To_v1_AnonymousAuthConfig(a.(*apiserver.AnonymousAuthConfig), b.(*AnonymousAuthConfig), scope)
-	}); err != nil {
-		return err
-	}
 	if err := s.AddGeneratedConversionFunc((*AuthenticationConfiguration)(nil), (*apiserver.AuthenticationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_v1_AuthenticationConfiguration_To_apiserver_AuthenticationConfiguration(a.(*AuthenticationConfiguration), b.(*apiserver.AuthenticationConfiguration), scope)
 	}); err != nil {
@@ -68,26 +28,6 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}
 	if err := s.AddGeneratedConversionFunc((*apiserver.AuthenticationConfiguration)(nil), (*AuthenticationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_apiserver_AuthenticationConfiguration_To_v1_AuthenticationConfiguration(a.(*apiserver.AuthenticationConfiguration), b.(*AuthenticationConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*AuthorizationConfiguration)(nil), (*apiserver.AuthorizationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_AuthorizationConfiguration_To_apiserver_AuthorizationConfiguration(a.(*AuthorizationConfiguration), b.(*apiserver.AuthorizationConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.AuthorizationConfiguration)(nil), (*AuthorizationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_AuthorizationConfiguration_To_v1_AuthorizationConfiguration(a.(*apiserver.AuthorizationConfiguration), b.(*AuthorizationConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*AuthorizerConfiguration)(nil), (*apiserver.AuthorizerConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_AuthorizerConfiguration_To_apiserver_AuthorizerConfiguration(a.(*AuthorizerConfiguration), b.(*apiserver.AuthorizerConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.AuthorizerConfiguration)(nil), (*AuthorizerConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_AuthorizerConfiguration_To_v1_AuthorizerConfiguration(a.(*apiserver.AuthorizerConfiguration), b.(*AuthorizerConfiguration), scope)
 	}); err != nil {
 		return err
 	}
@@ -161,16 +101,6 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*TracingConfiguration)(nil), (*apiserver.TracingConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_TracingConfiguration_To_apiserver_TracingConfiguration(a.(*TracingConfiguration), b.(*apiserver.TracingConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.TracingConfiguration)(nil), (*TracingConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_TracingConfiguration_To_v1_TracingConfiguration(a.(*apiserver.TracingConfiguration), b.(*TracingConfiguration), scope)
-	}); err != nil {
-		return err
-	}
 	if err := s.AddGeneratedConversionFunc((*UserValidationRule)(nil), (*apiserver.UserValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_v1_UserValidationRule_To_apiserver_UserValidationRule(a.(*UserValidationRule), b.(*apiserver.UserValidationRule), scope)
 	}); err != nil {
@@ -181,123 +111,7 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*WebhookConfiguration)(nil), (*apiserver.WebhookConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_WebhookConfiguration_To_apiserver_WebhookConfiguration(a.(*WebhookConfiguration), b.(*apiserver.WebhookConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.WebhookConfiguration)(nil), (*WebhookConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_WebhookConfiguration_To_v1_WebhookConfiguration(a.(*apiserver.WebhookConfiguration), b.(*WebhookConfiguration), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*WebhookConnectionInfo)(nil), (*apiserver.WebhookConnectionInfo)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_WebhookConnectionInfo_To_apiserver_WebhookConnectionInfo(a.(*WebhookConnectionInfo), b.(*apiserver.WebhookConnectionInfo), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.WebhookConnectionInfo)(nil), (*WebhookConnectionInfo)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_WebhookConnectionInfo_To_v1_WebhookConnectionInfo(a.(*apiserver.WebhookConnectionInfo), b.(*WebhookConnectionInfo), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*WebhookMatchCondition)(nil), (*apiserver.WebhookMatchCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1_WebhookMatchCondition_To_apiserver_WebhookMatchCondition(a.(*WebhookMatchCondition), b.(*apiserver.WebhookMatchCondition), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*apiserver.WebhookMatchCondition)(nil), (*WebhookMatchCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_apiserver_WebhookMatchCondition_To_v1_WebhookMatchCondition(a.(*apiserver.WebhookMatchCondition), b.(*WebhookMatchCondition), scope)
-	}); err != nil {
-		return err
-	}
 	return nil
-}
-
-func autoConvert_v1_AdmissionConfiguration_To_apiserver_AdmissionConfiguration(in *AdmissionConfiguration, out *apiserver.AdmissionConfiguration, s conversion.Scope) error {
-	out.Plugins = *(*[]apiserver.AdmissionPluginConfiguration)(unsafe.Pointer(&in.Plugins))
-	return nil
-}
-
-// Convert_v1_AdmissionConfiguration_To_apiserver_AdmissionConfiguration is an autogenerated conversion function.
-func Convert_v1_AdmissionConfiguration_To_apiserver_AdmissionConfiguration(in *AdmissionConfiguration, out *apiserver.AdmissionConfiguration, s conversion.Scope) error {
-	return autoConvert_v1_AdmissionConfiguration_To_apiserver_AdmissionConfiguration(in, out, s)
-}
-
-func autoConvert_apiserver_AdmissionConfiguration_To_v1_AdmissionConfiguration(in *apiserver.AdmissionConfiguration, out *AdmissionConfiguration, s conversion.Scope) error {
-	out.Plugins = *(*[]AdmissionPluginConfiguration)(unsafe.Pointer(&in.Plugins))
-	return nil
-}
-
-// Convert_apiserver_AdmissionConfiguration_To_v1_AdmissionConfiguration is an autogenerated conversion function.
-func Convert_apiserver_AdmissionConfiguration_To_v1_AdmissionConfiguration(in *apiserver.AdmissionConfiguration, out *AdmissionConfiguration, s conversion.Scope) error {
-	return autoConvert_apiserver_AdmissionConfiguration_To_v1_AdmissionConfiguration(in, out, s)
-}
-
-func autoConvert_v1_AdmissionPluginConfiguration_To_apiserver_AdmissionPluginConfiguration(in *AdmissionPluginConfiguration, out *apiserver.AdmissionPluginConfiguration, s conversion.Scope) error {
-	out.Name = in.Name
-	out.Path = in.Path
-	out.Configuration = (*runtime.Unknown)(unsafe.Pointer(in.Configuration))
-	return nil
-}
-
-// Convert_v1_AdmissionPluginConfiguration_To_apiserver_AdmissionPluginConfiguration is an autogenerated conversion function.
-func Convert_v1_AdmissionPluginConfiguration_To_apiserver_AdmissionPluginConfiguration(in *AdmissionPluginConfiguration, out *apiserver.AdmissionPluginConfiguration, s conversion.Scope) error {
-	return autoConvert_v1_AdmissionPluginConfiguration_To_apiserver_AdmissionPluginConfiguration(in, out, s)
-}
-
-func autoConvert_apiserver_AdmissionPluginConfiguration_To_v1_AdmissionPluginConfiguration(in *apiserver.AdmissionPluginConfiguration, out *AdmissionPluginConfiguration, s conversion.Scope) error {
-	out.Name = in.Name
-	out.Path = in.Path
-	out.Configuration = (*runtime.Unknown)(unsafe.Pointer(in.Configuration))
-	return nil
-}
-
-// Convert_apiserver_AdmissionPluginConfiguration_To_v1_AdmissionPluginConfiguration is an autogenerated conversion function.
-func Convert_apiserver_AdmissionPluginConfiguration_To_v1_AdmissionPluginConfiguration(in *apiserver.AdmissionPluginConfiguration, out *AdmissionPluginConfiguration, s conversion.Scope) error {
-	return autoConvert_apiserver_AdmissionPluginConfiguration_To_v1_AdmissionPluginConfiguration(in, out, s)
-}
-
-func autoConvert_v1_AnonymousAuthCondition_To_apiserver_AnonymousAuthCondition(in *AnonymousAuthCondition, out *apiserver.AnonymousAuthCondition, s conversion.Scope) error {
-	out.Path = in.Path
-	return nil
-}
-
-// Convert_v1_AnonymousAuthCondition_To_apiserver_AnonymousAuthCondition is an autogenerated conversion function.
-func Convert_v1_AnonymousAuthCondition_To_apiserver_AnonymousAuthCondition(in *AnonymousAuthCondition, out *apiserver.AnonymousAuthCondition, s conversion.Scope) error {
-	return autoConvert_v1_AnonymousAuthCondition_To_apiserver_AnonymousAuthCondition(in, out, s)
-}
-
-func autoConvert_apiserver_AnonymousAuthCondition_To_v1_AnonymousAuthCondition(in *apiserver.AnonymousAuthCondition, out *AnonymousAuthCondition, s conversion.Scope) error {
-	out.Path = in.Path
-	return nil
-}
-
-// Convert_apiserver_AnonymousAuthCondition_To_v1_AnonymousAuthCondition is an autogenerated conversion function.
-func Convert_apiserver_AnonymousAuthCondition_To_v1_AnonymousAuthCondition(in *apiserver.AnonymousAuthCondition, out *AnonymousAuthCondition, s conversion.Scope) error {
-	return autoConvert_apiserver_AnonymousAuthCondition_To_v1_AnonymousAuthCondition(in, out, s)
-}
-
-func autoConvert_v1_AnonymousAuthConfig_To_apiserver_AnonymousAuthConfig(in *AnonymousAuthConfig, out *apiserver.AnonymousAuthConfig, s conversion.Scope) error {
-	out.Enabled = in.Enabled
-	out.Conditions = *(*[]apiserver.AnonymousAuthCondition)(unsafe.Pointer(&in.Conditions))
-	return nil
-}
-
-// Convert_v1_AnonymousAuthConfig_To_apiserver_AnonymousAuthConfig is an autogenerated conversion function.
-func Convert_v1_AnonymousAuthConfig_To_apiserver_AnonymousAuthConfig(in *AnonymousAuthConfig, out *apiserver.AnonymousAuthConfig, s conversion.Scope) error {
-	return autoConvert_v1_AnonymousAuthConfig_To_apiserver_AnonymousAuthConfig(in, out, s)
-}
-
-func autoConvert_apiserver_AnonymousAuthConfig_To_v1_AnonymousAuthConfig(in *apiserver.AnonymousAuthConfig, out *AnonymousAuthConfig, s conversion.Scope) error {
-	out.Enabled = in.Enabled
-	out.Conditions = *(*[]AnonymousAuthCondition)(unsafe.Pointer(&in.Conditions))
-	return nil
-}
-
-// Convert_apiserver_AnonymousAuthConfig_To_v1_AnonymousAuthConfig is an autogenerated conversion function.
-func Convert_apiserver_AnonymousAuthConfig_To_v1_AnonymousAuthConfig(in *apiserver.AnonymousAuthConfig, out *AnonymousAuthConfig, s conversion.Scope) error {
-	return autoConvert_apiserver_AnonymousAuthConfig_To_v1_AnonymousAuthConfig(in, out, s)
 }
 
 func autoConvert_v1_AuthenticationConfiguration_To_apiserver_AuthenticationConfiguration(in *AuthenticationConfiguration, out *apiserver.AuthenticationConfiguration, s conversion.Scope) error {
@@ -312,7 +126,6 @@ func autoConvert_v1_AuthenticationConfiguration_To_apiserver_AuthenticationConfi
 	} else {
 		out.JWT = nil
 	}
-	out.Anonymous = (*apiserver.AnonymousAuthConfig)(unsafe.Pointer(in.Anonymous))
 	return nil
 }
 
@@ -333,93 +146,12 @@ func autoConvert_apiserver_AuthenticationConfiguration_To_v1_AuthenticationConfi
 	} else {
 		out.JWT = nil
 	}
-	out.Anonymous = (*AnonymousAuthConfig)(unsafe.Pointer(in.Anonymous))
 	return nil
 }
 
 // Convert_apiserver_AuthenticationConfiguration_To_v1_AuthenticationConfiguration is an autogenerated conversion function.
 func Convert_apiserver_AuthenticationConfiguration_To_v1_AuthenticationConfiguration(in *apiserver.AuthenticationConfiguration, out *AuthenticationConfiguration, s conversion.Scope) error {
 	return autoConvert_apiserver_AuthenticationConfiguration_To_v1_AuthenticationConfiguration(in, out, s)
-}
-
-func autoConvert_v1_AuthorizationConfiguration_To_apiserver_AuthorizationConfiguration(in *AuthorizationConfiguration, out *apiserver.AuthorizationConfiguration, s conversion.Scope) error {
-	if in.Authorizers != nil {
-		in, out := &in.Authorizers, &out.Authorizers
-		*out = make([]apiserver.AuthorizerConfiguration, len(*in))
-		for i := range *in {
-			if err := Convert_v1_AuthorizerConfiguration_To_apiserver_AuthorizerConfiguration(&(*in)[i], &(*out)[i], s); err != nil {
-				return err
-			}
-		}
-	} else {
-		out.Authorizers = nil
-	}
-	return nil
-}
-
-// Convert_v1_AuthorizationConfiguration_To_apiserver_AuthorizationConfiguration is an autogenerated conversion function.
-func Convert_v1_AuthorizationConfiguration_To_apiserver_AuthorizationConfiguration(in *AuthorizationConfiguration, out *apiserver.AuthorizationConfiguration, s conversion.Scope) error {
-	return autoConvert_v1_AuthorizationConfiguration_To_apiserver_AuthorizationConfiguration(in, out, s)
-}
-
-func autoConvert_apiserver_AuthorizationConfiguration_To_v1_AuthorizationConfiguration(in *apiserver.AuthorizationConfiguration, out *AuthorizationConfiguration, s conversion.Scope) error {
-	if in.Authorizers != nil {
-		in, out := &in.Authorizers, &out.Authorizers
-		*out = make([]AuthorizerConfiguration, len(*in))
-		for i := range *in {
-			if err := Convert_apiserver_AuthorizerConfiguration_To_v1_AuthorizerConfiguration(&(*in)[i], &(*out)[i], s); err != nil {
-				return err
-			}
-		}
-	} else {
-		out.Authorizers = nil
-	}
-	return nil
-}
-
-// Convert_apiserver_AuthorizationConfiguration_To_v1_AuthorizationConfiguration is an autogenerated conversion function.
-func Convert_apiserver_AuthorizationConfiguration_To_v1_AuthorizationConfiguration(in *apiserver.AuthorizationConfiguration, out *AuthorizationConfiguration, s conversion.Scope) error {
-	return autoConvert_apiserver_AuthorizationConfiguration_To_v1_AuthorizationConfiguration(in, out, s)
-}
-
-func autoConvert_v1_AuthorizerConfiguration_To_apiserver_AuthorizerConfiguration(in *AuthorizerConfiguration, out *apiserver.AuthorizerConfiguration, s conversion.Scope) error {
-	out.Type = apiserver.AuthorizerType(in.Type)
-	out.Name = in.Name
-	if in.Webhook != nil {
-		in, out := &in.Webhook, &out.Webhook
-		*out = new(apiserver.WebhookConfiguration)
-		if err := Convert_v1_WebhookConfiguration_To_apiserver_WebhookConfiguration(*in, *out, s); err != nil {
-			return err
-		}
-	} else {
-		out.Webhook = nil
-	}
-	return nil
-}
-
-// Convert_v1_AuthorizerConfiguration_To_apiserver_AuthorizerConfiguration is an autogenerated conversion function.
-func Convert_v1_AuthorizerConfiguration_To_apiserver_AuthorizerConfiguration(in *AuthorizerConfiguration, out *apiserver.AuthorizerConfiguration, s conversion.Scope) error {
-	return autoConvert_v1_AuthorizerConfiguration_To_apiserver_AuthorizerConfiguration(in, out, s)
-}
-
-func autoConvert_apiserver_AuthorizerConfiguration_To_v1_AuthorizerConfiguration(in *apiserver.AuthorizerConfiguration, out *AuthorizerConfiguration, s conversion.Scope) error {
-	out.Type = string(in.Type)
-	out.Name = in.Name
-	if in.Webhook != nil {
-		in, out := &in.Webhook, &out.Webhook
-		*out = new(WebhookConfiguration)
-		if err := Convert_apiserver_WebhookConfiguration_To_v1_WebhookConfiguration(*in, *out, s); err != nil {
-			return err
-		}
-	} else {
-		out.Webhook = nil
-	}
-	return nil
-}
-
-// Convert_apiserver_AuthorizerConfiguration_To_v1_AuthorizerConfiguration is an autogenerated conversion function.
-func Convert_apiserver_AuthorizerConfiguration_To_v1_AuthorizerConfiguration(in *apiserver.AuthorizerConfiguration, out *AuthorizerConfiguration, s conversion.Scope) error {
-	return autoConvert_apiserver_AuthorizerConfiguration_To_v1_AuthorizerConfiguration(in, out, s)
 }
 
 func autoConvert_v1_ClaimMappings_To_apiserver_ClaimMappings(in *ClaimMappings, out *apiserver.ClaimMappings, s conversion.Scope) error {
@@ -538,7 +270,6 @@ func autoConvert_v1_Issuer_To_apiserver_Issuer(in *Issuer, out *apiserver.Issuer
 	out.CertificateAuthority = in.CertificateAuthority
 	out.Audiences = *(*[]string)(unsafe.Pointer(&in.Audiences))
 	out.AudienceMatchPolicy = apiserver.AudienceMatchPolicyType(in.AudienceMatchPolicy)
-	out.EgressSelectorType = apiserver.EgressSelectorType(in.EgressSelectorType)
 	return nil
 }
 
@@ -555,7 +286,6 @@ func autoConvert_apiserver_Issuer_To_v1_Issuer(in *apiserver.Issuer, out *Issuer
 	out.CertificateAuthority = in.CertificateAuthority
 	out.Audiences = *(*[]string)(unsafe.Pointer(&in.Audiences))
 	out.AudienceMatchPolicy = AudienceMatchPolicyType(in.AudienceMatchPolicy)
-	out.EgressSelectorType = EgressSelectorType(in.EgressSelectorType)
 	return nil
 }
 
@@ -622,26 +352,6 @@ func Convert_apiserver_PrefixedClaimOrExpression_To_v1_PrefixedClaimOrExpression
 	return autoConvert_apiserver_PrefixedClaimOrExpression_To_v1_PrefixedClaimOrExpression(in, out, s)
 }
 
-func autoConvert_v1_TracingConfiguration_To_apiserver_TracingConfiguration(in *TracingConfiguration, out *apiserver.TracingConfiguration, s conversion.Scope) error {
-	out.TracingConfiguration = in.TracingConfiguration
-	return nil
-}
-
-// Convert_v1_TracingConfiguration_To_apiserver_TracingConfiguration is an autogenerated conversion function.
-func Convert_v1_TracingConfiguration_To_apiserver_TracingConfiguration(in *TracingConfiguration, out *apiserver.TracingConfiguration, s conversion.Scope) error {
-	return autoConvert_v1_TracingConfiguration_To_apiserver_TracingConfiguration(in, out, s)
-}
-
-func autoConvert_apiserver_TracingConfiguration_To_v1_TracingConfiguration(in *apiserver.TracingConfiguration, out *TracingConfiguration, s conversion.Scope) error {
-	out.TracingConfiguration = in.TracingConfiguration
-	return nil
-}
-
-// Convert_apiserver_TracingConfiguration_To_v1_TracingConfiguration is an autogenerated conversion function.
-func Convert_apiserver_TracingConfiguration_To_v1_TracingConfiguration(in *apiserver.TracingConfiguration, out *TracingConfiguration, s conversion.Scope) error {
-	return autoConvert_apiserver_TracingConfiguration_To_v1_TracingConfiguration(in, out, s)
-}
-
 func autoConvert_v1_UserValidationRule_To_apiserver_UserValidationRule(in *UserValidationRule, out *apiserver.UserValidationRule, s conversion.Scope) error {
 	out.Expression = in.Expression
 	out.Message = in.Message
@@ -662,96 +372,4 @@ func autoConvert_apiserver_UserValidationRule_To_v1_UserValidationRule(in *apise
 // Convert_apiserver_UserValidationRule_To_v1_UserValidationRule is an autogenerated conversion function.
 func Convert_apiserver_UserValidationRule_To_v1_UserValidationRule(in *apiserver.UserValidationRule, out *UserValidationRule, s conversion.Scope) error {
 	return autoConvert_apiserver_UserValidationRule_To_v1_UserValidationRule(in, out, s)
-}
-
-func autoConvert_v1_WebhookConfiguration_To_apiserver_WebhookConfiguration(in *WebhookConfiguration, out *apiserver.WebhookConfiguration, s conversion.Scope) error {
-	out.AuthorizedTTL = in.AuthorizedTTL
-	if err := metav1.Convert_Pointer_bool_To_bool(&in.CacheAuthorizedRequests, &out.CacheAuthorizedRequests, s); err != nil {
-		return err
-	}
-	out.UnauthorizedTTL = in.UnauthorizedTTL
-	if err := metav1.Convert_Pointer_bool_To_bool(&in.CacheUnauthorizedRequests, &out.CacheUnauthorizedRequests, s); err != nil {
-		return err
-	}
-	out.Timeout = in.Timeout
-	out.SubjectAccessReviewVersion = in.SubjectAccessReviewVersion
-	out.MatchConditionSubjectAccessReviewVersion = in.MatchConditionSubjectAccessReviewVersion
-	out.FailurePolicy = in.FailurePolicy
-	if err := Convert_v1_WebhookConnectionInfo_To_apiserver_WebhookConnectionInfo(&in.ConnectionInfo, &out.ConnectionInfo, s); err != nil {
-		return err
-	}
-	out.MatchConditions = *(*[]apiserver.WebhookMatchCondition)(unsafe.Pointer(&in.MatchConditions))
-	return nil
-}
-
-// Convert_v1_WebhookConfiguration_To_apiserver_WebhookConfiguration is an autogenerated conversion function.
-func Convert_v1_WebhookConfiguration_To_apiserver_WebhookConfiguration(in *WebhookConfiguration, out *apiserver.WebhookConfiguration, s conversion.Scope) error {
-	return autoConvert_v1_WebhookConfiguration_To_apiserver_WebhookConfiguration(in, out, s)
-}
-
-func autoConvert_apiserver_WebhookConfiguration_To_v1_WebhookConfiguration(in *apiserver.WebhookConfiguration, out *WebhookConfiguration, s conversion.Scope) error {
-	out.AuthorizedTTL = in.AuthorizedTTL
-	if err := metav1.Convert_bool_To_Pointer_bool(&in.CacheAuthorizedRequests, &out.CacheAuthorizedRequests, s); err != nil {
-		return err
-	}
-	out.UnauthorizedTTL = in.UnauthorizedTTL
-	if err := metav1.Convert_bool_To_Pointer_bool(&in.CacheUnauthorizedRequests, &out.CacheUnauthorizedRequests, s); err != nil {
-		return err
-	}
-	out.Timeout = in.Timeout
-	out.SubjectAccessReviewVersion = in.SubjectAccessReviewVersion
-	out.MatchConditionSubjectAccessReviewVersion = in.MatchConditionSubjectAccessReviewVersion
-	out.FailurePolicy = in.FailurePolicy
-	if err := Convert_apiserver_WebhookConnectionInfo_To_v1_WebhookConnectionInfo(&in.ConnectionInfo, &out.ConnectionInfo, s); err != nil {
-		return err
-	}
-	out.MatchConditions = *(*[]WebhookMatchCondition)(unsafe.Pointer(&in.MatchConditions))
-	return nil
-}
-
-// Convert_apiserver_WebhookConfiguration_To_v1_WebhookConfiguration is an autogenerated conversion function.
-func Convert_apiserver_WebhookConfiguration_To_v1_WebhookConfiguration(in *apiserver.WebhookConfiguration, out *WebhookConfiguration, s conversion.Scope) error {
-	return autoConvert_apiserver_WebhookConfiguration_To_v1_WebhookConfiguration(in, out, s)
-}
-
-func autoConvert_v1_WebhookConnectionInfo_To_apiserver_WebhookConnectionInfo(in *WebhookConnectionInfo, out *apiserver.WebhookConnectionInfo, s conversion.Scope) error {
-	out.Type = in.Type
-	out.KubeConfigFile = (*string)(unsafe.Pointer(in.KubeConfigFile))
-	return nil
-}
-
-// Convert_v1_WebhookConnectionInfo_To_apiserver_WebhookConnectionInfo is an autogenerated conversion function.
-func Convert_v1_WebhookConnectionInfo_To_apiserver_WebhookConnectionInfo(in *WebhookConnectionInfo, out *apiserver.WebhookConnectionInfo, s conversion.Scope) error {
-	return autoConvert_v1_WebhookConnectionInfo_To_apiserver_WebhookConnectionInfo(in, out, s)
-}
-
-func autoConvert_apiserver_WebhookConnectionInfo_To_v1_WebhookConnectionInfo(in *apiserver.WebhookConnectionInfo, out *WebhookConnectionInfo, s conversion.Scope) error {
-	out.Type = in.Type
-	out.KubeConfigFile = (*string)(unsafe.Pointer(in.KubeConfigFile))
-	return nil
-}
-
-// Convert_apiserver_WebhookConnectionInfo_To_v1_WebhookConnectionInfo is an autogenerated conversion function.
-func Convert_apiserver_WebhookConnectionInfo_To_v1_WebhookConnectionInfo(in *apiserver.WebhookConnectionInfo, out *WebhookConnectionInfo, s conversion.Scope) error {
-	return autoConvert_apiserver_WebhookConnectionInfo_To_v1_WebhookConnectionInfo(in, out, s)
-}
-
-func autoConvert_v1_WebhookMatchCondition_To_apiserver_WebhookMatchCondition(in *WebhookMatchCondition, out *apiserver.WebhookMatchCondition, s conversion.Scope) error {
-	out.Expression = in.Expression
-	return nil
-}
-
-// Convert_v1_WebhookMatchCondition_To_apiserver_WebhookMatchCondition is an autogenerated conversion function.
-func Convert_v1_WebhookMatchCondition_To_apiserver_WebhookMatchCondition(in *WebhookMatchCondition, out *apiserver.WebhookMatchCondition, s conversion.Scope) error {
-	return autoConvert_v1_WebhookMatchCondition_To_apiserver_WebhookMatchCondition(in, out, s)
-}
-
-func autoConvert_apiserver_WebhookMatchCondition_To_v1_WebhookMatchCondition(in *apiserver.WebhookMatchCondition, out *WebhookMatchCondition, s conversion.Scope) error {
-	out.Expression = in.Expression
-	return nil
-}
-
-// Convert_apiserver_WebhookMatchCondition_To_v1_WebhookMatchCondition is an autogenerated conversion function.
-func Convert_apiserver_WebhookMatchCondition_To_v1_WebhookMatchCondition(in *apiserver.WebhookMatchCondition, out *WebhookMatchCondition, s conversion.Scope) error {
-	return autoConvert_apiserver_WebhookMatchCondition_To_v1_WebhookMatchCondition(in, out, s)
 }
