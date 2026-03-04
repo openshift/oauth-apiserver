@@ -54,11 +54,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/apis/apiserver"
 	"k8s.io/apiserver/pkg/authentication/user"
-	"k8s.io/apiserver/pkg/features"
 	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	"k8s.io/apiserver/pkg/server/egressselector"
-	utilfeature "k8s.io/apiserver/pkg/util/feature"
-	featuregatetesting "k8s.io/component-base/featuregate/testing"
 	"k8s.io/component-base/metrics/legacyregistry"
 	"k8s.io/component-base/metrics/testutil"
 	"k8s.io/klog/v2"
@@ -4657,8 +4654,6 @@ func TestUnmarshalClaim(t *testing.T) {
 }
 
 func TestJWKSMetricsKeySetError(t *testing.T) {
-	featuregatetesting.SetFeatureGateDuringTest(t, utilfeature.DefaultFeatureGate, features.StructuredAuthenticationConfigurationJWKSMetrics, true)
-
 	synchronizeTokenIDVerifierForTest = true
 	signingKey := loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256)
 	pubKeys := []*jose.JSONWebKey{
@@ -4812,7 +4807,6 @@ func TestJWKSMetricsKeySetError(t *testing.T) {
 }
 
 func TestJWKSMetrics(t *testing.T) {
-	featuregatetesting.SetFeatureGateDuringTest(t, utilfeature.DefaultFeatureGate, features.StructuredAuthenticationConfigurationJWKSMetrics, true)
 	ResetMetrics()
 
 	synchronizeTokenIDVerifierForTest = true

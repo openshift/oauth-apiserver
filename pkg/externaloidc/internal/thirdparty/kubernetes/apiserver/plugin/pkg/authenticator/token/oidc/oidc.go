@@ -8,7 +8,7 @@
 *
 * Modifications to this file will be tracked as separate commits that follow our
 * standard patch commit structure of UPSTREAM: <carry>: {message}.
-*/
+ */
 /*
 Copyright 2015 The Kubernetes Authors.
 
@@ -72,18 +72,14 @@ import (
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/cel"
 	"k8s.io/apiserver/pkg/cel/lazy"
-	"k8s.io/apiserver/pkg/features"
 	"k8s.io/apiserver/pkg/server/egressselector"
-	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	certutil "k8s.io/client-go/util/cert"
 	"k8s.io/klog/v2"
 )
 
-var (
-	// synchronizeTokenIDVerifierForTest should be set to true to force a
-	// wait until the token ID verifiers are ready.
-	synchronizeTokenIDVerifierForTest = false
-)
+// synchronizeTokenIDVerifierForTest should be set to true to force a
+// wait until the token ID verifiers are ready.
+var synchronizeTokenIDVerifierForTest = false
 
 const (
 	wellKnownEndpointPath = "/.well-known/openid-configuration"
@@ -446,30 +442,28 @@ func New(lifecycleCtx context.Context, opts Options) (AuthenticatorTokenWithHeal
 					return false, nil
 				}
 
-				if utilfeature.DefaultFeatureGate.Enabled(features.StructuredAuthenticationConfigurationJWKSMetrics) {
-					providerJSON := &struct {
-						JWKSURL string `json:"jwks_uri"`
-					}{}
+				providerJSON := &struct {
+					JWKSURL string `json:"jwks_uri"`
+				}{}
 
-					if err := provider.Claims(providerJSON); err != nil {
-						klog.Errorf("oidc authenticator: error getting JWKS URL: %v", err)
-						authn.healthCheck.Store(&errorHolder{err: err})
-						return false, nil
-					}
-					if len(providerJSON.JWKSURL) == 0 {
-						klog.Errorf("provider did not return JWKS URL")
-						authn.healthCheck.Store(&errorHolder{err: fmt.Errorf("provider did not return JWKS URL")})
-						return false, nil
-					}
-
-					clientWithJWKSMetrics := *client
-					clientWithJWKSMetrics.Transport = withMetricsRoundTripper(client.Transport, providerJSON.JWKSURL, issuerURL, opts.APIServerID, lifecycleCtx)
-					client = &clientWithJWKSMetrics
-
-					remoteKeySet := oidc.NewRemoteKeySet(oidc.ClientContext(lifecycleCtx, client), providerJSON.JWKSURL)
-					authn.setVerifier(&idTokenVerifier{oidc.NewVerifier(issuerURL, remoteKeySet, verifierConfig), audiences})
-					return true, nil
+				if err := provider.Claims(providerJSON); err != nil {
+					klog.Errorf("oidc authenticator: error getting JWKS URL: %v", err)
+					authn.healthCheck.Store(&errorHolder{err: err})
+					return false, nil
 				}
+				if len(providerJSON.JWKSURL) == 0 {
+					klog.Errorf("provider did not return JWKS URL")
+					authn.healthCheck.Store(&errorHolder{err: fmt.Errorf("provider did not return JWKS URL")})
+					return false, nil
+				}
+
+				clientWithJWKSMetrics := *client
+				clientWithJWKSMetrics.Transport = withMetricsRoundTripper(client.Transport, providerJSON.JWKSURL, issuerURL, opts.APIServerID, lifecycleCtx)
+				client = &clientWithJWKSMetrics
+
+				remoteKeySet := oidc.NewRemoteKeySet(oidc.ClientContext(lifecycleCtx, client), providerJSON.JWKSURL)
+				authn.setVerifier(&idTokenVerifier{oidc.NewVerifier(issuerURL, remoteKeySet, verifierConfig), audiences})
+				return true, nil
 
 				verifier := provider.Verifier(verifierConfig)
 				authn.setVerifier(&idTokenVerifier{verifier, audiences})
