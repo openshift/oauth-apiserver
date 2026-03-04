@@ -8,7 +8,7 @@
 *
 * Modifications to this file will be tracked as separate commits that follow our
 * standard patch commit structure of UPSTREAM: <carry>: {message}.
-*/
+ */
 /*
 Copyright 2023 The Kubernetes Authors.
 

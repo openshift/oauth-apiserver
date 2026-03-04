@@ -8,7 +8,7 @@
 *
 * Modifications to this file will be tracked as separate commits that follow our
 * standard patch commit structure of UPSTREAM: <carry>: {message}.
-*/
+ */
 /*
 Copyright 2023 The Kubernetes Authors.
 
@@ -39,12 +39,12 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
+	api "github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/apis/apiserver"
+	authenticationcel "github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/authentication/cel"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	api "github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/apis/apiserver"
-	authenticationcel "github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/authentication/cel"
 	authorizationcel "k8s.io/apiserver/pkg/authorization/cel"
 	certutil "k8s.io/client-go/util/cert"
 	"k8s.io/utils/ptr"

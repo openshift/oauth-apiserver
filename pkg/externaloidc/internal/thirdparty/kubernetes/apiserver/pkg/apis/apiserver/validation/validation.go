@@ -8,7 +8,7 @@
 *
 * Modifications to this file will be tracked as separate commits that follow our
 * standard patch commit structure of UPSTREAM: <carry>: {message}.
-*/
+ */
 /*
 Copyright 2023 The Kubernetes Authors.
 
@@ -40,13 +40,13 @@ import (
 	"github.com/google/cel-go/common/operators"
 	exprpb "google.golang.org/genproto/googleapis/api/expr/v1alpha1"
 
+	api "github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/apis/apiserver"
+	authenticationcel "github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/authentication/cel"
 	v1 "k8s.io/api/authorization/v1"
 	"k8s.io/api/authorization/v1beta1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	utilvalidation "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	api "github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/apis/apiserver"
-	authenticationcel "github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/authentication/cel"
 	authorizationcel "k8s.io/apiserver/pkg/authorization/cel"
 	"k8s.io/apiserver/pkg/cel"
 	"k8s.io/client-go/util/cert"
@@ -187,7 +187,7 @@ func validateURL(issuerURL string, disallowedIssuers sets.Set[string], fldPath *
 
 // Copied from https://github.com/kubernetes/kubernetes/blob/7ea5b88209020a07cc96717c6e8cb622feebdd4a/staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation_encryption.go#L37
 const (
-	atLeastOneRequiredErrFmt       = "at least one %s is required"
+	atLeastOneRequiredErrFmt = "at least one %s is required"
 )
 
 func validateAudiences(audiences []string, audienceMatchPolicy api.AudienceMatchPolicyType, fldPath, audienceMatchPolicyFldPath *field.Path) field.ErrorList {
