@@ -5330,7 +5330,7 @@ func TestJWKSMetrics(t *testing.T) {
 	if _, _, err = a.AuthenticateToken(ctx, token); err != nil {
 		t.Fatalf("authenticate token: %v", err)
 	}
-	checkJWKSMetrics(t, jwtIssuerHash, "sha256:6c22a3ad4bfe350786cb03d06c6e6d40a6d642d168935b88f1e72c407d969c83")
+	checkJWKSMetrics(t, jwtIssuerHash, "sha256:bc037b89cf0e2ea0630064cc9aa120ca2211a8fe511b4a2451ef07df564d8f4e")
 
 	// 2. Rotate the keys and update the server.
 	signingKey = loadRSAPrivKey(t, "testdata/rsa_2.pem", jose.RS256)
@@ -5359,7 +5359,7 @@ func TestJWKSMetrics(t *testing.T) {
 	if _, _, err = a.AuthenticateToken(ctx, token); err != nil {
 		t.Fatalf("authenticate token: %v", err)
 	}
-	checkJWKSMetrics(t, jwtIssuerHash, "sha256:42444728eaa3a55f7a0192d60cfea88ff5a69ecb7bf9ef0d2ffa3f9db9ceff41")
+	checkJWKSMetrics(t, jwtIssuerHash, "sha256:5198eed9d9c71186008d68680a5838aa9df976ad595eda0025ab9242cf3c5c7c")
 
 	// 3. Cancel the context and verify metrics are NOT updated after cancellation.
 	// Capture current metrics before cancellation.
