@@ -4547,10 +4547,10 @@ func TestToken(t *testing.T) {
 		// check metrics for success and failure
 		if test.wantErr == "" {
 			successTestCount++
-			testutil.AssertHistogramTotalCount(t, "apiserver_authentication_jwt_authenticator_latency_seconds", map[string]string{"result": "success"}, successTestCount)
+			testutil.AssertHistogramTotalCount(t, "oauthapiserver_authentication_jwt_authenticator_latency_seconds", map[string]string{"result": "success"}, successTestCount)
 		} else {
 			failureTestCount++
-			testutil.AssertHistogramTotalCount(t, "apiserver_authentication_jwt_authenticator_latency_seconds", map[string]string{"result": "failure"}, failureTestCount)
+			testutil.AssertHistogramTotalCount(t, "oauthapiserver_authentication_jwt_authenticator_latency_seconds", map[string]string{"result": "failure"}, failureTestCount)
 		}
 	}
 }
@@ -4783,7 +4783,7 @@ func TestJWKSMetricsKeySetError(t *testing.T) {
 			jwtIssuerHash := getHash(ts.URL)
 			var timestamp float64
 			for _, family := range metricFamilies {
-				if family.GetName() != "apiserver_authentication_jwt_authenticator_jwks_fetch_last_timestamp_seconds" {
+				if family.GetName() != "oauthapiserver_authentication_jwt_authenticator_jwks_fetch_last_timestamp_seconds" {
 					continue
 				}
 
@@ -5001,7 +5001,7 @@ func captureTimestampMetric(t *testing.T, jwtIssuerHash, apiServerIDHash string)
 	}
 
 	for _, family := range metricFamilies {
-		if family.GetName() != "apiserver_authentication_jwt_authenticator_jwks_fetch_last_timestamp_seconds" {
+		if family.GetName() != "oauthapiserver_authentication_jwt_authenticator_jwks_fetch_last_timestamp_seconds" {
 			continue
 		}
 
@@ -5024,12 +5024,12 @@ func checkJWKSMetrics(t *testing.T, jwtIssuerHash string, expectedJWKSHash strin
 	t.Helper()
 
 	expectedMetricValue := fmt.Sprintf(`
-       # HELP apiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info [ALPHA] Information about the last JWKS fetched by the JWT authenticator with hash as label, split by api server identity and jwt issuer.
-	   # TYPE apiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info gauge
-	   apiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info{apiserver_id_hash="sha256:14f9d63e669337ac6bfda2e2162915ee6a6067743eddd4e5c374b572f951ff37",hash="%s",jwt_issuer_hash="%s"} 1
+       # HELP oauthapiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info [ALPHA] Information about the last JWKS fetched by the JWT authenticator with hash as label, split by api server identity and jwt issuer.
+	   # TYPE oauthapiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info gauge
+	   oauthapiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info{apiserver_id_hash="sha256:14f9d63e669337ac6bfda2e2162915ee6a6067743eddd4e5c374b572f951ff37",hash="%s",jwt_issuer_hash="%s"} 1
 	`, expectedJWKSHash, jwtIssuerHash)
 
-	if err := testutil.GatherAndCompare(legacyregistry.DefaultGatherer, strings.NewReader(expectedMetricValue), "apiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info"); err != nil {
+	if err := testutil.GatherAndCompare(legacyregistry.DefaultGatherer, strings.NewReader(expectedMetricValue), "oauthapiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info"); err != nil {
 		t.Fatalf("unexpected metrics:\n%s", err)
 	}
 
@@ -5040,7 +5040,7 @@ func checkJWKSMetrics(t *testing.T, jwtIssuerHash string, expectedJWKSHash strin
 
 	var ts float64
 	for _, family := range metricFamilies {
-		if family.GetName() != "apiserver_authentication_jwt_authenticator_jwks_fetch_last_timestamp_seconds" {
+		if family.GetName() != "oauthapiserver_authentication_jwt_authenticator_jwks_fetch_last_timestamp_seconds" {
 			continue
 		}
 

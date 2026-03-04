@@ -41,7 +41,7 @@ import (
 )
 
 const (
-	namespace = "apiserver"
+	namespace = "oauthapiserver"
 	subsystem = "authentication"
 )
 
