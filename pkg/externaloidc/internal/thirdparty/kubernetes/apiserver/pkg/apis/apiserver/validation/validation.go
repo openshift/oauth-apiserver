@@ -194,6 +194,11 @@ func validateURL(issuerURL string, disallowedIssuers sets.Set[string], fldPath *
 	return allErrs
 }
 
+// Copied from https://github.com/kubernetes/kubernetes/blob/7ea5b88209020a07cc96717c6e8cb622feebdd4a/staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation_encryption.go#L37
+const (
+	atLeastOneRequiredErrFmt       = "at least one %s is required"
+)
+
 func validateAudiences(audiences []string, audienceMatchPolicy api.AudienceMatchPolicyType, fldPath, audienceMatchPolicyFldPath *field.Path, structuredAuthnFeatureEnabled bool) field.ErrorList {
 	var allErrs field.ErrorList
 
