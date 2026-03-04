@@ -54,6 +54,14 @@ type CELMapper struct {
 	UserValidationRules  UserMapper
 }
 
+// ExternalSourceCELMapper is a struct that holds the compiled expressions
+// used when externally sourcing claims.
+type ExternalSourceCELMapper struct {
+	URL        ClaimsMapper
+	Conditions ClaimsMapper
+	Sources    ExternalClaimsMapper
+}
+
 // NewClaimsMapper returns a new ClaimsMapper.
 func NewClaimsMapper(compilationResults []CompilationResult) ClaimsMapper {
 	return &mapper{
@@ -63,6 +71,12 @@ func NewClaimsMapper(compilationResults []CompilationResult) ClaimsMapper {
 
 // NewUserMapper returns a new UserMapper.
 func NewUserMapper(compilationResults []CompilationResult) UserMapper {
+	return &mapper{
+		compilationResults: compilationResults,
+	}
+}
+
+func NewExternalClaimsMapper(compilationResults []CompilationResult) ExternalClaimsMapper {
 	return &mapper{
 		compilationResults: compilationResults,
 	}
@@ -88,6 +102,21 @@ func (m *mapper) EvalClaimMappings(ctx context.Context, claims traits.Mapper) ([
 // EvalUser evaluates the given user expressions and returns a list of EvaluationResult.
 func (m *mapper) EvalUser(ctx context.Context, userInfo traits.Mapper) ([]EvaluationResult, error) {
 	return m.eval(ctx, &varNameActivation{name: userVarName, value: userInfo})
+}
+
+func (m *mapper) EvalExternalClaim(ctx context.Context, response traits.Mapper) (EvaluationResult, error) {
+	results, err := m.eval(ctx, &varNameActivation{name: responseVarName, value: response})
+	if err != nil {
+		return EvaluationResult{}, err
+	}
+	if len(results) != 1 {
+		return EvaluationResult{}, fmt.Errorf("expected 1 evaluation result, got %d", len(results))
+	}
+	return results[0], nil
+}
+
+func (m *mapper) EvalExternalClaims(ctx context.Context, response traits.Mapper) ([]EvaluationResult, error) {
+	return m.eval(ctx, &varNameActivation{name: responseVarName, value: response})
 }
 
 func (m *mapper) eval(ctx context.Context, input *varNameActivation) ([]EvaluationResult, error) {

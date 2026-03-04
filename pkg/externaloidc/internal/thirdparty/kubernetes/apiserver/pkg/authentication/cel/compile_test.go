@@ -263,3 +263,45 @@ func nativeTypeToCELType(t *testing.T, nativeType reflect.Type) *apiservercel.De
 	}
 	return nil
 }
+
+func TestCompileExternalSourceExpression(t *testing.T) {
+	testCases := []struct {
+		name                string
+		expressionAccessors []ExpressionAccessor
+		wantErr             string
+	}{
+		{
+			name: "valid ExternalSourceExpression",
+			expressionAccessors: []ExpressionAccessor{
+				&ExtraMappingExpression{
+					Expression: "response.field == 'bar'",
+				},
+			},
+		},
+		{
+			name: "invalid ExternalSourceExpression",
+			expressionAccessors: []ExpressionAccessor{
+				&ExtraMappingExpression{
+					Expression: "claims.field",
+				},
+			},
+			wantErr: "ERROR: <input>:1:1: undeclared reference to 'claims'",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, expressionAccessor := range tc.expressionAccessors {
+				_, err := NewDefaultCompiler().CompileExternalSourceExpression(expressionAccessor)
+				switch {
+				case tc.wantErr != "" && err == nil:
+					t.Errorf("expected error: %v , but got none", tc.wantErr)
+				case tc.wantErr != "" && err != nil && !strings.Contains(err.Error(), tc.wantErr):
+					t.Errorf("expected received error %v to contain substring %q but it did not", err, tc.wantErr)
+				case tc.wantErr == "" && err != nil:
+					t.Errorf("unexpected error %v", err)
+				}
+			}
+		})
+	}
+}

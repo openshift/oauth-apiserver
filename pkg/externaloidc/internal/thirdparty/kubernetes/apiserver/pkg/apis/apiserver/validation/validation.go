@@ -31,6 +31,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 
 	celgo "github.com/google/cel-go/cel"
@@ -99,6 +100,7 @@ func validateJWTAuthenticator(compiler authenticationcel.Compiler, authenticator
 	allErrs = append(allErrs, validateClaimValidationRules(compiler, state, authenticator.ClaimValidationRules, fldPath.Child("claimValidationRules"))...)
 	allErrs = append(allErrs, validateClaimMappings(compiler, state, authenticator.ClaimMappings, fldPath.Child("claimMappings"))...)
 	allErrs = append(allErrs, validateUserValidationRules(compiler, state, authenticator.UserValidationRules, fldPath.Child("userValidationRules"))...)
+	allErrs = append(allErrs, validateExternalClaimsSources(compiler, authenticator.ExternalClaimsSources, fldPath.Child("externalClaimsSources"))...)
 
 	return state.mapper, allErrs
 }
@@ -258,7 +260,6 @@ func validateClaimValidationRules(compiler authenticationcel.Compiler, state *va
 				Expression: rule.Expression,
 				Message:    rule.Message,
 			}, fldPath.Child("expression"))
-
 			if err != nil {
 				allErrs = append(allErrs, err)
 				continue
@@ -344,7 +345,6 @@ func validateClaimMappings(compiler authenticationcel.Compiler, state *validatio
 			Key:        mapping.Key,
 			Expression: mapping.ValueExpression,
 		}, fldPath.Child("valueExpression"))
-
 		if err != nil {
 			allErrs = append(allErrs, err)
 			continue
@@ -509,7 +509,6 @@ func validatePrefixClaimOrExpression(compiler authenticationcel.Compiler, mappin
 		compilationResult, err = compileClaimsCELExpression(compiler, &authenticationcel.ClaimMappingExpression{
 			Expression: mapping.Expression,
 		}, fldPath.Child("expression"))
-
 		if err != nil {
 			allErrs = append(allErrs, err)
 		}
@@ -546,7 +545,6 @@ func validateUserValidationRules(compiler authenticationcel.Compiler, state *val
 			Expression: rule.Expression,
 			Message:    rule.Message,
 		}, fldPath.Child("expression"))
-
 		if err != nil {
 			allErrs = append(allErrs, err)
 			continue
@@ -593,4 +591,244 @@ func convertCELErrorToValidationError(fldPath *field.Path, expression string, er
 		}
 	}
 	return field.InternalError(fldPath, fmt.Errorf("error is not cel error: %w", err))
+}
+
+const maxExternalClaimSources = 5
+
+func validateExternalClaimsSources(compiler authenticationcel.Compiler, externalClaimsSources []api.ExternalClaimsSource, fldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	seenExternalClaimNames := sets.New[string]()
+
+	if len(externalClaimsSources) > maxExternalClaimSources {
+		allErrs = append(allErrs, field.TooMany(fldPath, len(externalClaimsSources), maxExternalClaimSources))
+	}
+
+	for i, source := range externalClaimsSources {
+		allErrs = append(allErrs, validateExternalClaimsSource(compiler, source, seenExternalClaimNames, fldPath.Index(i))...)
+	}
+
+	return allErrs
+}
+
+func validateExternalClaimsSource(compiler authenticationcel.Compiler, source api.ExternalClaimsSource, seenExternalClaimNames sets.Set[string], path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	allErrs = append(allErrs, validateExternalClaimsSourceAuthentication(source.Authentication, path.Child("authentication"))...)
+	allErrs = append(allErrs, validateExternalClaimsSourceTLS(compiler, source.TLS, path.Child("tls"))...)
+	allErrs = append(allErrs, validateExternalClaimsSourceMappings(compiler, source.Mappings, seenExternalClaimNames, path.Child("mappings"))...)
+	allErrs = append(allErrs, validateExternalClaimsSourceConditions(compiler, source.Conditions, path.Child("conditions"))...)
+	allErrs = append(allErrs, validateExternalClaimsSourceURL(compiler, source.URL, path.Child("url"))...)
+
+	return allErrs
+}
+
+func validateExternalClaimsSourceURL(compiler authenticationcel.Compiler, sourceURL *api.SourceURL, path *field.Path) field.ErrorList {
+	if sourceURL == nil {
+		return field.ErrorList{field.Required(path, "url is required")}
+	}
+
+	allErrs := field.ErrorList{}
+
+	allErrs = append(allErrs, validateExternalClaimsSourceURLHostname(sourceURL.Hostname, path.Child("hostname"))...)
+	allErrs = append(allErrs, validateExternalClaimsSourceURLPathExpression(compiler, sourceURL.PathExpression, path.Child("pathExpression"))...)
+
+	return allErrs
+}
+
+const (
+	dns1123LabelFmt     string = "[a-z0-9]([-a-z0-9]*[a-z0-9])?"
+	dns1123SubdomainFmt string = dns1123LabelFmt + "(\\." + dns1123LabelFmt + ")*"
+	optionalPortFmt     string = "(:(\\d{1,5}))?"
+)
+
+var rfc1123HostnameWithPortRegex = regexp.MustCompile("^" + dns1123SubdomainFmt + optionalPortFmt + "$")
+
+func validateExternalClaimsSourceURLHostname(hostname *string, path *field.Path) field.ErrorList {
+	if hostname == nil {
+		return field.ErrorList{field.Required(path, "hostname is required")}
+	}
+
+	if len(*hostname) < 1 {
+		return field.ErrorList{field.Invalid(path, *hostname, "hostname must not be an empty string")}
+	}
+
+	if !rfc1123HostnameWithPortRegex.MatchString(*hostname) {
+		return field.ErrorList{field.Invalid(path, *hostname, "hostname must be a valid RFC1123 subdomain name (start/end with a lowercase alphanumeric character and only contain lowercase alphanumeric characters, '-', and '.'), optionally followed by a port.")}
+	}
+
+	return nil
+}
+
+func validateExternalClaimsSourceURLPathExpression(compiler authenticationcel.Compiler, pathExpression *string, path *field.Path) field.ErrorList {
+	if pathExpression == nil {
+		return field.ErrorList{field.Required(path, "pathExpression is required")}
+	}
+
+	if len(*pathExpression) < 1 {
+		return field.ErrorList{field.Invalid(path, *pathExpression, "pathExpression must not be an empty string")}
+	}
+
+	_, err := compiler.CompileClaimsExpression(&authenticationcel.ExternalSourceURLExpression{
+		PathExpression: *pathExpression,
+	})
+	if err != nil {
+		return field.ErrorList{field.Invalid(path.Child("pathExpression"), *pathExpression, fmt.Sprintf("error compiling expression: %v", err))}
+	}
+
+	return nil
+}
+
+const maxExternalSourceConditions = 16
+
+func validateExternalClaimsSourceConditions(compiler authenticationcel.Compiler, externalSourceConditions []api.ExternalSourceCondition, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if len(externalSourceConditions) > maxExternalSourceConditions {
+		allErrs = append(allErrs, field.TooMany(path, len(externalSourceConditions), maxExternalSourceConditions))
+	}
+
+	seenConditions := sets.New[string]()
+
+	for i, condition := range externalSourceConditions {
+		allErrs = append(allErrs, validateExternalSourceCondition(compiler, condition, seenConditions, path.Index(i))...)
+	}
+
+	return allErrs
+}
+
+func validateExternalSourceCondition(compiler authenticationcel.Compiler, condition api.ExternalSourceCondition, seenConditions sets.Set[string], path *field.Path) field.ErrorList {
+	if condition.Expression == nil {
+		return field.ErrorList{field.Required(path.Child("expression"), "expression is required")}
+	}
+
+	if len(*condition.Expression) < 1 {
+		return field.ErrorList{field.Invalid(path.Child("expression"), *condition.Expression, "expression must not be an empty string")}
+	}
+
+	if seenConditions.Has(*condition.Expression) {
+		return field.ErrorList{field.Duplicate(path.Child("expression"), *condition.Expression)}
+	}
+
+	seenConditions.Insert(*condition.Expression)
+
+	_, err := compiler.CompileClaimsExpression(&authenticationcel.ExternalSourceMappingExpression{
+		Expression: *condition.Expression,
+	})
+	if err != nil {
+		return field.ErrorList{field.Invalid(path.Child("expression"), *condition.Expression, fmt.Sprintf("error compiling expression: %v", err))}
+	}
+
+	return nil
+}
+
+const maxSourcedClaimMappings = 16
+
+func validateExternalClaimsSourceMappings(compiler authenticationcel.Compiler, sourcedClaimMappings []api.SourcedClaimMapping, seenExternalClaimNames sets.Set[string], path *field.Path) field.ErrorList {
+	if len(sourcedClaimMappings) == 0 {
+		return field.ErrorList{field.Required(path, "mappings is required and must not be an empty list.")}
+	}
+
+	allErrs := field.ErrorList{}
+
+	if len(sourcedClaimMappings) > maxSourcedClaimMappings {
+		allErrs = append(allErrs, field.TooMany(path, len(sourcedClaimMappings), maxSourcedClaimMappings))
+	}
+
+	for i, mapping := range sourcedClaimMappings {
+		allErrs = append(allErrs, validateExternalClaimsSourceMapping(compiler, mapping, seenExternalClaimNames, path.Index(i))...)
+	}
+
+	return allErrs
+}
+
+func validateExternalClaimsSourceMapping(compiler authenticationcel.Compiler, sourcedClaimMapping api.SourcedClaimMapping, seenExternalClaimNames sets.Set[string], path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	allErrs = append(allErrs, validateExternalClaimsSourceMappingName(sourcedClaimMapping.Name, seenExternalClaimNames, path.Child("name"))...)
+	allErrs = append(allErrs, validateExternalClaimsSourceMappingExpression(compiler, sourcedClaimMapping.Expression, path.Child("expression"))...)
+
+	return allErrs
+}
+
+func validateExternalClaimsSourceMappingExpression(compiler authenticationcel.Compiler, expression *string, path *field.Path) field.ErrorList {
+	if expression == nil {
+		return field.ErrorList{field.Required(path, "expression is required")}
+	}
+
+	if len(*expression) < 1 {
+		return field.ErrorList{field.Invalid(path, *expression, "expression must not be an empty string")}
+	}
+
+	_, err := compiler.CompileExternalSourceExpression(&authenticationcel.ExternalSourceMappingExpression{
+		Expression: *expression,
+	})
+	if err != nil {
+		return field.ErrorList{field.Invalid(path, expression, fmt.Sprintf("error compiling expression: %v", err))}
+	}
+
+	return nil
+}
+
+var nameRegex = regexp.MustCompile("^([a-z_])+$")
+
+const maxSourceMappingNameLength = 256
+
+func validateExternalClaimsSourceMappingName(name *string, seenExternalClaimNames sets.Set[string], path *field.Path) field.ErrorList {
+	if name == nil {
+		return field.ErrorList{field.Required(path, "name is required")}
+	}
+
+	if len(*name) < 1 {
+		return field.ErrorList{field.Invalid(path, *name, "name must not be an empty string (\"\")")}
+	}
+
+	if !nameRegex.MatchString(*name) {
+		return field.ErrorList{field.Invalid(path, name, "name must consist of only lowercase alpha characters and underscores ('_').")}
+	}
+
+	if len(*name) > maxSourceMappingNameLength {
+		return field.ErrorList{field.TooLong(path, name, maxSourceMappingNameLength)}
+	}
+
+	if seenExternalClaimNames.Has(*name) {
+		return field.ErrorList{field.Duplicate(path, *name)}
+	}
+
+	seenExternalClaimNames.Insert(*name)
+
+	return nil
+}
+
+func validateExternalClaimsSourceTLS(compiler authenticationcel.Compiler, tls *api.TLS, path *field.Path) field.ErrorList {
+	if tls == nil {
+		return nil
+	}
+
+	if tls.CertificateAuthority == nil {
+		return field.ErrorList{field.Required(path.Child("certificateAuthority"), "certificateAuthority is required")}
+	}
+
+	if len(*tls.CertificateAuthority) < 1 {
+		return field.ErrorList{field.Invalid(path.Child("certificateAuthority"), *tls.CertificateAuthority, "certificateAuthority must not be empty and must be a valid PEM-encoded certificate")}
+	}
+
+	return validateCertificateAuthority(*tls.CertificateAuthority, path.Child("certificateAuthority"))
+}
+
+func validateExternalClaimsSourceAuthentication(authentication *api.Authentication, path *field.Path) field.ErrorList {
+	if authentication == nil {
+		return field.ErrorList{field.Required(path, "authentication is required")}
+	}
+
+	allowedTypes := sets.New(api.AuthenticationTypeRequestProvidedToken)
+	if authentication.Type == nil {
+		return field.ErrorList{field.Required(path.Child("type"), fmt.Sprintf("type is required and must be one of %v", sets.List(allowedTypes)))}
+	}
+
+	if !allowedTypes.Has(*authentication.Type) {
+		return field.ErrorList{field.Invalid(path.Child("type"), authentication.Type, fmt.Sprintf("type must be one of %v", sets.List(allowedTypes)))}
+	}
+
+	return nil
 }

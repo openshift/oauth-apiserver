@@ -38,6 +38,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"reflect"
 	"strings"
@@ -244,6 +245,16 @@ func newClaimServer(t *testing.T, keys jose.JSONWebKeySet, signer jose.Signer, c
 				t.Errorf("while serializing response token: %v", err)
 			}
 			w.Write([]byte(token))
+		case "/external":
+			if claimToResponseMap == nil {
+				t.Errorf("no claims specified in response")
+			}
+			auth := r.Header.Get("Authorization")
+			// allow any token in the Authorization header
+			if auth == "" {
+				t.Error("bearer token expected but was empty")
+			}
+			w.Write([]byte(claimToResponseMap["external"]))
 		default:
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, "unexpected URL: %v", r.URL)
@@ -295,12 +306,22 @@ func (c *claimsTest) run(t *testing.T) {
 	// Allow claims to refer to the serving URL of the test server.  For this,
 	// substitute all references to {{.URL}} in appropriate places.
 	// Use {{.Expired}} to handle the token expiry date string with correct timezone handling.
+	// Use {{.Hostname}} to inject the URL hostname.
+	// Use {{.CACert}} to inject CA certificate.
+	parsedURL, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatalf("test server URL %q failed to parse as a URL: %v", ts.URL, err)
+	}
 	v := struct {
-		URL     string
-		Expired string
+		URL      string
+		Expired  string
+		Hostname string
+		CACert   string
 	}{
-		URL:     ts.URL,
-		Expired: fmt.Sprintf("%v", time.Unix(expired.Unix(), 0)),
+		URL:      ts.URL,
+		Expired:  fmt.Sprintf("%v", time.Unix(expired.Unix(), 0)),
+		Hostname: fmt.Sprintf("%s:%s", parsedURL.Hostname(), parsedURL.Port()),
+		CACert:   string(caBundle),
 	}
 	c.claims = replace(c.claims, &v)
 	c.openIDConfig = replace(c.openIDConfig, &v)
@@ -319,6 +340,14 @@ func (c *claimsTest) run(t *testing.T) {
 
 	if c.optsFunc != nil {
 		c.optsFunc(&c.options)
+	}
+
+	for i := range c.options.JWTAuthenticator.ExternalClaimsSources {
+		hostnameReplacement := replace(*c.options.JWTAuthenticator.ExternalClaimsSources[i].URL.Hostname, &v)
+		c.options.JWTAuthenticator.ExternalClaimsSources[i].URL.Hostname = &hostnameReplacement
+
+		caReplacement := replace(*c.options.JWTAuthenticator.ExternalClaimsSources[i].TLS.CertificateAuthority, &v)
+		c.options.JWTAuthenticator.ExternalClaimsSources[i].TLS.CertificateAuthority = &caReplacement
 	}
 
 	expectInitErr := len(c.wantInitErr) > 0
@@ -4155,6 +4184,771 @@ func TestToken(t *testing.T) {
 				"jti": "ea28ed49-2e11-4280-9ec5-bc3d1d84661a"
 			}`, valid.Unix()),
 			wantErr: `oidc: error evaluating user info validation rule: validation expression '!(user.extra[?'authentication.kubernetes.io/credential-id'][0].orValue('') in ["JTI=ea28ed49-2e11-4280-9ec5-bc3d1d84661a"])' failed: credential is revoked`,
+		},
+		{
+			name: "externally sourced claims used for establishing a users groups",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.groups.split(',')",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "groups": ["one", "two", "three"]
+			    }`,
+			},
+			want: &user.DefaultInfo{
+				Name: "jane",
+				Groups: []string{
+					"one",
+					"two",
+					"three",
+				},
+			},
+		},
+		{
+			name: "externally sourced claims overwrites claims in the token",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.groups.split(',')",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"groups": ["a", "b", "c"],
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "groups": ["one", "two", "three"]
+			    }`,
+			},
+			want: &user.DefaultInfo{
+				Name: "jane",
+				Groups: []string{
+					"one",
+					"two",
+					"three",
+				},
+			},
+		},
+		{
+			name: "externally sourced claims overwrites distributed claims in the token",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.groups.split(',')",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"_claim_names": {
+						"groups": "src1"
+				},
+				"_claim_sources": {
+						"src1": {
+								"endpoint": "{{.URL}}/groups",
+								"access_token": "groups_token"
+						}
+				},
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "groups": ["one", "two", "three"]
+			    }`,
+				"groups": fmt.Sprintf(`{
+					"iss": "{{.URL}}",
+				    "aud": "my-client",
+					"groups": ["team1", "team2"],
+					"exp": %d
+			     }`, valid.Unix()),
+			},
+			want: &user.DefaultInfo{
+				Name: "jane",
+				Groups: []string{
+					"one",
+					"two",
+					"three",
+				},
+			},
+		},
+		{
+			name: "externally sourced claims can be used in any mapping",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Claim:  "preferred_username",
+							Prefix: ptr.To(""),
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.groups.split(',')",
+						},
+						UID: apiserver.ClaimOrExpression{
+							Claim: "user_uid",
+						},
+						Extra: []apiserver.ExtraMapping{
+							{
+								Key:             "test/job-title",
+								ValueExpression: "claims.job_title",
+							},
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+								{
+									Name:       ptr.To("preferred_username"),
+									Expression: ptr.To("response.preferred_username"),
+								},
+								{
+									Name:       ptr.To("user_uid"),
+									Expression: ptr.To("response.user_uid"),
+								},
+								{
+									Name:       ptr.To("job_title"),
+									Expression: ptr.To("response.job_title"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "groups": ["one", "two", "three"],
+				  "preferred_username": "jgoodall",
+				  "user_uid": "unique",
+				  "job_title": "anthropologist"
+			    }`,
+			},
+			want: &user.DefaultInfo{
+				Name: "jgoodall",
+				Groups: []string{
+					"one",
+					"two",
+					"three",
+				},
+				UID: "unique",
+				Extra: map[string][]string{
+					"test/job-title": {"anthropologist"},
+				},
+			},
+		},
+		{
+			name: "externally sourcing claims doesn't resolve a claim, mapping doesn't handle externally sourced claim as optional, mapping fails due to missing claim",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							// Doesn't optionally handle the existence of the `groups`
+							// claim so non-existence of the claim fails and blocks authentication.
+							Expression: "claims.groups.split(',')",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "teams": ["one", "two", "three"]
+			    }`,
+			},
+			wantErr: "oidc: error evaluating group claim expression: expression 'claims.groups.split(',')' resulted in error: no such key: groups",
+		},
+		{
+			name: "externally sourcing claims doesn't resolve a claim, mapping handles externally sourced claim as optional, mapping succeeds without partial identity data",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							// Optionally handles the existence of the `groups`
+							// claim so non-existence of the claim should not fail and
+							// authentication should succeed.
+							Expression: "has(claims.groups) ? claims.groups.split(',') : []",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name: ptr.To("groups"),
+									// Unconditionally attempting to get a non-existent claim should
+									// result in the `groups` claim not being added to the set of
+									// claims available to the claim mappings.
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "teams": ["one", "two", "three"]
+			    }`,
+			},
+			want: &user.DefaultInfo{
+				Name:   "jane",
+				Groups: []string(nil),
+			},
+		},
+		{
+			name: "externally sourcing claims, claim sourcing condition not met, externally sourced claim is not conditionally handled, mapping fails",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							// Unconditionally expects the existence of the `groups`
+							// claim so non-existence of the claim should fail and
+							// authentication should not succeed.
+							Expression: "claims.groups.split(',')",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+							Conditions: []apiserver.ExternalSourceCondition{
+								{
+									// always return false so this external source is never used
+									// to source claim mappings from
+									Expression: ptr.To("false"),
+								},
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "teams": ["one", "two", "three"]
+			    }`,
+			},
+			wantErr: "oidc: error evaluating group claim expression: expression 'claims.groups.split(',')' resulted in error: no such key: groups",
+		},
+		{
+			name: "externally sourcing claims, claim sourcing condition not met, externally sourced claim is conditionally handled, mapping succeeds",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							// Optionally handles the existence of the `groups`
+							// claim so non-existence of the claim should not fail and
+							// authentication should succeed.
+							Expression: "has(claims.groups) ? claims.groups.split(',') : []",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+							Conditions: []apiserver.ExternalSourceCondition{
+								{
+									// always return false so this external source is never used
+									// to source claim mappings from
+									Expression: ptr.To("false"),
+								},
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "teams": ["one", "two", "three"]
+			    }`,
+			},
+			want: &user.DefaultInfo{
+				Name:   "jane",
+				Groups: []string(nil),
+			},
+		},
+		{
+			name: "externally sourcing claims, claim sourcing condition on claim non-existence in token, condition met (claim not in token), externally sourced, mapping succeeds",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							Expression: "has(claims.groups) ? claims.groups.split(',') : []",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+							Conditions: []apiserver.ExternalSourceCondition{
+								{
+									Expression: ptr.To("!has(claims.groups)"),
+								},
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "groups": ["one", "two", "three"]
+			    }`,
+			},
+			want: &user.DefaultInfo{
+				Name:   "jane",
+				Groups: []string{"one", "two", "three"},
+			},
+		},
+		{
+			name: "externally sourcing claims, claim sourcing condition on claim non-existence in token, condition not met (claim in token), not externally sourced, mapping succeeds",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							Expression: "type(claims.groups) == list ? claims.groups : claims.groups.split(',')",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name:       ptr.To("groups"),
+									Expression: ptr.To("response.groups.join(',')"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+							Conditions: []apiserver.ExternalSourceCondition{
+								{
+									Expression: ptr.To("!has(claims.groups)"),
+								},
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"groups": ["four", "five"],
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "groups": ["one", "two", "three"]
+			    }`,
+			},
+			want: &user.DefaultInfo{
+				Name:   "jane",
+				Groups: []string{"four", "five"},
+			},
+		},
+		{
+			name: "externally sourced groups claims, external source response is complex object, external source mapping translates to comma-delimited string, mapping succeeds",
+			options: Options{
+				JWTAuthenticator: apiserver.JWTAuthenticator{
+					Issuer: apiserver.Issuer{
+						URL:       "https://auth.example.com",
+						Audiences: []string{"my-client"},
+					},
+					ClaimMappings: apiserver.ClaimMappings{
+						Username: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.username",
+						},
+						Groups: apiserver.PrefixedClaimOrExpression{
+							Expression: "claims.groups.split(',')",
+						},
+					},
+					ExternalClaimsSources: []apiserver.ExternalClaimsSource{
+						{
+							Authentication: &apiserver.Authentication{
+								Type: ptr.To(apiserver.AuthenticationTypeRequestProvidedToken),
+							},
+							URL: &apiserver.SourceURL{
+								Hostname:       ptr.To("{{.Hostname}}"),
+								PathExpression: ptr.To("['external']"),
+							},
+							Mappings: []apiserver.SourcedClaimMapping{
+								{
+									Name: ptr.To("groups"),
+									// More complex expression, mapping only direct group memberships
+									Expression: ptr.To("has(response.memberships) ? (type(response.memberships) == list ? response.memberships.filter(x, x.direct).map(x, x.name).join(',') : '') : ''"),
+								},
+							},
+							TLS: &apiserver.TLS{
+								CertificateAuthority: ptr.To("{{.CACert}}"),
+							},
+							Conditions: []apiserver.ExternalSourceCondition{
+								{
+									Expression: ptr.To("!has(claims.groups)"),
+								},
+							},
+						},
+					},
+				},
+				now: func() time.Time { return now },
+			},
+			signingKey: loadRSAPrivKey(t, "testdata/rsa_1.pem", jose.RS256),
+			pubKeys: []*jose.JSONWebKey{
+				loadRSAKey(t, "testdata/rsa_1.pem", jose.RS256),
+			},
+			claims: fmt.Sprintf(`{
+				"iss": "https://auth.example.com",
+				"aud": "my-client",
+				"username": "jane",
+				"exp": %d
+			}`, valid.Unix()),
+			claimToResponseMap: map[string]string{
+				"external": `{
+				  "memberships": [
+				    {
+				      "name": "one",
+				      "id": "1ef876hg",
+				      "direct": true
+				    },
+				    {
+				      "name": "two",
+				      "id": "2edhujy7",
+				      "direct": true
+				    },
+				    {
+				      "name": "three",
+				      "id": "3suf678",
+				      "direct": false
+				    }
+				  ]
+			    }`,
+			},
+			want: &user.DefaultInfo{
+				Name:   "jane",
+				Groups: []string{"one", "two"},
+			},
 		},
 	}
 

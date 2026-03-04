@@ -59,6 +59,7 @@ type EvaluationResult struct {
 type Compiler interface {
 	CompileClaimsExpression(expressionAccessor ExpressionAccessor) (CompilationResult, error)
 	CompileUserExpression(expressionAccessor ExpressionAccessor) (CompilationResult, error)
+	CompileExternalSourceExpression(expressionAccessor ExpressionAccessor) (CompilationResult, error)
 }
 
 // ClaimsMapper provides a CEL expression mapper configured with the claims CEL variable.
@@ -154,5 +155,69 @@ func (v *UserValidationCondition) GetExpression() string {
 
 // ReturnTypes returns the CEL expression return types.
 func (v *UserValidationCondition) ReturnTypes() []*celgo.Type {
+	return []*celgo.Type{celgo.BoolType}
+}
+
+type ExternalClaimsMapper interface {
+	// EvalExternalClaim evaluates the given external claim and returns an EvaluationResult.
+	// This is used for external claim source validation that contains a single external claim.
+	EvalExternalClaim(context.Context, traits.Mapper) (EvaluationResult, error)
+
+	// EvalExternalClaims evaluates the given external claims and returns a list of EvaluationResult.
+	// This is used for external claim source validation that contains multiple external claims.
+	EvalExternalClaims(context.Context, traits.Mapper) ([]EvaluationResult, error)
+}
+
+var _ ExpressionAccessor = &ExternalSourceMappingExpression{}
+
+type ExternalSourceMappingExpression struct {
+	Claim      string
+	Expression string
+}
+
+// GetExpression returns the CEL expression.
+func (v *ExternalSourceMappingExpression) GetExpression() string {
+	return v.Expression
+}
+
+// ReturnTypes returns the CEL expression return types.
+func (v *ExternalSourceMappingExpression) ReturnTypes() []*celgo.Type {
+	// return types is only used for validation. The response variable that's available
+	// to the external source expressions is a map[string]interface{}, so we can't
+	// really know what the return type is during compilation. Strict type checking
+	// is done during evaluation to ensure that it is a string.
+	return []*celgo.Type{celgo.AnyType}
+}
+
+var _ ExpressionAccessor = &ExternalSourceURLExpression{}
+
+type ExternalSourceURLExpression struct {
+	Hostname       string
+	PathExpression string
+}
+
+// GetExpression returns the CEL expression.
+func (v *ExternalSourceURLExpression) GetExpression() string {
+	return v.PathExpression
+}
+
+// ReturnTypes returns the CEL expression return types.
+func (v *ExternalSourceURLExpression) ReturnTypes() []*celgo.Type {
+	return []*celgo.Type{celgo.AnyType}
+}
+
+var _ ExpressionAccessor = &ExternalSourceConditionExpression{}
+
+type ExternalSourceConditionExpression struct {
+	Expression string
+}
+
+// GetExpression returns the CEL expression.
+func (v *ExternalSourceConditionExpression) GetExpression() string {
+	return v.Expression
+}
+
+// ReturnTypes returns the CEL expression return types.
+func (v *ExternalSourceConditionExpression) ReturnTypes() []*celgo.Type {
 	return []*celgo.Type{celgo.BoolType}
 }

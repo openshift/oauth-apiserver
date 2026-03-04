@@ -33,6 +33,7 @@ import (
 	"crypto/rand"
 	"encoding/pem"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -669,6 +670,1172 @@ func TestValidateAuthenticationConfiguration(t *testing.T) {
 			},
 			want: "",
 		},
+		{
+			name: "valid authentication configuration with an external claims source",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "",
+		},
+		{
+			name: "invalid authentication configuration with external claims sources, too many",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: func() []api.ExternalClaimsSource {
+							out := []api.ExternalClaimsSource{}
+							for i := range maxExternalClaimSources + 1 {
+								out = append(out, api.ExternalClaimsSource{
+									Authentication: &api.Authentication{
+										Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+									},
+									URL: &api.SourceURL{
+										Hostname:       ptr.To("test.kubernetes.com"),
+										PathExpression: ptr.To("['claims']"),
+									},
+									Mappings: []api.SourcedClaimMapping{
+										{
+											Name:       ptr.To(strings.Repeat("a", i+1)),
+											Expression: ptr.To("response.groups.join(',')"),
+										},
+									},
+								})
+							}
+							return out
+						}(),
+					},
+				},
+			},
+			want: fmt.Sprintf("jwt[0].externalClaimsSources: Too many: %d: must have at most %d items", maxExternalClaimSources+1, maxExternalClaimSources),
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, authentication not specified",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].authentication: Required value: authentication is required",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, authentication specified, authentication.type not specified",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].authentication.type: Required value: type is required and must be one of [RequestProvidedToken]",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, authentication specified, authentication.type not valid option",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationType("NotARealAuthenticationType")),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].authentication.type: Invalid value: \"NotARealAuthenticationType\": type must be one of [RequestProvidedToken]",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, tls specified, tls.certificateAuthority omitted",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								TLS: &api.TLS{},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].tls.certificateAuthority: Required value: certificateAuthority is required",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, tls specified, tls.certificateAuthority empty string",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								TLS: &api.TLS{
+									CertificateAuthority: ptr.To(""),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].tls.certificateAuthority: Invalid value: \"\": certificateAuthority must not be empty and must be a valid PEM-encoded certificate",
+		},
+		{
+			name: "valid authentication configuration with an external claims source, tls specified, tls.certificateAuthority valid certificate",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								TLS: &api.TLS{
+									CertificateAuthority: func() *string {
+										caPrivateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+										if err != nil {
+											t.Fatal(err)
+										}
+										caCert, err := certutil.NewSelfSignedCACert(certutil.Config{CommonName: "test-ca"}, caPrivateKey)
+										if err != nil {
+											t.Fatal(err)
+										}
+										return ptr.To(string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caCert.Raw})))
+									}(),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, no mappings",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings: Required value: mappings is required and must not be an empty list.",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, too many mappings",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: func() []api.SourcedClaimMapping {
+									out := []api.SourcedClaimMapping{}
+									for i := range maxSourcedClaimMappings + 1 {
+										out = append(out, api.SourcedClaimMapping{
+											Name:       ptr.To(strings.Repeat("a", i+1)),
+											Expression: ptr.To("'test'"),
+										})
+									}
+									return out
+								}(),
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings: Too many: 17: must have at most 16 items",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, duplicate mapping names in single source",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("'true'"),
+									},
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("'true'"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings[1].name: Duplicate value: \"groups\"",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, duplicate mapping names across sources",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("'true'"),
+									},
+								},
+							},
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['otherclaims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("'true'"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[1].mappings[0].name: Duplicate value: \"groups\"",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, mapping with no name",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Expression: ptr.To("'true'"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings[0].name: Required value: name is required",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, mapping with empty string name",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To(""),
+										Expression: ptr.To("'true'"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings[0].name: Invalid value: \"\": name must not be an empty string (\"\")",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, mapping with name not matching pattern",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("ABC789"),
+										Expression: ptr.To("'true'"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings[0].name: Invalid value: \"ABC789\": name must consist of only lowercase alpha characters and underscores ('_').",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, mapping with too long name",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To(strings.Repeat("a", maxSourceMappingNameLength+1)),
+										Expression: ptr.To("'true'"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings[0].name: Too long: may not be more than 256 bytes",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, mapping with no expression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name: ptr.To("groups"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings[0].expression: Required value: expression is required",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, mapping with empty string expression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To(""),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings[0].expression: Invalid value: \"\": expression must not be an empty string",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, mapping with invalid expression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("notreal.claims.thing"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].mappings[0].expression: Invalid value: \"notreal.claims.thing\": error compiling expression: compilation failed: ERROR: <input>:1:1: undeclared reference to 'notreal' (in container '')\n | notreal.claims.thing\n | ^",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, conditions specified with too many conditions",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups"),
+									},
+								},
+								Conditions: func() []api.ExternalSourceCondition {
+									out := []api.ExternalSourceCondition{}
+									for i := range maxExternalSourceConditions + 1 {
+										out = append(out, api.ExternalSourceCondition{
+											Expression: ptr.To(fmt.Sprintf("!has(claims.%s)", strings.Repeat("a", i+1))),
+										})
+									}
+									return out
+								}(),
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].conditions: Too many: 17: must have at most 16 items",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, condition specified, condition missing expression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups"),
+									},
+								},
+								Conditions: []api.ExternalSourceCondition{
+									{},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].conditions[0].expression: Required value: expression is required",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, condition specified, condition has empty string expression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups"),
+									},
+								},
+								Conditions: []api.ExternalSourceCondition{
+									{
+										Expression: ptr.To(""),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].conditions[0].expression: Invalid value: \"\": expression must not be an empty string",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, condition specified, condition has invalid expression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups"),
+									},
+								},
+								Conditions: []api.ExternalSourceCondition{
+									{
+										Expression: ptr.To("response.something"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].conditions[0].expression: Invalid value: \"response.something\": error compiling expression: compilation failed: ERROR: <input>:1:1: undeclared reference to 'response' (in container '')\n | response.something\n | ^",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, condition specified, conditions has duplicate expressions",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname:       ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("['claims']"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups"),
+									},
+								},
+								Conditions: []api.ExternalSourceCondition{
+									{
+										Expression: ptr.To("!has(claims.groups)"),
+									},
+									{
+										Expression: ptr.To("!has(claims.groups)"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].conditions[1].expression: Duplicate value: \"!has(claims.groups)\"",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, no source url",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].url: Required value: url is required",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, source url, no hostname",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									PathExpression: ptr.To("[claims.path]"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].url.hostname: Required value: hostname is required",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, source url, invalid hostname",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname: ptr.To("ABC-.123.C0m"),
+									PathExpression: ptr.To("[claims.path]"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].url.hostname: Invalid value: \"ABC-.123.C0m\": hostname must be a valid RFC1123 subdomain name (start/end with a lowercase alphanumeric character and only contain lowercase alphanumeric characters, '-', and '.'), optionally followed by a port.",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, source url, no pathExpression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname: ptr.To("test.kubernetes.com"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].url.pathExpression: Required value: pathExpression is required",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, source url, empty pathExpression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname: ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To(""),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].url.pathExpression: Invalid value: \"\": pathExpression must not be an empty string",
+		},
+		{
+			name: "invalid authentication configuration with an external claims source, source url, invalid pathExpression",
+			in: &api.AuthenticationConfiguration{
+				JWT: []api.JWTAuthenticator{
+					{
+						Issuer: api.Issuer{
+							URL:       "https://issuer-url",
+							Audiences: []string{"audience"},
+						},
+						ClaimMappings: api.ClaimMappings{
+							Username: api.PrefixedClaimOrExpression{
+								Claim:  "sub",
+								Prefix: ptr.To("prefix"),
+							},
+						},
+						ExternalClaimsSources: []api.ExternalClaimsSource{
+							{
+								Authentication: &api.Authentication{
+									Type: ptr.To(api.AuthenticationTypeRequestProvidedToken),
+								},
+								URL: &api.SourceURL{
+									Hostname: ptr.To("test.kubernetes.com"),
+									PathExpression: ptr.To("[response.thing]"),
+								},
+								Mappings: []api.SourcedClaimMapping{
+									{
+										Name:       ptr.To("groups"),
+										Expression: ptr.To("response.groups.join(',')"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: "jwt[0].externalClaimsSources[0].url.pathExpression.pathExpression: Invalid value: \"[response.thing]\": error compiling expression: compilation failed: ERROR: <input>:1:2: undeclared reference to 'response' (in container '')\n | [response.thing]\n | .^",
+		},
 	}
 
 	for _, tt := range testCases {
@@ -747,74 +1914,74 @@ func TestValidateIssuerDiscoveryURL(t *testing.T) {
 	fldPath := field.NewPath("issuer", "discoveryURL")
 
 	testCases := []struct {
-		name                          string
-		in                            string
-		issuerURL                     string
-		want                          string
+		name      string
+		in        string
+		issuerURL string
+		want      string
 	}{
 		{
-			name:                          "url is empty",
-			in:                            "",
-			want:                          "",
+			name: "url is empty",
+			in:   "",
+			want: "",
 		},
 		{
-			name:                          "url parse error",
-			in:                            "https://oidc.oidc-namespace.svc:invalid-port",
-			want:                          `issuer.discoveryURL: Invalid value: "https://oidc.oidc-namespace.svc:invalid-port": parse "https://oidc.oidc-namespace.svc:invalid-port": invalid port ":invalid-port" after host`,
+			name: "url parse error",
+			in:   "https://oidc.oidc-namespace.svc:invalid-port",
+			want: `issuer.discoveryURL: Invalid value: "https://oidc.oidc-namespace.svc:invalid-port": parse "https://oidc.oidc-namespace.svc:invalid-port": invalid port ":invalid-port" after host`,
 		},
 		{
-			name:                          "url is not https",
-			in:                            "http://oidc.oidc-namespace.svc",
-			want:                          `issuer.discoveryURL: Invalid value: "http://oidc.oidc-namespace.svc": URL scheme must be https`,
+			name: "url is not https",
+			in:   "http://oidc.oidc-namespace.svc",
+			want: `issuer.discoveryURL: Invalid value: "http://oidc.oidc-namespace.svc": URL scheme must be https`,
 		},
 		{
-			name:                          "url user info is not allowed",
-			in:                            "https://user:pass@oidc.oidc-namespace.svc",
-			want:                          `issuer.discoveryURL: Invalid value: "https://user:pass@oidc.oidc-namespace.svc": URL must not contain a username or password`,
+			name: "url user info is not allowed",
+			in:   "https://user:pass@oidc.oidc-namespace.svc",
+			want: `issuer.discoveryURL: Invalid value: "https://user:pass@oidc.oidc-namespace.svc": URL must not contain a username or password`,
 		},
 		{
-			name:                          "url raw query is not allowed",
-			in:                            "https://oidc.oidc-namespace.svc?query",
-			want:                          `issuer.discoveryURL: Invalid value: "https://oidc.oidc-namespace.svc?query": URL must not contain a query`,
+			name: "url raw query is not allowed",
+			in:   "https://oidc.oidc-namespace.svc?query",
+			want: `issuer.discoveryURL: Invalid value: "https://oidc.oidc-namespace.svc?query": URL must not contain a query`,
 		},
 		{
-			name:                          "url fragment is not allowed",
-			in:                            "https://oidc.oidc-namespace.svc#fragment",
-			want:                          `issuer.discoveryURL: Invalid value: "https://oidc.oidc-namespace.svc#fragment": URL must not contain a fragment`,
+			name: "url fragment is not allowed",
+			in:   "https://oidc.oidc-namespace.svc#fragment",
+			want: `issuer.discoveryURL: Invalid value: "https://oidc.oidc-namespace.svc#fragment": URL must not contain a fragment`,
 		},
 		{
-			name:                          "valid url",
-			in:                            "https://oidc.oidc-namespace.svc",
-			want:                          "",
+			name: "valid url",
+			in:   "https://oidc.oidc-namespace.svc",
+			want: "",
 		},
 		{
-			name:                          "valid url with path",
-			in:                            "https://oidc.oidc-namespace.svc/path",
-			want:                          "",
+			name: "valid url with path",
+			in:   "https://oidc.oidc-namespace.svc/path",
+			want: "",
 		},
 		{
-			name:                          "discovery url same as issuer url",
-			issuerURL:                     "https://issuer-url",
-			in:                            "https://issuer-url",
-			want:                          `issuer.discoveryURL: Invalid value: "https://issuer-url": discoveryURL must be different from URL`,
+			name:      "discovery url same as issuer url",
+			issuerURL: "https://issuer-url",
+			in:        "https://issuer-url",
+			want:      `issuer.discoveryURL: Invalid value: "https://issuer-url": discoveryURL must be different from URL`,
 		},
 		{
-			name:                          "discovery url same as issuer url, with trailing slash",
-			issuerURL:                     "https://issuer-url",
-			in:                            "https://issuer-url/",
-			want:                          `issuer.discoveryURL: Invalid value: "https://issuer-url/": discoveryURL must be different from URL`,
+			name:      "discovery url same as issuer url, with trailing slash",
+			issuerURL: "https://issuer-url",
+			in:        "https://issuer-url/",
+			want:      `issuer.discoveryURL: Invalid value: "https://issuer-url/": discoveryURL must be different from URL`,
 		},
 		{
-			name:                          "discovery url same as issuer url, with multiple trailing slashes",
-			issuerURL:                     "https://issuer-url",
-			in:                            "https://issuer-url///",
-			want:                          `issuer.discoveryURL: Invalid value: "https://issuer-url///": discoveryURL must be different from URL`,
+			name:      "discovery url same as issuer url, with multiple trailing slashes",
+			issuerURL: "https://issuer-url",
+			in:        "https://issuer-url///",
+			want:      `issuer.discoveryURL: Invalid value: "https://issuer-url///": discoveryURL must be different from URL`,
 		},
 		{
-			name:                          "discovery url same as issuer url, issuer url with trailing slash",
-			issuerURL:                     "https://issuer-url/",
-			in:                            "https://issuer-url",
-			want:                          `issuer.discoveryURL: Invalid value: "https://issuer-url": discoveryURL must be different from URL`,
+			name:      "discovery url same as issuer url, issuer url with trailing slash",
+			issuerURL: "https://issuer-url/",
+			in:        "https://issuer-url",
+			want:      `issuer.discoveryURL: Invalid value: "https://issuer-url": discoveryURL must be different from URL`,
 		},
 	}
 
@@ -833,10 +2000,10 @@ func TestValidateAudiences(t *testing.T) {
 	audienceMatchPolicyFldPath := field.NewPath("issuer", "audienceMatchPolicy")
 
 	testCases := []struct {
-		name                          string
-		in                            []string
-		matchPolicy                   string
-		want                          string
+		name        string
+		in          []string
+		matchPolicy string
+		want        string
 	}{
 		{
 			name: "audiences is empty",
@@ -866,21 +2033,21 @@ func TestValidateAudiences(t *testing.T) {
 			want:        "",
 		},
 		{
-			name:                          "duplicate audience",
-			in:                            []string{"audience", "audience"},
-			matchPolicy:                   "MatchAny",
-			want:                          `issuer.audiences[1]: Duplicate value: "audience"`,
+			name:        "duplicate audience",
+			in:          []string{"audience", "audience"},
+			matchPolicy: "MatchAny",
+			want:        `issuer.audiences[1]: Duplicate value: "audience"`,
 		},
 		{
-			name:                          "match policy not set with multiple audiences",
-			in:                            []string{"audience1", "audience2"},
-			want:                          `issuer.audienceMatchPolicy: Invalid value: "": audienceMatchPolicy must be MatchAny for multiple audiences`,
+			name: "match policy not set with multiple audiences",
+			in:   []string{"audience1", "audience2"},
+			want: `issuer.audienceMatchPolicy: Invalid value: "": audienceMatchPolicy must be MatchAny for multiple audiences`,
 		},
 		{
-			name:                          "valid multiple audiences",
-			in:                            []string{"audience1", "audience2"},
-			matchPolicy:                   "MatchAny",
-			want:                          "",
+			name:        "valid multiple audiences",
+			in:          []string{"audience1", "audience2"},
+			matchPolicy: "MatchAny",
+			want:        "",
 		},
 	}
 
@@ -943,37 +2110,37 @@ func TestValidateClaimValidationRules(t *testing.T) {
 	fldPath := field.NewPath("issuer", "claimValidationRules")
 
 	testCases := []struct {
-		name                          string
-		in                            []api.ClaimValidationRule
-		want                          string
-		wantCELMapper                 bool
-		wantUsesEmailVerifiedClaim    bool
+		name                       string
+		in                         []api.ClaimValidationRule
+		want                       string
+		wantCELMapper              bool
+		wantUsesEmailVerifiedClaim bool
 	}{
 		{
-			name:                          "claim and expression are empty",
-			in:                            []api.ClaimValidationRule{{}},
-			want:                          "issuer.claimValidationRules[0]: Required value: claim or expression is required",
+			name: "claim and expression are empty",
+			in:   []api.ClaimValidationRule{{}},
+			want: "issuer.claimValidationRules[0]: Required value: claim or expression is required",
 		},
 		{
 			name: "claim and expression are set",
 			in: []api.ClaimValidationRule{
 				{Claim: "claim", Expression: "expression"},
 			},
-			want:                          `issuer.claimValidationRules[0]: Invalid value: "claim": claim and expression can't both be set`,
+			want: `issuer.claimValidationRules[0]: Invalid value: "claim": claim and expression can't both be set`,
 		},
 		{
 			name: "message set when claim is set",
 			in: []api.ClaimValidationRule{
 				{Claim: "claim", Message: "message"},
 			},
-			want:                          `issuer.claimValidationRules[0].message: Invalid value: "message": may not be specified when claim is set`,
+			want: `issuer.claimValidationRules[0].message: Invalid value: "message": may not be specified when claim is set`,
 		},
 		{
 			name: "requiredValue set when expression is set",
 			in: []api.ClaimValidationRule{
 				{Expression: "claims.foo == 'bar'", RequiredValue: "value"},
 			},
-			want:                          `issuer.claimValidationRules[0].requiredValue: Invalid value: "value": may not be specified when expression is set`,
+			want: `issuer.claimValidationRules[0].requiredValue: Invalid value: "value": may not be specified when expression is set`,
 		},
 		{
 			name: "duplicate claim",
@@ -981,7 +2148,7 @@ func TestValidateClaimValidationRules(t *testing.T) {
 				{Claim: "claim"},
 				{Claim: "claim"},
 			},
-			want:                          `issuer.claimValidationRules[1].claim: Duplicate value: "claim"`,
+			want: `issuer.claimValidationRules[1].claim: Duplicate value: "claim"`,
 		},
 		{
 			name: "duplicate expression",
@@ -989,7 +2156,7 @@ func TestValidateClaimValidationRules(t *testing.T) {
 				{Expression: "claims.foo == 'bar'"},
 				{Expression: "claims.foo == 'bar'"},
 			},
-			want:                          `issuer.claimValidationRules[1].expression: Duplicate value: "claims.foo == 'bar'"`,
+			want: `issuer.claimValidationRules[1].expression: Duplicate value: "claims.foo == 'bar'"`,
 		},
 		{
 			name: "CEL expression compilation error",
@@ -1005,15 +2172,15 @@ func TestValidateClaimValidationRules(t *testing.T) {
 			in: []api.ClaimValidationRule{
 				{Expression: "claims.foo"},
 			},
-			want:                          `issuer.claimValidationRules[0].expression: Invalid value: "claims.foo": must evaluate to bool`,
+			want: `issuer.claimValidationRules[0].expression: Invalid value: "claims.foo": must evaluate to bool`,
 		},
 		{
 			name: "valid claim validation rule with expression",
 			in: []api.ClaimValidationRule{
 				{Expression: "claims.foo == 'bar'"},
 			},
-			want:                          "",
-			wantCELMapper:                 true,
+			want:          "",
+			wantCELMapper: true,
 		},
 		{
 			name: "valid claim validation rule with multiple rules and email_verified check",
@@ -1022,8 +2189,8 @@ func TestValidateClaimValidationRules(t *testing.T) {
 				{Claim: "claim2", RequiredValue: "value2"},
 				{Expression: "has(claims.email_verified)"},
 			},
-			want:                          "",
-			wantUsesEmailVerifiedClaim:    true,
+			want:                       "",
+			wantUsesEmailVerifiedClaim: true,
 		},
 		{
 			name: "valid claim validation rule with multiple rules and almost email_verified check",
@@ -1032,8 +2199,8 @@ func TestValidateClaimValidationRules(t *testing.T) {
 				{Claim: "claim2", RequiredValue: "value2"},
 				{Expression: "has(claims.email_verified_)"},
 			},
-			want:                          "",
-			wantUsesEmailVerifiedClaim:    false,
+			want:                       "",
+			wantUsesEmailVerifiedClaim: false,
 		},
 		{
 			name: "valid claim validation rule with multiple rules",
@@ -1041,8 +2208,8 @@ func TestValidateClaimValidationRules(t *testing.T) {
 				{Claim: "claim1", RequiredValue: "value1"},
 				{Claim: "claim2", RequiredValue: "claims.email_verified"}, // not a CEL expression
 			},
-			want:                          "",
-			wantUsesEmailVerifiedClaim:    false,
+			want:                       "",
+			wantUsesEmailVerifiedClaim: false,
 		},
 	}
 
@@ -1067,11 +2234,11 @@ func TestValidateClaimMappings(t *testing.T) {
 	fldPath := field.NewPath("issuer", "claimMappings")
 
 	testCases := []struct {
-		name                          string
-		in                            api.ClaimMappings
-		usesEmailVerifiedClaim        bool
-		want                          string
-		wantCELMapper                 bool
+		name                   string
+		in                     api.ClaimMappings
+		usesEmailVerifiedClaim bool
+		want                   string
+		wantCELMapper          bool
 	}{
 		{
 			name: "username expression and claim are set",
@@ -1081,12 +2248,12 @@ func TestValidateClaimMappings(t *testing.T) {
 					Expression: "claims.username",
 				},
 			},
-			want:                          `issuer.claimMappings.username: Invalid value: "": claim and expression can't both be set`,
+			want: `issuer.claimMappings.username: Invalid value: "": claim and expression can't both be set`,
 		},
 		{
-			name:                          "username expression and claim are empty",
-			in:                            api.ClaimMappings{Username: api.PrefixedClaimOrExpression{}},
-			want:                          "issuer.claimMappings.username: Required value: claim or expression is required",
+			name: "username expression and claim are empty",
+			in:   api.ClaimMappings{Username: api.PrefixedClaimOrExpression{}},
+			want: "issuer.claimMappings.username: Required value: claim or expression is required",
 		},
 		{
 			name: "username prefix set when expression is set",
@@ -1096,7 +2263,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					Prefix:     ptr.To("prefix"),
 				},
 			},
-			want:                          `issuer.claimMappings.username.prefix: Invalid value: "prefix": may not be specified when expression is set`,
+			want: `issuer.claimMappings.username.prefix: Invalid value: "prefix": may not be specified when expression is set`,
 		},
 		{
 			name: "username prefix is nil when claim is set",
@@ -1105,7 +2272,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					Claim: "claim",
 				},
 			},
-			want:                          `issuer.claimMappings.username.prefix: Required value: prefix is required when claim is set. It can be set to an empty string to disable prefixing`,
+			want: `issuer.claimMappings.username.prefix: Required value: prefix is required when claim is set. It can be set to an empty string to disable prefixing`,
 		},
 		{
 			name: "username expression is invalid",
@@ -1130,7 +2297,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					Expression: "claims.groups",
 				},
 			},
-			want:                          `issuer.claimMappings.groups: Invalid value: "": claim and expression can't both be set`,
+			want: `issuer.claimMappings.groups: Invalid value: "": claim and expression can't both be set`,
 		},
 		{
 			name: "groups prefix set when expression is set",
@@ -1144,7 +2311,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					Prefix:     ptr.To("prefix"),
 				},
 			},
-			want:                          `issuer.claimMappings.groups.prefix: Invalid value: "prefix": may not be specified when expression is set`,
+			want: `issuer.claimMappings.groups.prefix: Invalid value: "prefix": may not be specified when expression is set`,
 		},
 		{
 			name: "groups prefix is nil when claim is set",
@@ -1157,7 +2324,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					Claim: "claim",
 				},
 			},
-			want:                          `issuer.claimMappings.groups.prefix: Required value: prefix is required when claim is set. It can be set to an empty string to disable prefixing`,
+			want: `issuer.claimMappings.groups.prefix: Required value: prefix is required when claim is set. It can be set to an empty string to disable prefixing`,
 		},
 		{
 			name: "groups expression is invalid",
@@ -1186,7 +2353,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					Expression: "claims.uid",
 				},
 			},
-			want:                          `issuer.claimMappings.uid: Invalid value: "": claim and expression can't both be set`,
+			want: `issuer.claimMappings.uid: Invalid value: "": claim and expression can't both be set`,
 		},
 		{
 			name: "uid expression is invalid",
@@ -1214,7 +2381,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "", ValueExpression: "claims.extra"},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[0].key: Required value`,
+			want: `issuer.claimMappings.extra[0].key: Required value`,
 		},
 		{
 			name: "extra mapping value expression is empty",
@@ -1227,7 +2394,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: ""},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[0].valueExpression: Required value`,
+			want: `issuer.claimMappings.extra[0].valueExpression: Required value`,
 		},
 		{
 			name: "extra mapping value expression is invalid",
@@ -1254,7 +2421,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.extras"},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[1].key: Duplicate value: "example.org/foo"`,
+			want: `issuer.claimMappings.extra[1].key: Duplicate value: "example.org/foo"`,
 		},
 		{
 			name: "extra mapping key is not domain prefix path",
@@ -1265,7 +2432,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "foo", ValueExpression: "claims.extra"},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[0].key: Invalid value: "foo": must be a domain-prefixed path (such as "acme.io/foo")`,
+			want: `issuer.claimMappings.extra[0].key: Invalid value: "foo": must be a domain-prefixed path (such as "acme.io/foo")`,
 		},
 		{
 			name: "extra mapping key is not lower case",
@@ -1276,7 +2443,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/Foo", ValueExpression: "claims.extra"},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[0].key: Invalid value: "example.org/Foo": must be lowercase`,
+			want: `issuer.claimMappings.extra[0].key: Invalid value: "example.org/Foo": must be lowercase`,
 		},
 		{
 			name: "extra mapping key prefix is k8.io",
@@ -1287,7 +2454,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "k8s.io/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[0].key: Invalid value: "k8s.io/foo": k8s.io, kubernetes.io and their subdomains are reserved for Kubernetes use`,
+			want: `issuer.claimMappings.extra[0].key: Invalid value: "k8s.io/foo": k8s.io, kubernetes.io and their subdomains are reserved for Kubernetes use`,
 		},
 		{
 			name: "extra mapping key prefix contains k8.io",
@@ -1298,7 +2465,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.k8s.io/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[0].key: Invalid value: "example.k8s.io/foo": k8s.io, kubernetes.io and their subdomains are reserved for Kubernetes use`,
+			want: `issuer.claimMappings.extra[0].key: Invalid value: "example.k8s.io/foo": k8s.io, kubernetes.io and their subdomains are reserved for Kubernetes use`,
 		},
 		{
 			name: "extra mapping key prefix is kubernetes.io",
@@ -1309,7 +2476,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "kubernetes.io/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[0].key: Invalid value: "kubernetes.io/foo": k8s.io, kubernetes.io and their subdomains are reserved for Kubernetes use`,
+			want: `issuer.claimMappings.extra[0].key: Invalid value: "kubernetes.io/foo": k8s.io, kubernetes.io and their subdomains are reserved for Kubernetes use`,
 		},
 		{
 			name: "extra mapping key prefix contains kubernetes.io",
@@ -1320,7 +2487,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.kubernetes.io/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			want:                          `issuer.claimMappings.extra[0].key: Invalid value: "example.kubernetes.io/foo": k8s.io, kubernetes.io and their subdomains are reserved for Kubernetes use`,
+			want: `issuer.claimMappings.extra[0].key: Invalid value: "example.kubernetes.io/foo": k8s.io, kubernetes.io and their subdomains are reserved for Kubernetes use`,
 		},
 		{
 			name: "extra mapping key prefix with ak8s.io, *.ak8s.io, bkubernetes.io, *.bkubernetes.io are still valid",
@@ -1334,7 +2501,7 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.bkubernetes.io/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			want:                          "",
+			want: "",
 		},
 		{
 			name: "valid claim mappings but uses email without verification",
@@ -1346,8 +2513,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          `issuer.claimMappings.username.expression: Invalid value: "claims.email": claims.email_verified must be used in claimMappings.username.expression or claimMappings.extra[*].valueExpression or claimValidationRules[*].expression when claims.email is used in claimMappings.username.expression`,
+			wantCELMapper: true,
+			want:          `issuer.claimMappings.username.expression: Invalid value: "claims.email": claims.email_verified must be used in claimMappings.username.expression or claimMappings.extra[*].valueExpression or claimValidationRules[*].expression when claims.email is used in claimMappings.username.expression`,
 		},
 		{
 			name: "valid claim mappings but uses email in complex CEL expression without verification",
@@ -1359,8 +2526,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          `issuer.claimMappings.username.expression: Invalid value: "has(claims.email) ? claims.email : claims.sub": claims.email_verified must be used in claimMappings.username.expression or claimMappings.extra[*].valueExpression or claimValidationRules[*].expression when claims.email is used in claimMappings.username.expression`,
+			wantCELMapper: true,
+			want:          `issuer.claimMappings.username.expression: Invalid value: "has(claims.email) ? claims.email : claims.sub": claims.email_verified must be used in claimMappings.username.expression or claimMappings.extra[*].valueExpression or claimValidationRules[*].expression when claims.email is used in claimMappings.username.expression`,
 		},
 		{
 			name: "valid claim mappings but uses email in CEL expression function without verification",
@@ -1372,8 +2539,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          `issuer.claimMappings.username.expression: Invalid value: "claims.email.trim()": claims.email_verified must be used in claimMappings.username.expression or claimMappings.extra[*].valueExpression or claimValidationRules[*].expression when claims.email is used in claimMappings.username.expression`,
+			wantCELMapper: true,
+			want:          `issuer.claimMappings.username.expression: Invalid value: "claims.email.trim()": claims.email_verified must be used in claimMappings.username.expression or claimMappings.extra[*].valueExpression or claimValidationRules[*].expression when claims.email is used in claimMappings.username.expression`,
 		},
 		{
 			name: "valid claim mappings and uses email with verification via extra",
@@ -1385,8 +2552,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.email_verified"},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          "",
+			wantCELMapper: true,
+			want:          "",
 		},
 		{
 			name: "valid claim mappings and uses email with verification via extra optional",
@@ -1398,8 +2565,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: `has(claims.email_verified) ? string(claims.email_verified) : "false"`},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          "",
+			wantCELMapper: true,
+			want:          "",
 		},
 		{
 			name: "valid claim mappings and almost uses email with verification via extra optional",
@@ -1411,8 +2578,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: `has(claims.email_verified_) ? string(claims.email_verified_) : "false"`},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          `issuer.claimMappings.username.expression: Invalid value: "claims.email": claims.email_verified must be used in claimMappings.username.expression or claimMappings.extra[*].valueExpression or claimValidationRules[*].expression when claims.email is used in claimMappings.username.expression`,
+			wantCELMapper: true,
+			want:          `issuer.claimMappings.username.expression: Invalid value: "claims.email": claims.email_verified must be used in claimMappings.username.expression or claimMappings.extra[*].valueExpression or claimValidationRules[*].expression when claims.email is used in claimMappings.username.expression`,
 		},
 		{
 			name: "valid claim mappings and uses email with verification via hasVerifiedEmail",
@@ -1424,9 +2591,9 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			usesEmailVerifiedClaim:        true,
-			wantCELMapper:                 true,
-			want:                          "",
+			usesEmailVerifiedClaim: true,
+			wantCELMapper:          true,
+			want:                   "",
 		},
 		{
 			name: "valid claim mappings that almost use claims.email",
@@ -1438,8 +2605,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          "",
+			wantCELMapper: true,
+			want:          "",
 		},
 		{
 			name: "valid claim mappings that almost use claims.email via nesting",
@@ -1451,8 +2618,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          "",
+			wantCELMapper: true,
+			want:          "",
 		},
 		{
 			name: "valid claim mappings",
@@ -1464,8 +2631,8 @@ func TestValidateClaimMappings(t *testing.T) {
 					{Key: "example.org/foo", ValueExpression: "claims.extra"},
 				},
 			},
-			wantCELMapper:                 true,
-			want:                          "",
+			wantCELMapper: true,
+			want:          "",
 		},
 	}
 
@@ -1499,15 +2666,15 @@ func TestValidateUserValidationRules(t *testing.T) {
 	fldPath := field.NewPath("issuer", "userValidationRules")
 
 	testCases := []struct {
-		name                          string
-		in                            []api.UserValidationRule
-		want                          string
-		wantCELMapper                 bool
+		name          string
+		in            []api.UserValidationRule
+		want          string
+		wantCELMapper bool
 	}{
 		{
-			name:                          "user info validation rule, expression is empty",
-			in:                            []api.UserValidationRule{{}},
-			want:                          "issuer.userValidationRules[0].expression: Required value",
+			name: "user info validation rule, expression is empty",
+			in:   []api.UserValidationRule{{}},
+			want: "issuer.userValidationRules[0].expression: Required value",
 		},
 		{
 			name: "duplicate expression",
@@ -1515,7 +2682,7 @@ func TestValidateUserValidationRules(t *testing.T) {
 				{Expression: "user.username == 'foo'"},
 				{Expression: "user.username == 'foo'"},
 			},
-			want:                          `issuer.userValidationRules[1].expression: Duplicate value: "user.username == 'foo'"`,
+			want: `issuer.userValidationRules[1].expression: Duplicate value: "user.username == 'foo'"`,
 		},
 		{
 			name: "expression is invalid",
@@ -1531,7 +2698,7 @@ func TestValidateUserValidationRules(t *testing.T) {
 			in: []api.UserValidationRule{
 				{Expression: "user.username"},
 			},
-			want:                          `issuer.userValidationRules[0].expression: Invalid value: "user.username": must evaluate to bool`,
+			want: `issuer.userValidationRules[0].expression: Invalid value: "user.username": must evaluate to bool`,
 		},
 		{
 			name: "valid user info validation rule",
@@ -1539,8 +2706,8 @@ func TestValidateUserValidationRules(t *testing.T) {
 				{Expression: "user.username == 'foo'"},
 				{Expression: "!user.username.startsWith('system:')", Message: "username cannot used reserved system: prefix"},
 			},
-			want:                          "",
-			wantCELMapper:                 true,
+			want:          "",
+			wantCELMapper: true,
 		},
 	}
 
