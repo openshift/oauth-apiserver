@@ -26,14 +26,14 @@
 
 set -e
 
-rm ./*.pem
+rm -f ./*.pem
 
 for N in $(seq 1 3); do
-    ssh-keygen -t rsa -b 2048 -f rsa_"$N".pem -N ''
+    ssh-keygen -m PEM -t rsa -b 2048 -f rsa_"$N".pem -N ''
 done
 
 for N in $(seq 1 3); do
-    ssh-keygen -t ecdsa -b 521 -f ecdsa_"$N".pem -N ''
+    openssl ecparam -name secp521r1 -genkey -noout -out ecdsa_"$N".pem
 done
 
 rm ./*.pub
