@@ -15,6 +15,7 @@ function codegen::join() { local IFS="$1"; shift; echo "$*"; }
 ALL_FQ_APIS=(
     github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth/v1
     github.com/openshift/oauth-apiserver/pkg/user/apis/user/v1
+    github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/thirdparty/kubernetes/apiserver/pkg/apis/apiserver/v1
 )
 
 ALL_PEERS=(

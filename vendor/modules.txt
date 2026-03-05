@@ -22,6 +22,9 @@ github.com/cenkalti/backoff/v4
 # github.com/cespare/xxhash/v2 v2.3.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
+# github.com/coreos/go-oidc v2.3.0+incompatible
+## explicit
+github.com/coreos/go-oidc
 # github.com/coreos/go-semver v0.3.1
 ## explicit; go 1.8
 github.com/coreos/go-semver/semver
@@ -282,6 +285,10 @@ github.com/pkg/profile
 # github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
 ## explicit
 github.com/pmezard/go-difflib/difflib
+# github.com/pquerna/cachecontrol v0.1.0
+## explicit; go 1.16
+github.com/pquerna/cachecontrol
+github.com/pquerna/cachecontrol/cacheobject
 # github.com/prometheus/client_golang v1.22.0
 ## explicit; go 1.22
 github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil
@@ -538,10 +545,12 @@ golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/cryptobyte
 golang.org/x/crypto/cryptobyte/asn1
+golang.org/x/crypto/ed25519
 golang.org/x/crypto/hkdf
 golang.org/x/crypto/internal/alias
 golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/nacl/secretbox
+golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/salsa20/salsa
 # golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 ## explicit; go 1.20
@@ -759,6 +768,11 @@ google.golang.org/protobuf/types/known/wrapperspb
 # gopkg.in/evanphx/json-patch.v4 v4.12.0
 ## explicit
 gopkg.in/evanphx/json-patch.v4
+# gopkg.in/go-jose/go-jose.v2 v2.6.3
+## explicit
+gopkg.in/go-jose/go-jose.v2
+gopkg.in/go-jose/go-jose.v2/cipher
+gopkg.in/go-jose/go-jose.v2/json
 # gopkg.in/inf.v0 v0.9.1
 ## explicit
 gopkg.in/inf.v0
@@ -1012,6 +1026,7 @@ k8s.io/apiserver/pkg/authentication/request/websocket
 k8s.io/apiserver/pkg/authentication/request/x509
 k8s.io/apiserver/pkg/authentication/serviceaccount
 k8s.io/apiserver/pkg/authentication/token/cache
+k8s.io/apiserver/pkg/authentication/token/jwt
 k8s.io/apiserver/pkg/authentication/token/tokenfile
 k8s.io/apiserver/pkg/authentication/token/union
 k8s.io/apiserver/pkg/authentication/user
@@ -1605,6 +1620,7 @@ k8s.io/kubernetes/pkg/api/legacyscheme
 k8s.io/kubernetes/pkg/apis/authentication
 k8s.io/kubernetes/pkg/apis/authentication/v1
 k8s.io/kubernetes/pkg/registry/authentication/tokenreview
+k8s.io/kubernetes/pkg/util/filesystem
 # k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 ## explicit; go 1.18
 k8s.io/utils/buffer
