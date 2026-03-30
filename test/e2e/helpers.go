@@ -26,7 +26,7 @@ import (
 )
 
 // NewClientConfigForTest returns a config configured to connect to the api server
-func NewClientConfigForTest(t *testing.T) *rest.Config {
+func NewClientConfigForTest(t testing.TB) *rest.Config {
 	loader := clientcmd.NewDefaultClientConfigLoadingRules()
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, &clientcmd.ConfigOverrides{ClusterInfo: api.Cluster{InsecureSkipTLSVerify: true}})
 	config, err := clientConfig.ClientConfig()
@@ -91,7 +91,7 @@ func waitForSelfSAR(interval, timeout time.Duration, c kubernetes.Interface, sel
 
 // PortForwardSvc forwards a remote service's port to localhost
 // portMapping is a string "localPort:remotePort"
-func PortForwardSvc(t *testing.T, svcNS, svcName, portMapping string) context.CancelFunc {
+func PortForwardSvc(t testing.TB, svcNS, svcName, portMapping string) context.CancelFunc {
 	var err error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
@@ -135,7 +135,7 @@ type ResourceTrashbin struct {
 }
 
 // NewResourceTrashbin creates an instance of a ResourceTrashbin
-func NewResourceTrashbin(t *testing.T, adminKubeconfig *rest.Config) *ResourceTrashbin {
+func NewResourceTrashbin(t testing.TB, adminKubeconfig *rest.Config) *ResourceTrashbin {
 	dynamicClient, err := dynamic.NewForConfig(adminKubeconfig)
 	require.NoError(t, err)
 
@@ -158,7 +158,7 @@ func (b *ResourceTrashbin) AddResource(resource schema.GroupVersionResource, obj
 }
 
 // Empty deletes all of the cached resources
-func (b *ResourceTrashbin) Empty(t *testing.T) {
+func (b *ResourceTrashbin) Empty(t testing.TB) {
 	for _, r := range b.resourcesToDelete {
 		err := b.dynamicClient.
 			Resource(r.Resource).
