@@ -222,7 +222,7 @@ github.com/onsi/gomega/matchers/support/goraph/edge
 github.com/onsi/gomega/matchers/support/goraph/node
 github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
-# github.com/openshift-eng/openshift-tests-extension v0.0.0-20250804142706-7b3ab438a292
+# github.com/openshift-eng/openshift-tests-extension v0.0.0-20260408205138-ec501c2bf4a5
 ## explicit; go 1.23.0
 github.com/openshift-eng/openshift-tests-extension/pkg/cmd
 github.com/openshift-eng/openshift-tests-extension/pkg/cmd/cmdimages
@@ -238,7 +238,7 @@ github.com/openshift-eng/openshift-tests-extension/pkg/ginkgo
 github.com/openshift-eng/openshift-tests-extension/pkg/junit
 github.com/openshift-eng/openshift-tests-extension/pkg/util/sets
 github.com/openshift-eng/openshift-tests-extension/pkg/version
-# github.com/openshift/api v0.0.0-20260105191300-d1c4dc4fd37b
+# github.com/openshift/api v0.0.0-20260413132630-e010a985205d
 ## explicit; go 1.24.0
 github.com/openshift/api/authorization/v1
 github.com/openshift/api/build/v1
@@ -303,7 +303,7 @@ github.com/openshift/client-go/user/informers/externalversions/internalinterface
 github.com/openshift/client-go/user/informers/externalversions/user
 github.com/openshift/client-go/user/informers/externalversions/user/v1
 github.com/openshift/client-go/user/listers/user/v1
-# github.com/openshift/library-go v0.0.0-20251205073205-ab8d51820e0b
+# github.com/openshift/library-go v0.0.0-20260309173530-9ed71ac3148f
 ## explicit; go 1.24.0
 github.com/openshift/library-go/pkg/authentication/bootstrapauthenticator
 github.com/openshift/library-go/pkg/authorization/scopemetadata
@@ -1021,7 +1021,7 @@ k8s.io/apimachinery/pkg/version
 k8s.io/apimachinery/pkg/watch
 k8s.io/apimachinery/third_party/forked/golang/json
 k8s.io/apimachinery/third_party/forked/golang/reflect
-# k8s.io/apiserver v0.34.1 => github.com/openshift/kubernetes-apiserver v0.0.0-20260211130612-1431f3222f03
+# k8s.io/apiserver v0.34.1 => github.com/openshift/kubernetes-apiserver v0.0.0-20260415154523-acdcc04896b5
 ## explicit; go 1.24.0
 k8s.io/apiserver/pkg/admission
 k8s.io/apiserver/pkg/admission/configuration
@@ -1716,7 +1716,7 @@ sigs.k8s.io/yaml
 # k8s.io/api => k8s.io/api v0.34.1
 # k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.34.1
 # k8s.io/apimachinery => k8s.io/apimachinery v0.34.1
-# k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20260211130612-1431f3222f03
+# k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20260415154523-acdcc04896b5
 # k8s.io/cli-runtime => k8s.io/cli-runtime v0.34.1
 # k8s.io/client-go => k8s.io/client-go v0.34.1
 # k8s.io/cloud-provider => k8s.io/cloud-provider v0.34.1

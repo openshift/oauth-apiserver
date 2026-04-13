@@ -630,8 +630,8 @@ var (
 								reportProblemsToJiraComponent("Networking/router").
 								contactPerson("miciah").
 								productScope(ocpSpecific).
-								enhancementPR(legacyFeatureGateWithoutEnhancement).
-								enableIn(configv1.DevPreviewNoUpgrade).
+								enhancementPR("https://github.com/openshift/enhancements/pull/1687").
+								enableIn(configv1.DevPreviewNoUpgrade, configv1.TechPreviewNoUpgrade).
 								mustRegister()
 
 	FeatureGateMinimumKubeletVersion = newFeatureGate("MinimumKubeletVersion").
@@ -655,8 +655,16 @@ var (
 						contactPerson("swghosh").
 						productScope(ocpSpecific).
 						enhancementPR("https://github.com/openshift/enhancements/pull/1682").
-						enableIn(configv1.DevPreviewNoUpgrade, configv1.TechPreviewNoUpgrade).
+						enableIn(configv1.DevPreviewNoUpgrade).
 						mustRegister()
+
+	FeatureGateKMSEncryption = newFeatureGate("KMSEncryption").
+		reportProblemsToJiraComponent("kube-apiserver").
+		contactPerson("ardaguclu").
+		productScope(ocpSpecific).
+		enhancementPR("https://github.com/openshift/enhancements/pull/1900").
+		enableIn(configv1.DevPreviewNoUpgrade, configv1.TechPreviewNoUpgrade).
+		mustRegister()
 
 	FeatureGateHighlyAvailableArbiter = newFeatureGate("HighlyAvailableArbiter").
 						reportProblemsToJiraComponent("Two Node with Arbiter").
