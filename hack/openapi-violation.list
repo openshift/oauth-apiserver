@@ -134,7 +134,6 @@ API rule violation: list_type_missing,github.com/openshift/api/project/v1,Projec
 API rule violation: list_type_missing,github.com/openshift/api/project/v1,ProjectStatus,Conditions
 API rule violation: list_type_missing,github.com/openshift/api/user/v1,User,Groups
 API rule violation: list_type_missing,github.com/openshift/api/user/v1,User,Identities
-API rule violation: list_type_missing,k8s.io/api/storagemigration/v1alpha1,StorageVersionMigrationList,Items
 API rule violation: names_match,github.com/openshift/api/authorization/v1,Action,Group
 API rule violation: names_match,github.com/openshift/api/authorization/v1,Action,Version
 API rule violation: names_match,github.com/openshift/api/authorization/v1,GroupRestriction,Selectors
