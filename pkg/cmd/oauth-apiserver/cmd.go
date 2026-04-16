@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 
 	apifeatures "github.com/openshift/api/features"
 	"github.com/openshift/library-go/pkg/features"
@@ -14,6 +15,7 @@ import (
 	"github.com/openshift/oauth-apiserver/pkg/cmd/oauth-apiserver/openapiconfig"
 	"github.com/openshift/oauth-apiserver/pkg/serverscheme"
 	tokenvalidationoptions "github.com/openshift/oauth-apiserver/pkg/tokenvalidation/options"
+	"github.com/openshift/oauth-apiserver/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -49,6 +51,18 @@ type OAuthAPIServerOptions struct {
 }
 
 func NewOAuthAPIServerOptions(out io.Writer, featureGate featuregate.MutableFeatureGate) *OAuthAPIServerOptions {
+	// default to OpenShift 5 as the major version for feature gate
+	// initialization if no version information overrides this.
+	featureGatesMajorVersion := uint64(5)
+	parsedMajorVersion, err := strconv.ParseUint(version.Get().Major, 10, 64)
+	// only if we successfully parse the override
+	// for the major version do we actually override it,
+	// otherwise use the defined default.
+	if err == nil {
+		if parsedMajorVersion > 0 {
+			featureGatesMajorVersion = parsedMajorVersion
+		}
+	}
 	o := &OAuthAPIServerOptions{
 		GenericServerRunOptions: genericapiserveroptions.NewServerRunOptions(),
 		RecommendedOptions: genericapiserveroptions.NewRecommendedOptions(
@@ -56,7 +70,7 @@ func NewOAuthAPIServerOptions(out io.Writer, featureGate featuregate.MutableFeat
 			serverscheme.Codecs.LegacyCodec(serverscheme.Scheme.PrioritizedVersionsAllGroups()...),
 		),
 		TokenValidationOptions: tokenvalidationoptions.NewTokenValidationOptions(),
-		FeatureGateOptions:     features.NewFeatureGateOptionsOrDie(featureGate, apifeatures.SelfManaged),
+		FeatureGateOptions:     features.NewFeatureGateOptionsOrDie(featureGate, featureGatesMajorVersion, apifeatures.SelfManaged),
 		Output:                 out,
 	}
 	return o
