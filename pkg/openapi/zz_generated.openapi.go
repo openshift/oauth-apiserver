@@ -192,6 +192,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.AWSPlatformStatus":                               schema_openshift_api_config_v1_AWSPlatformStatus(ref),
 		"github.com/openshift/api/config/v1.AWSResourceTag":                                  schema_openshift_api_config_v1_AWSResourceTag(ref),
 		"github.com/openshift/api/config/v1.AWSServiceEndpoint":                              schema_openshift_api_config_v1_AWSServiceEndpoint(ref),
+		"github.com/openshift/api/config/v1.AcceptRisk":                                      schema_openshift_api_config_v1_AcceptRisk(ref),
 		"github.com/openshift/api/config/v1.AdmissionConfig":                                 schema_openshift_api_config_v1_AdmissionConfig(ref),
 		"github.com/openshift/api/config/v1.AdmissionPluginConfig":                           schema_openshift_api_config_v1_AdmissionPluginConfig(ref),
 		"github.com/openshift/api/config/v1.AlibabaCloudPlatformSpec":                        schema_openshift_api_config_v1_AlibabaCloudPlatformSpec(ref),
@@ -250,6 +251,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.ConsoleList":                                     schema_openshift_api_config_v1_ConsoleList(ref),
 		"github.com/openshift/api/config/v1.ConsoleSpec":                                     schema_openshift_api_config_v1_ConsoleSpec(ref),
 		"github.com/openshift/api/config/v1.ConsoleStatus":                                   schema_openshift_api_config_v1_ConsoleStatus(ref),
+		"github.com/openshift/api/config/v1.Custom":                                          schema_openshift_api_config_v1_Custom(ref),
 		"github.com/openshift/api/config/v1.CustomFeatureGates":                              schema_openshift_api_config_v1_CustomFeatureGates(ref),
 		"github.com/openshift/api/config/v1.CustomTLSProfile":                                schema_openshift_api_config_v1_CustomTLSProfile(ref),
 		"github.com/openshift/api/config/v1.DNS":                                             schema_openshift_api_config_v1_DNS(ref),
@@ -278,11 +280,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.FeatureGateSpec":                                 schema_openshift_api_config_v1_FeatureGateSpec(ref),
 		"github.com/openshift/api/config/v1.FeatureGateStatus":                               schema_openshift_api_config_v1_FeatureGateStatus(ref),
 		"github.com/openshift/api/config/v1.FeatureGateTests":                                schema_openshift_api_config_v1_FeatureGateTests(ref),
-		"github.com/openshift/api/config/v1.FulcioCAWithRekor":                               schema_openshift_api_config_v1_FulcioCAWithRekor(ref),
 		"github.com/openshift/api/config/v1.GCPPlatformSpec":                                 schema_openshift_api_config_v1_GCPPlatformSpec(ref),
 		"github.com/openshift/api/config/v1.GCPPlatformStatus":                               schema_openshift_api_config_v1_GCPPlatformStatus(ref),
 		"github.com/openshift/api/config/v1.GCPResourceLabel":                                schema_openshift_api_config_v1_GCPResourceLabel(ref),
 		"github.com/openshift/api/config/v1.GCPResourceTag":                                  schema_openshift_api_config_v1_GCPResourceTag(ref),
+		"github.com/openshift/api/config/v1.GatherConfig":                                    schema_openshift_api_config_v1_GatherConfig(ref),
+		"github.com/openshift/api/config/v1.GathererConfig":                                  schema_openshift_api_config_v1_GathererConfig(ref),
+		"github.com/openshift/api/config/v1.Gatherers":                                       schema_openshift_api_config_v1_Gatherers(ref),
 		"github.com/openshift/api/config/v1.GenericAPIServerConfig":                          schema_openshift_api_config_v1_GenericAPIServerConfig(ref),
 		"github.com/openshift/api/config/v1.GenericControllerConfig":                         schema_openshift_api_config_v1_GenericControllerConfig(ref),
 		"github.com/openshift/api/config/v1.GitHubIdentityProvider":                          schema_openshift_api_config_v1_GitHubIdentityProvider(ref),
@@ -309,9 +313,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.ImageLabel":                                      schema_openshift_api_config_v1_ImageLabel(ref),
 		"github.com/openshift/api/config/v1.ImageList":                                       schema_openshift_api_config_v1_ImageList(ref),
 		"github.com/openshift/api/config/v1.ImagePolicy":                                     schema_openshift_api_config_v1_ImagePolicy(ref),
+		"github.com/openshift/api/config/v1.ImagePolicyFulcioCAWithRekorRootOfTrust":         schema_openshift_api_config_v1_ImagePolicyFulcioCAWithRekorRootOfTrust(ref),
 		"github.com/openshift/api/config/v1.ImagePolicyList":                                 schema_openshift_api_config_v1_ImagePolicyList(ref),
+		"github.com/openshift/api/config/v1.ImagePolicyPKIRootOfTrust":                       schema_openshift_api_config_v1_ImagePolicyPKIRootOfTrust(ref),
+		"github.com/openshift/api/config/v1.ImagePolicyPublicKeyRootOfTrust":                 schema_openshift_api_config_v1_ImagePolicyPublicKeyRootOfTrust(ref),
 		"github.com/openshift/api/config/v1.ImagePolicySpec":                                 schema_openshift_api_config_v1_ImagePolicySpec(ref),
 		"github.com/openshift/api/config/v1.ImagePolicyStatus":                               schema_openshift_api_config_v1_ImagePolicyStatus(ref),
+		"github.com/openshift/api/config/v1.ImageSigstoreVerificationPolicy":                 schema_openshift_api_config_v1_ImageSigstoreVerificationPolicy(ref),
 		"github.com/openshift/api/config/v1.ImageSpec":                                       schema_openshift_api_config_v1_ImageSpec(ref),
 		"github.com/openshift/api/config/v1.ImageStatus":                                     schema_openshift_api_config_v1_ImageStatus(ref),
 		"github.com/openshift/api/config/v1.ImageTagMirrorSet":                               schema_openshift_api_config_v1_ImageTagMirrorSet(ref),
@@ -328,6 +336,9 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.IngressPlatformSpec":                             schema_openshift_api_config_v1_IngressPlatformSpec(ref),
 		"github.com/openshift/api/config/v1.IngressSpec":                                     schema_openshift_api_config_v1_IngressSpec(ref),
 		"github.com/openshift/api/config/v1.IngressStatus":                                   schema_openshift_api_config_v1_IngressStatus(ref),
+		"github.com/openshift/api/config/v1.InsightsDataGather":                              schema_openshift_api_config_v1_InsightsDataGather(ref),
+		"github.com/openshift/api/config/v1.InsightsDataGatherList":                          schema_openshift_api_config_v1_InsightsDataGatherList(ref),
+		"github.com/openshift/api/config/v1.InsightsDataGatherSpec":                          schema_openshift_api_config_v1_InsightsDataGatherSpec(ref),
 		"github.com/openshift/api/config/v1.IntermediateTLSProfile":                          schema_openshift_api_config_v1_IntermediateTLSProfile(ref),
 		"github.com/openshift/api/config/v1.KMSConfig":                                       schema_openshift_api_config_v1_KMSConfig(ref),
 		"github.com/openshift/api/config/v1.KeystoneIdentityProvider":                        schema_openshift_api_config_v1_KeystoneIdentityProvider(ref),
@@ -387,11 +398,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.OvirtPlatformLoadBalancer":                       schema_openshift_api_config_v1_OvirtPlatformLoadBalancer(ref),
 		"github.com/openshift/api/config/v1.OvirtPlatformSpec":                               schema_openshift_api_config_v1_OvirtPlatformSpec(ref),
 		"github.com/openshift/api/config/v1.OvirtPlatformStatus":                             schema_openshift_api_config_v1_OvirtPlatformStatus(ref),
-		"github.com/openshift/api/config/v1.PKI":                                             schema_openshift_api_config_v1_PKI(ref),
 		"github.com/openshift/api/config/v1.PKICertificateSubject":                           schema_openshift_api_config_v1_PKICertificateSubject(ref),
+		"github.com/openshift/api/config/v1.PersistentVolumeClaimReference":                  schema_openshift_api_config_v1_PersistentVolumeClaimReference(ref),
+		"github.com/openshift/api/config/v1.PersistentVolumeConfig":                          schema_openshift_api_config_v1_PersistentVolumeConfig(ref),
 		"github.com/openshift/api/config/v1.PlatformSpec":                                    schema_openshift_api_config_v1_PlatformSpec(ref),
 		"github.com/openshift/api/config/v1.PlatformStatus":                                  schema_openshift_api_config_v1_PlatformStatus(ref),
-		"github.com/openshift/api/config/v1.Policy":                                          schema_openshift_api_config_v1_Policy(ref),
 		"github.com/openshift/api/config/v1.PolicyFulcioSubject":                             schema_openshift_api_config_v1_PolicyFulcioSubject(ref),
 		"github.com/openshift/api/config/v1.PolicyIdentity":                                  schema_openshift_api_config_v1_PolicyIdentity(ref),
 		"github.com/openshift/api/config/v1.PolicyMatchExactRepository":                      schema_openshift_api_config_v1_PolicyMatchExactRepository(ref),
@@ -411,7 +422,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.ProxyList":                                       schema_openshift_api_config_v1_ProxyList(ref),
 		"github.com/openshift/api/config/v1.ProxySpec":                                       schema_openshift_api_config_v1_ProxySpec(ref),
 		"github.com/openshift/api/config/v1.ProxyStatus":                                     schema_openshift_api_config_v1_ProxyStatus(ref),
-		"github.com/openshift/api/config/v1.PublicKey":                                       schema_openshift_api_config_v1_PublicKey(ref),
 		"github.com/openshift/api/config/v1.RegistryLocation":                                schema_openshift_api_config_v1_RegistryLocation(ref),
 		"github.com/openshift/api/config/v1.RegistrySources":                                 schema_openshift_api_config_v1_RegistrySources(ref),
 		"github.com/openshift/api/config/v1.Release":                                         schema_openshift_api_config_v1_Release(ref),
@@ -426,6 +436,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.SecretNameReference":                             schema_openshift_api_config_v1_SecretNameReference(ref),
 		"github.com/openshift/api/config/v1.ServingInfo":                                     schema_openshift_api_config_v1_ServingInfo(ref),
 		"github.com/openshift/api/config/v1.SignatureStore":                                  schema_openshift_api_config_v1_SignatureStore(ref),
+		"github.com/openshift/api/config/v1.Storage":                                         schema_openshift_api_config_v1_Storage(ref),
 		"github.com/openshift/api/config/v1.StringSource":                                    schema_openshift_api_config_v1_StringSource(ref),
 		"github.com/openshift/api/config/v1.StringSourceSpec":                                schema_openshift_api_config_v1_StringSourceSpec(ref),
 		"github.com/openshift/api/config/v1.TLSProfileSpec":                                  schema_openshift_api_config_v1_TLSProfileSpec(ref),
@@ -438,10 +449,12 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openshift/api/config/v1.TokenClaimMapping":                               schema_openshift_api_config_v1_TokenClaimMapping(ref),
 		"github.com/openshift/api/config/v1.TokenClaimMappings":                              schema_openshift_api_config_v1_TokenClaimMappings(ref),
 		"github.com/openshift/api/config/v1.TokenClaimOrExpressionMapping":                   schema_openshift_api_config_v1_TokenClaimOrExpressionMapping(ref),
+		"github.com/openshift/api/config/v1.TokenClaimValidationCELRule":                     schema_openshift_api_config_v1_TokenClaimValidationCELRule(ref),
 		"github.com/openshift/api/config/v1.TokenClaimValidationRule":                        schema_openshift_api_config_v1_TokenClaimValidationRule(ref),
 		"github.com/openshift/api/config/v1.TokenConfig":                                     schema_openshift_api_config_v1_TokenConfig(ref),
 		"github.com/openshift/api/config/v1.TokenIssuer":                                     schema_openshift_api_config_v1_TokenIssuer(ref),
 		"github.com/openshift/api/config/v1.TokenRequiredClaim":                              schema_openshift_api_config_v1_TokenRequiredClaim(ref),
+		"github.com/openshift/api/config/v1.TokenUserValidationRule":                         schema_openshift_api_config_v1_TokenUserValidationRule(ref),
 		"github.com/openshift/api/config/v1.Update":                                          schema_openshift_api_config_v1_Update(ref),
 		"github.com/openshift/api/config/v1.UpdateHistory":                                   schema_openshift_api_config_v1_UpdateHistory(ref),
 		"github.com/openshift/api/config/v1.UsernameClaimMapping":                            schema_openshift_api_config_v1_UsernameClaimMapping(ref),
@@ -7035,6 +7048,13 @@ func schema_openshift_api_config_v1_APIServerSpec(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/openshift/api/config/v1.TLSSecurityProfile"),
 						},
 					},
+					"tlsAdherence": {
+						SchemaProps: spec.SchemaProps{
+							Description: "tlsAdherence controls if components in the cluster adhere to the TLS security profile configured on this APIServer resource.\n\nValid values are \"LegacyAdheringComponentsOnly\" and \"StrictAllComponents\".\n\nWhen set to \"LegacyAdheringComponentsOnly\", components that already honor the cluster-wide TLS profile continue to do so. Components that do not already honor it continue to use their individual TLS configurations.\n\nWhen set to \"StrictAllComponents\", all components must honor the configured TLS profile unless they have a component-specific TLS configuration that overrides it. This mode is recommended for security-conscious deployments and is required for certain compliance frameworks.\n\nNote: Some components such as Kubelet and IngressController have their own dedicated TLS configuration mechanisms via KubeletConfig and IngressController CRs respectively. When these component-specific TLS configurations are set, they take precedence over the cluster-wide tlsSecurityProfile. When not set, these components fall back to the cluster-wide default.\n\nComponents that encounter an unknown value for tlsAdherence should treat it as \"StrictAllComponents\" and log a warning to ensure forward compatibility while defaulting to the more secure behavior.\n\nThis field is optional. When omitted, this means the user has no opinion and the platform is left to choose reasonable defaults. These defaults are subject to change over time. The current default is LegacyAdheringComponentsOnly.\n\nOnce set, this field may be changed to a different value, but may not be removed.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"audit": {
 						SchemaProps: spec.SchemaProps{
 							Description: "audit specifies the settings for audit configuration to be applied to all OpenShift-provided API servers in the cluster.",
@@ -7069,7 +7089,7 @@ func schema_openshift_api_config_v1_AWSDNSSpec(ref common.ReferenceCallback) com
 				Properties: map[string]spec.Schema{
 					"privateZoneIAMRole": {
 						SchemaProps: spec.SchemaProps{
-							Description: "privateZoneIAMRole contains the ARN of an IAM role that should be assumed when performing operations on the cluster's private hosted zone specified in the cluster DNS config. When left empty, no role should be assumed.",
+							Description: "privateZoneIAMRole contains the ARN of an IAM role that should be assumed when performing operations on the cluster's private hosted zone specified in the cluster DNS config. When left empty, no role should be assumed.\n\nThe ARN must follow the format: arn:<partition>:iam::<account-id>:role/<role-name>, where: <partition> is the AWS partition (aws, aws-cn, aws-us-gov, or aws-eusc), <account-id> is a 12-digit numeric identifier for the AWS account, <role-name> is the IAM role name.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -7309,6 +7329,27 @@ func schema_openshift_api_config_v1_AWSServiceEndpoint(ref common.ReferenceCallb
 					},
 				},
 				Required: []string{"name", "url"},
+			},
+		},
+	}
+}
+
+func schema_openshift_api_config_v1_AcceptRisk(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "AcceptRisk represents a risk that is considered acceptable.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "name is the name of the acceptable risk. It must be a non-empty string and must not exceed 256 characters.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"name"},
 			},
 		},
 	}
@@ -8901,7 +8942,7 @@ func schema_openshift_api_config_v1_ClusterImagePolicySpec(ref common.ReferenceC
 						SchemaProps: spec.SchemaProps{
 							Description: "policy is a required field that contains configuration to allow scopes to be verified, and defines how images not matching the verification policy will be treated.",
 							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/openshift/api/config/v1.Policy"),
+							Ref:         ref("github.com/openshift/api/config/v1.ImageSigstoreVerificationPolicy"),
 						},
 					},
 				},
@@ -8909,7 +8950,7 @@ func schema_openshift_api_config_v1_ClusterImagePolicySpec(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.Policy"},
+			"github.com/openshift/api/config/v1.ImageSigstoreVerificationPolicy"},
 	}
 }
 
@@ -9624,12 +9665,34 @@ func schema_openshift_api_config_v1_ClusterVersionStatus(ref common.ReferenceCal
 							},
 						},
 					},
+					"conditionalUpdateRisks": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "conditionalUpdateRisks contains the list of risks associated with conditionalUpdates. When performing a conditional update, all its associated risks will be compared with the set of accepted risks in the spec.desiredUpdate.acceptRisks field. If all risks for a conditional update are included in the spec.desiredUpdate.acceptRisks set, the conditional update can proceed, otherwise it is blocked. The risk names in the list must be unique. conditionalUpdateRisks must not contain more than 500 entries.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openshift/api/config/v1.ConditionalUpdateRisk"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"desired", "observedGeneration", "versionHash", "availableUpdates"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.ClusterOperatorStatusCondition", "github.com/openshift/api/config/v1.ClusterVersionCapabilitiesStatus", "github.com/openshift/api/config/v1.ConditionalUpdate", "github.com/openshift/api/config/v1.Release", "github.com/openshift/api/config/v1.UpdateHistory"},
+			"github.com/openshift/api/config/v1.ClusterOperatorStatusCondition", "github.com/openshift/api/config/v1.ClusterVersionCapabilitiesStatus", "github.com/openshift/api/config/v1.ConditionalUpdate", "github.com/openshift/api/config/v1.ConditionalUpdateRisk", "github.com/openshift/api/config/v1.Release", "github.com/openshift/api/config/v1.UpdateHistory"},
 	}
 }
 
@@ -9854,6 +9917,26 @@ func schema_openshift_api_config_v1_ConditionalUpdate(ref common.ReferenceCallba
 							Ref:         ref("github.com/openshift/api/config/v1.Release"),
 						},
 					},
+					"riskNames": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "riskNames represents the set of the names of conditionalUpdateRisks that are relevant to this update for some clusters. The Applies condition of each conditionalUpdateRisks entry declares if that risk applies to this cluster. A conditional update is accepted only if each of its risks either does not apply to the cluster or is considered acceptable by the cluster administrator. The latter means that the risk names are included in value of the spec.desiredUpdate.acceptRisks field. Entries must be unique and must not exceed 256 characters. riskNames must not contain more than 500 entries.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 					"risks": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
@@ -9916,6 +9999,28 @@ func schema_openshift_api_config_v1_ConditionalUpdateRisk(ref common.ReferenceCa
 				Description: "ConditionalUpdateRisk represents a reason and cluster-state for not recommending a conditional update.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"type",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "conditions represents the observations of the conditional update risk's current status. Known types are: * Applies, for whether the risk applies to the current cluster. The condition's types in the list must be unique. conditions must not contain more than one entry.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref(metav1.Condition{}.OpenAPIModelName()),
+									},
+								},
+							},
+						},
+					},
 					"url": {
 						SchemaProps: spec.SchemaProps{
 							Description: "url contains information about this risk.",
@@ -9964,7 +10069,7 @@ func schema_openshift_api_config_v1_ConditionalUpdateRisk(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.ClusterCondition"},
+			"github.com/openshift/api/config/v1.ClusterCondition", metav1.Condition{}.OpenAPIModelName()},
 	}
 }
 
@@ -10181,6 +10286,44 @@ func schema_openshift_api_config_v1_ConsoleStatus(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_openshift_api_config_v1_Custom(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Custom provides the custom configuration of gatherers",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"configs": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "configs is a required list of gatherers configurations that can be used to enable or disable specific gatherers. It may not exceed 100 items and each gatherer can be present only once. It is possible to disable an entire set of gatherers while allowing a specific function within that set. The particular gatherers IDs can be found at https://github.com/openshift/insights-operator/blob/master/docs/gathered-data.md. Run the following command to get the names of last active gatherers: \"oc get insightsoperators.operator.openshift.io cluster -o json | jq '.status.gatherStatus.gatherers[].name'\"",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openshift/api/config/v1.GathererConfig"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"configs"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.GathererConfig"},
+	}
+}
+
 func schema_openshift_api_config_v1_CustomFeatureGates(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -10237,7 +10380,7 @@ func schema_openshift_api_config_v1_CustomTLSProfile(ref common.ReferenceCallbac
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "ciphers is used to specify the cipher algorithms that are negotiated during the TLS handshake.  Operators may remove entries their operands do not support.  For example, to use DES-CBC3-SHA  (yaml):\n\n  ciphers:\n    - DES-CBC3-SHA",
+							Description: "ciphers is used to specify the cipher algorithms that are negotiated during the TLS handshake. Operators may remove entries that their operands do not support. For example, to use only ECDHE-RSA-AES128-GCM-SHA256 (yaml):\n\n  ciphers:\n    - ECDHE-RSA-AES128-GCM-SHA256\n\nTLS 1.3 cipher suites (e.g. TLS_AES_128_GCM_SHA256) are not configurable and are always enabled when TLS 1.3 is negotiated.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -10252,7 +10395,7 @@ func schema_openshift_api_config_v1_CustomTLSProfile(ref common.ReferenceCallbac
 					},
 					"minTLSVersion": {
 						SchemaProps: spec.SchemaProps{
-							Description: "minTLSVersion is used to specify the minimal version of the TLS protocol that is negotiated during the TLS handshake. For example, to use TLS versions 1.1, 1.2 and 1.3 (yaml):\n\n  minTLSVersion: VersionTLS11\n\nNOTE: currently the highest minTLSVersion allowed is VersionTLS12",
+							Description: "minTLSVersion is used to specify the minimal version of the TLS protocol that is negotiated during the TLS handshake. For example, to use TLS versions 1.1, 1.2 and 1.3 (yaml):\n\n  minTLSVersion: VersionTLS11",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -11223,43 +11366,6 @@ func schema_openshift_api_config_v1_FeatureGateTests(ref common.ReferenceCallbac
 	}
 }
 
-func schema_openshift_api_config_v1_FulcioCAWithRekor(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "FulcioCAWithRekor defines the root of trust based on the Fulcio certificate and the Rekor public key.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"fulcioCAData": {
-						SchemaProps: spec.SchemaProps{
-							Description: "fulcioCAData is a required field contains inline base64-encoded data for the PEM format fulcio CA. fulcioCAData must be at most 8192 characters.",
-							Type:        []string{"string"},
-							Format:      "byte",
-						},
-					},
-					"rekorKeyData": {
-						SchemaProps: spec.SchemaProps{
-							Description: "rekorKeyData is a required field contains inline base64-encoded data for the PEM format from the Rekor public key. rekorKeyData must be at most 8192 characters.",
-							Type:        []string{"string"},
-							Format:      "byte",
-						},
-					},
-					"fulcioSubject": {
-						SchemaProps: spec.SchemaProps{
-							Description: "fulcioSubject is a required field specifies OIDC issuer and the email of the Fulcio authentication configuration.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/openshift/api/config/v1.PolicyFulcioSubject"),
-						},
-					},
-				},
-				Required: []string{"fulcioCAData", "rekorKeyData", "fulcioSubject"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/openshift/api/config/v1.PolicyFulcioSubject"},
-	}
-}
-
 func schema_openshift_api_config_v1_GCPPlatformSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -11422,6 +11528,126 @@ func schema_openshift_api_config_v1_GCPResourceTag(ref common.ReferenceCallback)
 	}
 }
 
+func schema_openshift_api_config_v1_GatherConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GatherConfig provides data gathering configuration options.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"dataPolicy": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "atomic",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "dataPolicy is an optional list of DataPolicyOptions that allows user to enable additional obfuscation of the Insights archive data. It may not exceed 2 items and must not contain duplicates. Valid values are ObfuscateNetworking and WorkloadNames. When set to ObfuscateNetworking the IP addresses and the cluster domain name are obfuscated. When set to WorkloadNames, the gathered data about cluster resources will not contain the workload names for your deployments. Resources UIDs will be used instead. When omitted no obfuscation is applied.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"gatherers": {
+						SchemaProps: spec.SchemaProps{
+							Description: "gatherers is a required field that specifies the configuration of the gatherers.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.Gatherers"),
+						},
+					},
+					"storage": {
+						SchemaProps: spec.SchemaProps{
+							Description: "storage is an optional field that allows user to define persistent storage for gathering jobs to store the Insights data archive. If omitted, the gathering job will use ephemeral storage.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.Storage"),
+						},
+					},
+				},
+				Required: []string{"gatherers"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.Gatherers", "github.com/openshift/api/config/v1.Storage"},
+	}
+}
+
+func schema_openshift_api_config_v1_GathererConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GathererConfig allows to configure specific gatherers",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "name is the required name of a specific gatherer. It may not exceed 256 characters. The format for a gatherer name is: {gatherer}/{function} where the function is optional. Gatherer consists of a lowercase letters only that may include underscores (_). Function consists of a lowercase letters only that may include underscores (_) and is separated from the gatherer by a forward slash (/). The particular gatherers can be found at https://github.com/openshift/insights-operator/blob/master/docs/gathered-data.md. Run the following command to get the names of last active gatherers: \"oc get insightsoperators.operator.openshift.io cluster -o json | jq '.status.gatherStatus.gatherers[].name'\"",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"state": {
+						SchemaProps: spec.SchemaProps{
+							Description: "state is a required field that allows you to configure specific gatherer. Valid values are \"Enabled\" and \"Disabled\". When set to Enabled the gatherer will run. When set to Disabled the gatherer will not run.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"name", "state"},
+			},
+		},
+	}
+}
+
+func schema_openshift_api_config_v1_Gatherers(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Gatherers specifies the configuration of the gatherers",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"mode": {
+						SchemaProps: spec.SchemaProps{
+							Description: "mode is a required field that specifies the mode for gatherers. Allowed values are All, None, and Custom. When set to All, all gatherers will run and gather data. When set to None, all gatherers will be disabled and no data will be gathered. When set to Custom, the custom configuration from the custom field will be applied.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"custom": {
+						SchemaProps: spec.SchemaProps{
+							Description: "custom provides gathering configuration. It is required when mode is Custom, and forbidden otherwise. Custom configuration allows user to disable only a subset of gatherers. Gatherers that are not explicitly disabled in custom configuration will run.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.Custom"),
+						},
+					},
+				},
+				Required: []string{"mode"},
+			},
+			VendorExtensible: spec.VendorExtensible{
+				Extensions: spec.Extensions{
+					"x-kubernetes-unions": []interface{}{
+						map[string]interface{}{
+							"discriminator": "mode",
+							"fields-to-discriminateBy": map[string]interface{}{
+								"custom": "Custom",
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.Custom"},
+	}
+}
+
 func schema_openshift_api_config_v1_GenericAPIServerConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -11491,9 +11717,23 @@ func schema_openshift_api_config_v1_GenericControllerConfig(ref common.Reference
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "GenericControllerConfig provides information to configure a controller",
+				Description: "GenericControllerConfig provides information to configure a controller\n\nCompatibility level 1: Stable within a major release for a minimum of 12 months or 3 minor releases (whichever is longer).",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"servingInfo": {
 						SchemaProps: spec.SchemaProps{
 							Description: "servingInfo is the HTTP serving information for the controller's endpoints",
@@ -12694,6 +12934,43 @@ func schema_openshift_api_config_v1_ImagePolicy(ref common.ReferenceCallback) co
 	}
 }
 
+func schema_openshift_api_config_v1_ImagePolicyFulcioCAWithRekorRootOfTrust(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ImagePolicyFulcioCAWithRekorRootOfTrust defines the root of trust based on the Fulcio certificate and the Rekor public key.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"fulcioCAData": {
+						SchemaProps: spec.SchemaProps{
+							Description: "fulcioCAData is a required field contains inline base64-encoded data for the PEM format fulcio CA. fulcioCAData must be at most 8192 characters.",
+							Type:        []string{"string"},
+							Format:      "byte",
+						},
+					},
+					"rekorKeyData": {
+						SchemaProps: spec.SchemaProps{
+							Description: "rekorKeyData is a required field contains inline base64-encoded data for the PEM format from the Rekor public key. rekorKeyData must be at most 8192 characters.",
+							Type:        []string{"string"},
+							Format:      "byte",
+						},
+					},
+					"fulcioSubject": {
+						SchemaProps: spec.SchemaProps{
+							Description: "fulcioSubject is a required field specifies OIDC issuer and the email of the Fulcio authentication configuration.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.PolicyFulcioSubject"),
+						},
+					},
+				},
+				Required: []string{"fulcioCAData", "rekorKeyData", "fulcioSubject"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.PolicyFulcioSubject"},
+	}
+}
+
 func schema_openshift_api_config_v1_ImagePolicyList(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -12745,6 +13022,71 @@ func schema_openshift_api_config_v1_ImagePolicyList(ref common.ReferenceCallback
 	}
 }
 
+func schema_openshift_api_config_v1_ImagePolicyPKIRootOfTrust(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ImagePolicyPKIRootOfTrust defines the root of trust based on Root CA(s) and corresponding intermediate certificates.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"caRootsData": {
+						SchemaProps: spec.SchemaProps{
+							Description: "caRootsData contains base64-encoded data of a certificate bundle PEM file, which contains one or more CA roots in the PEM format. The total length of the data must not exceed 8192 characters.",
+							Type:        []string{"string"},
+							Format:      "byte",
+						},
+					},
+					"caIntermediatesData": {
+						SchemaProps: spec.SchemaProps{
+							Description: "caIntermediatesData contains base64-encoded data of a certificate bundle PEM file, which contains one or more intermediate certificates in the PEM format. The total length of the data must not exceed 8192 characters. caIntermediatesData requires caRootsData to be set.",
+							Type:        []string{"string"},
+							Format:      "byte",
+						},
+					},
+					"pkiCertificateSubject": {
+						SchemaProps: spec.SchemaProps{
+							Description: "pkiCertificateSubject defines the requirements imposed on the subject to which the certificate was issued.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.PKICertificateSubject"),
+						},
+					},
+				},
+				Required: []string{"caRootsData", "pkiCertificateSubject"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.PKICertificateSubject"},
+	}
+}
+
+func schema_openshift_api_config_v1_ImagePolicyPublicKeyRootOfTrust(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ImagePolicyPublicKeyRootOfTrust defines the root of trust based on a sigstore public key.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"keyData": {
+						SchemaProps: spec.SchemaProps{
+							Description: "keyData is a required field contains inline base64-encoded data for the PEM format public key. keyData must be at most 8192 characters.",
+							Type:        []string{"string"},
+							Format:      "byte",
+						},
+					},
+					"rekorKeyData": {
+						SchemaProps: spec.SchemaProps{
+							Description: "rekorKeyData is an optional field contains inline base64-encoded data for the PEM format from the Rekor public key. rekorKeyData must be at most 8192 characters.",
+							Type:        []string{"string"},
+							Format:      "byte",
+						},
+					},
+				},
+				Required: []string{"keyData"},
+			},
+		},
+	}
+}
+
 func schema_openshift_api_config_v1_ImagePolicySpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -12776,7 +13118,7 @@ func schema_openshift_api_config_v1_ImagePolicySpec(ref common.ReferenceCallback
 						SchemaProps: spec.SchemaProps{
 							Description: "policy is a required field that contains configuration to allow scopes to be verified, and defines how images not matching the verification policy will be treated.",
 							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/openshift/api/config/v1.Policy"),
+							Ref:         ref("github.com/openshift/api/config/v1.ImageSigstoreVerificationPolicy"),
 						},
 					},
 				},
@@ -12784,7 +13126,7 @@ func schema_openshift_api_config_v1_ImagePolicySpec(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.Policy"},
+			"github.com/openshift/api/config/v1.ImageSigstoreVerificationPolicy"},
 	}
 }
 
@@ -12821,6 +13163,35 @@ func schema_openshift_api_config_v1_ImagePolicyStatus(ref common.ReferenceCallba
 		},
 		Dependencies: []string{
 			metav1.Condition{}.OpenAPIModelName()},
+	}
+}
+
+func schema_openshift_api_config_v1_ImageSigstoreVerificationPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ImageSigstoreVerificationPolicy defines the verification policy for the items in the scopes list.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"rootOfTrust": {
+						SchemaProps: spec.SchemaProps{
+							Description: "rootOfTrust is a required field that defines the root of trust for verifying image signatures during retrieval. This allows image consumers to specify policyType and corresponding configuration of the policy, matching how the policy was generated.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.PolicyRootOfTrust"),
+						},
+					},
+					"signedIdentity": {
+						SchemaProps: spec.SchemaProps{
+							Description: "signedIdentity is an optional field specifies what image identity the signature claims about the image. This is useful when the image identity in the signature differs from the original image spec, such as when mirror registry is configured for the image scope, the signature from the mirror registry contains the image identity of the mirror instead of the original scope. The required matchPolicy field specifies the approach used in the verification process to verify the identity in the signature and the actual image identity, the default matchPolicy is \"MatchRepoDigestOrExact\".",
+							Ref:         ref("github.com/openshift/api/config/v1.PolicyIdentity"),
+						},
+					},
+				},
+				Required: []string{"rootOfTrust"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.PolicyIdentity", "github.com/openshift/api/config/v1.PolicyRootOfTrust"},
 	}
 }
 
@@ -13325,7 +13696,7 @@ func schema_openshift_api_config_v1_InfrastructureStatus(ref common.ReferenceCal
 					},
 					"controlPlaneTopology": {
 						SchemaProps: spec.SchemaProps{
-							Description: "controlPlaneTopology expresses the expectations for operands that normally run on control nodes. The default is 'HighlyAvailable', which represents the behavior operators have in a \"normal\" cluster. The 'SingleReplica' mode will be used in single-node deployments and the operators should not configure the operand for highly-available operation The 'External' mode indicates that the control plane is hosted externally to the cluster and that its components are not visible within the cluster.",
+							Description: "controlPlaneTopology expresses the expectations for operands that normally run on control nodes. The default is 'HighlyAvailable', which represents the behavior operators have in a \"normal\" cluster. The 'SingleReplica' mode will be used in single-node deployments and the operators should not configure the operand for highly-available operation The 'External' mode indicates that the control plane is hosted externally to the cluster and that its components are not visible within the cluster. The 'HighlyAvailableArbiter' mode indicates that the control plane will consist of 2 control-plane nodes that run conventional services and 1 smaller sized arbiter node that runs a bare minimum of services to maintain quorum.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -13616,11 +13987,129 @@ func schema_openshift_api_config_v1_IngressStatus(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_openshift_api_config_v1_InsightsDataGather(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "InsightsDataGather provides data gather configuration options for the Insights Operator.\n\n\n\nCompatibility level 1: Stable within a major release for a minimum of 12 months or 3 minor releases (whichever is longer).",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "metadata is the standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",
+							Default:     map[string]interface{}{},
+							Ref:         ref(metav1.ObjectMeta{}.OpenAPIModelName()),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "spec holds user settable values for configuration",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.InsightsDataGatherSpec"),
+						},
+					},
+				},
+				Required: []string{"spec"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.InsightsDataGatherSpec", metav1.ObjectMeta{}.OpenAPIModelName()},
+	}
+}
+
+func schema_openshift_api_config_v1_InsightsDataGatherList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "InsightsDataGatherList is a collection of items Compatibility level 1: Stable within a major release for a minimum of 12 months or 3 minor releases (whichever is longer).",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "metadata is the required standard list's metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata",
+							Default:     map[string]interface{}{},
+							Ref:         ref(metav1.ListMeta{}.OpenAPIModelName()),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Description: "items is the required list of InsightsDataGather objects it may not exceed 100 items",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openshift/api/config/v1.InsightsDataGather"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"metadata", "items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.InsightsDataGather", metav1.ListMeta{}.OpenAPIModelName()},
+	}
+}
+
+func schema_openshift_api_config_v1_InsightsDataGatherSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "InsightsDataGatherSpec contains the configuration for the data gathering.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"gatherConfig": {
+						SchemaProps: spec.SchemaProps{
+							Description: "gatherConfig is a required spec attribute that includes all the configuration options related to gathering of the Insights data and its uploading to the ingress.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.GatherConfig"),
+						},
+					},
+				},
+				Required: []string{"gatherConfig"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.GatherConfig"},
+	}
+}
+
 func schema_openshift_api_config_v1_IntermediateTLSProfile(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "IntermediateTLSProfile is a TLS security profile based on: https://wiki.mozilla.org/Security/Server_Side_TLS#Intermediate_compatibility_.28default.29",
+				Description: "IntermediateTLSProfile is a TLS security profile based on the \"intermediate\" configuration of the Mozilla Server Side TLS configuration guidelines.",
 				Type:        []string{"object"},
 			},
 		},
@@ -14087,7 +14576,7 @@ func schema_openshift_api_config_v1_ModernTLSProfile(ref common.ReferenceCallbac
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ModernTLSProfile is a TLS security profile based on: https://wiki.mozilla.org/Security/Server_Side_TLS#Modern_compatibility",
+				Description: "ModernTLSProfile is a TLS security profile based on the \"modern\" configuration of the Mozilla Server Side TLS configuration guidelines.",
 				Type:        []string{"object"},
 			},
 		},
@@ -15343,12 +15832,12 @@ func schema_openshift_api_config_v1_OIDCClientConfig(ref common.ReferenceCallbac
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "OIDCClientConfig configures how platform clients interact with identity providers as an authentication method",
+				Description: "OIDCClientConfig configures how platform clients interact with identity providers as an authentication method.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"componentName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "componentName is a required field that specifies the name of the platform component being configured to use the identity provider as an authentication mode. It is used in combination with componentNamespace as a unique identifier.\n\ncomponentName must not be an empty string (\"\") and must not exceed 256 characters in length.",
+							Description: "componentName is a required field that specifies the name of the platform component being configured to use the identity provider as an authentication mode.\n\nIt is used in combination with componentNamespace as a unique identifier.\n\ncomponentName must not be an empty string (\"\") and must not exceed 256 characters in length.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -15356,7 +15845,7 @@ func schema_openshift_api_config_v1_OIDCClientConfig(ref common.ReferenceCallbac
 					},
 					"componentNamespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "componentNamespace is a required field that specifies the namespace in which the platform component being configured to use the identity provider as an authentication mode is running. It is used in combination with componentName as a unique identifier.\n\ncomponentNamespace must not be an empty string (\"\") and must not exceed 63 characters in length.",
+							Description: "componentNamespace is a required field that specifies the namespace in which the platform component being configured to use the identity provider as an authentication mode is running.\n\nIt is used in combination with componentName as a unique identifier.\n\ncomponentNamespace must not be an empty string (\"\") and must not exceed 63 characters in length.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -15372,7 +15861,7 @@ func schema_openshift_api_config_v1_OIDCClientConfig(ref common.ReferenceCallbac
 					},
 					"clientSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "clientSecret is an optional field that configures the client secret used by the platform component when making authentication requests to the identity provider.\n\nWhen not specified, no client secret will be used when making authentication requests to the identity provider.\n\nWhen specified, clientSecret references a Secret in the 'openshift-config' namespace that contains the client secret in the 'clientSecret' key of the '.data' field. The client secret will be used when making authentication requests to the identity provider.\n\nPublic clients do not require a client secret but private clients do require a client secret to work with the identity provider.",
+							Description: "clientSecret is an optional field that configures the client secret used by the platform component when making authentication requests to the identity provider.\n\nWhen not specified, no client secret will be used when making authentication requests to the identity provider.\n\nWhen specified, clientSecret references a Secret in the 'openshift-config' namespace that contains the client secret in the 'clientSecret' key of the '.data' field.\n\nThe client secret will be used when making authentication requests to the identity provider.\n\nPublic clients do not require a client secret but private clients do require a client secret to work with the identity provider.",
 							Default:     map[string]interface{}{},
 							Ref:         ref("github.com/openshift/api/config/v1.SecretNameReference"),
 						},
@@ -15461,7 +15950,7 @@ func schema_openshift_api_config_v1_OIDCClientStatus(ref common.ReferenceCallbac
 					},
 					"componentNamespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "componentNamespace is a required field that specifies the namespace in which the platform component using the identity provider as an authentication mode is running. It is used in combination with componentName as a unique identifier.\n\ncomponentNamespace must not be an empty string (\"\") and must not exceed 63 characters in length.",
+							Description: "componentNamespace is a required field that specifies the namespace in which the platform component using the identity provider as an authentication mode is running.\n\nIt is used in combination with componentName as a unique identifier.\n\ncomponentNamespace must not be an empty string (\"\") and must not exceed 63 characters in length.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -15478,7 +15967,7 @@ func schema_openshift_api_config_v1_OIDCClientStatus(ref common.ReferenceCallbac
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "currentOIDCClients is an optional list of clients that the component is currently using. Entries must have unique issuerURL/clientID pairs.",
+							Description: "currentOIDCClients is an optional list of clients that the component is currently using.\n\nEntries must have unique issuerURL/clientID pairs.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -15611,12 +16100,34 @@ func schema_openshift_api_config_v1_OIDCProvider(ref common.ReferenceCallback) c
 							},
 						},
 					},
+					"userValidationRules": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"expression",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "userValidationRules is an optional field that configures the set of rules used to validate the cluster user identity that was constructed via mapping token claims to user identity attributes. Rules are CEL expressions that must evaluate to 'true' for authentication to succeed. If any rule in the chain of rules evaluates to 'false', authentication will fail. When specified, at least one rule must be specified and no more than 64 rules may be specified.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openshift/api/config/v1.TokenUserValidationRule"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"name", "issuer", "claimMappings"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.OIDCClientConfig", "github.com/openshift/api/config/v1.TokenClaimMappings", "github.com/openshift/api/config/v1.TokenClaimValidationRule", "github.com/openshift/api/config/v1.TokenIssuer"},
+			"github.com/openshift/api/config/v1.OIDCClientConfig", "github.com/openshift/api/config/v1.TokenClaimMappings", "github.com/openshift/api/config/v1.TokenClaimValidationRule", "github.com/openshift/api/config/v1.TokenIssuer", "github.com/openshift/api/config/v1.TokenUserValidationRule"},
 	}
 }
 
@@ -15669,7 +16180,7 @@ func schema_openshift_api_config_v1_OldTLSProfile(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "OldTLSProfile is a TLS security profile based on: https://wiki.mozilla.org/Security/Server_Side_TLS#Old_backward_compatibility",
+				Description: "OldTLSProfile is a TLS security profile based on the \"old\" configuration of the Mozilla Server Side TLS configuration guidelines.",
 				Type:        []string{"object"},
 			},
 		},
@@ -16403,43 +16914,6 @@ func schema_openshift_api_config_v1_OvirtPlatformStatus(ref common.ReferenceCall
 	}
 }
 
-func schema_openshift_api_config_v1_PKI(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "PKI defines the root of trust based on Root CA(s) and corresponding intermediate certificates.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"caRootsData": {
-						SchemaProps: spec.SchemaProps{
-							Description: "caRootsData contains base64-encoded data of a certificate bundle PEM file, which contains one or more CA roots in the PEM format. The total length of the data must not exceed 8192 characters.",
-							Type:        []string{"string"},
-							Format:      "byte",
-						},
-					},
-					"caIntermediatesData": {
-						SchemaProps: spec.SchemaProps{
-							Description: "caIntermediatesData contains base64-encoded data of a certificate bundle PEM file, which contains one or more intermediate certificates in the PEM format. The total length of the data must not exceed 8192 characters. caIntermediatesData requires caRootsData to be set.",
-							Type:        []string{"string"},
-							Format:      "byte",
-						},
-					},
-					"pkiCertificateSubject": {
-						SchemaProps: spec.SchemaProps{
-							Description: "pkiCertificateSubject defines the requirements imposed on the subject to which the certificate was issued.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/openshift/api/config/v1.PKICertificateSubject"),
-						},
-					},
-				},
-				Required: []string{"caRootsData", "pkiCertificateSubject"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/openshift/api/config/v1.PKICertificateSubject"},
-	}
-}
-
 func schema_openshift_api_config_v1_PKICertificateSubject(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -16467,6 +16941,57 @@ func schema_openshift_api_config_v1_PKICertificateSubject(ref common.ReferenceCa
 	}
 }
 
+func schema_openshift_api_config_v1_PersistentVolumeClaimReference(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PersistentVolumeClaimReference is a reference to a PersistentVolumeClaim.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "name is the name of the PersistentVolumeClaim that will be used to store the Insights data archive. It is a string that follows the DNS1123 subdomain format. It must be at most 253 characters in length, and must consist only of lower case alphanumeric characters, '-' and '.', and must start and end with an alphanumeric character.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"name"},
+			},
+		},
+	}
+}
+
+func schema_openshift_api_config_v1_PersistentVolumeConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PersistentVolumeConfig provides configuration options for PersistentVolume storage.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"claim": {
+						SchemaProps: spec.SchemaProps{
+							Description: "claim is a required field that specifies the configuration of the PersistentVolumeClaim that will be used to store the Insights data archive. The PersistentVolumeClaim must be created in the openshift-insights namespace.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.PersistentVolumeClaimReference"),
+						},
+					},
+					"mountPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "mountPath is an optional field specifying the directory where the PVC will be mounted inside the Insights data gathering Pod. When omitted, this means no opinion and the platform is left to choose a reasonable default, which is subject to change over time. The current default mount path is /var/lib/insights-operator The path may not exceed 1024 characters and must not contain a colon.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"claim"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.PersistentVolumeClaimReference"},
+	}
+}
+
 func schema_openshift_api_config_v1_PlatformSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -16476,7 +17001,7 @@ func schema_openshift_api_config_v1_PlatformSpec(ref common.ReferenceCallback) c
 				Properties: map[string]spec.Schema{
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "type is the underlying infrastructure provider for the cluster. This value controls whether infrastructure automation such as service load balancers, dynamic volume provisioning, machine creation and deletion, and other integrations are enabled. If None, no infrastructure automation is enabled. Allowed values are \"AWS\", \"Azure\", \"BareMetal\", \"GCP\", \"Libvirt\", \"OpenStack\", \"VSphere\", \"oVirt\", \"KubeVirt\", \"EquinixMetal\", \"PowerVS\", \"AlibabaCloud\", \"Nutanix\" and \"None\". Individual components may not support all platforms, and must handle unrecognized platforms as None if they do not support that platform.",
+							Description: "type is the underlying infrastructure provider for the cluster. This value controls whether infrastructure automation such as service load balancers, dynamic volume provisioning, machine creation and deletion, and other integrations are enabled. If None, no infrastructure automation is enabled. Allowed values are \"AWS\", \"Azure\", \"BareMetal\", \"GCP\", \"Libvirt\", \"OpenStack\", \"VSphere\", \"oVirt\", \"IBMCloud\", \"KubeVirt\", \"EquinixMetal\", \"PowerVS\", \"AlibabaCloud\", \"Nutanix\", \"External\", and \"None\". Individual components may not support all platforms, and must handle unrecognized platforms as None if they do not support that platform.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -16683,35 +17208,6 @@ func schema_openshift_api_config_v1_PlatformStatus(ref common.ReferenceCallback)
 	}
 }
 
-func schema_openshift_api_config_v1_Policy(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Policy defines the verification policy for the items in the scopes list.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"rootOfTrust": {
-						SchemaProps: spec.SchemaProps{
-							Description: "rootOfTrust is a required field that defines the root of trust for verifying image signatures during retrieval. This allows image consumers to specify policyType and corresponding configuration of the policy, matching how the policy was generated.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/openshift/api/config/v1.PolicyRootOfTrust"),
-						},
-					},
-					"signedIdentity": {
-						SchemaProps: spec.SchemaProps{
-							Description: "signedIdentity is an optional field specifies what image identity the signature claims about the image. This is useful when the image identity in the signature differs from the original image spec, such as when mirror registry is configured for the image scope, the signature from the mirror registry contains the image identity of the mirror instead of the original scope. The required matchPolicy field specifies the approach used in the verification process to verify the identity in the signature and the actual image identity, the default matchPolicy is \"MatchRepoDigestOrExact\".",
-							Ref:         ref("github.com/openshift/api/config/v1.PolicyIdentity"),
-						},
-					},
-				},
-				Required: []string{"rootOfTrust"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/openshift/api/config/v1.PolicyIdentity", "github.com/openshift/api/config/v1.PolicyRootOfTrust"},
-	}
-}
-
 func schema_openshift_api_config_v1_PolicyFulcioSubject(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -16859,19 +17355,19 @@ func schema_openshift_api_config_v1_PolicyRootOfTrust(ref common.ReferenceCallba
 					"publicKey": {
 						SchemaProps: spec.SchemaProps{
 							Description: "publicKey defines the root of trust configuration based on a sigstore public key. Optionally include a Rekor public key for Rekor verification. publicKey is required when policyType is PublicKey, and forbidden otherwise.",
-							Ref:         ref("github.com/openshift/api/config/v1.PublicKey"),
+							Ref:         ref("github.com/openshift/api/config/v1.ImagePolicyPublicKeyRootOfTrust"),
 						},
 					},
 					"fulcioCAWithRekor": {
 						SchemaProps: spec.SchemaProps{
 							Description: "fulcioCAWithRekor defines the root of trust configuration based on the Fulcio certificate and the Rekor public key. fulcioCAWithRekor is required when policyType is FulcioCAWithRekor, and forbidden otherwise For more information about Fulcio and Rekor, please refer to the document at: https://github.com/sigstore/fulcio and https://github.com/sigstore/rekor",
-							Ref:         ref("github.com/openshift/api/config/v1.FulcioCAWithRekor"),
+							Ref:         ref("github.com/openshift/api/config/v1.ImagePolicyFulcioCAWithRekorRootOfTrust"),
 						},
 					},
 					"pki": {
 						SchemaProps: spec.SchemaProps{
 							Description: "pki defines the root of trust configuration based on Bring Your Own Public Key Infrastructure (BYOPKI) Root CA(s) and corresponding intermediate certificates. pki is required when policyType is PKI, and forbidden otherwise.",
-							Ref:         ref("github.com/openshift/api/config/v1.PKI"),
+							Ref:         ref("github.com/openshift/api/config/v1.ImagePolicyPKIRootOfTrust"),
 						},
 					},
 				},
@@ -16893,7 +17389,7 @@ func schema_openshift_api_config_v1_PolicyRootOfTrust(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.FulcioCAWithRekor", "github.com/openshift/api/config/v1.PKI", "github.com/openshift/api/config/v1.PublicKey"},
+			"github.com/openshift/api/config/v1.ImagePolicyFulcioCAWithRekorRootOfTrust", "github.com/openshift/api/config/v1.ImagePolicyPKIRootOfTrust", "github.com/openshift/api/config/v1.ImagePolicyPublicKeyRootOfTrust"},
 	}
 }
 
@@ -17049,22 +17545,28 @@ func schema_openshift_api_config_v1_PrefixedClaimMapping(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"claim": {
 						SchemaProps: spec.SchemaProps{
-							Description: "claim is a required field that configures the JWT token claim whose value is assigned to the cluster identity field associated with this mapping.",
+							Description: "claim is an optional field for specifying the JWT token claim that is used in the mapping. The value of this claim will be assigned to the field in which this mapping is associated. claim must not exceed 256 characters in length. When set to the empty string `\"\"`, this means that no named claim should be used for the group mapping. claim is required when the ExternalOIDCWithUpstreamParity feature gate is not enabled.",
 							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"expression": {
+						SchemaProps: spec.SchemaProps{
+							Description: "expression is an optional CEL expression used to derive group values from JWT claims.\n\nCEL expressions have access to the token claims through a CEL variable, 'claims'.\n\nexpression must be at least 1 character and must not exceed 1024 characters in length .\n\nWhen specified, claim must not be set or be explicitly set to the empty string (`\"\"`).",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"prefix": {
 						SchemaProps: spec.SchemaProps{
-							Description: "prefix is an optional field that configures the prefix that will be applied to the cluster identity attribute during the process of mapping JWT claims to cluster identity attributes.\n\nWhen omitted (\"\"), no prefix is applied to the cluster identity attribute.\n\nExample: if `prefix` is set to \"myoidc:\" and the `claim` in JWT contains an array of strings \"a\", \"b\" and  \"c\", the mapping will result in an array of string \"myoidc:a\", \"myoidc:b\" and \"myoidc:c\".",
+							Description: "prefix is an optional field that configures the prefix that will be applied to the cluster identity attribute during the process of mapping JWT claims to cluster identity attributes.\n\nWhen omitted or set to an empty string (\"\"), no prefix is applied to the cluster identity attribute. Must not be set to a non-empty value when expression is set.\n\nExample: if `prefix` is set to \"myoidc:\" and the `claim` in JWT contains an array of strings \"a\", \"b\" and \"c\", the mapping will result in an array of string \"myoidc:a\", \"myoidc:b\" and \"myoidc:c\".",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 				},
-				Required: []string{"claim"},
 			},
 		},
 	}
@@ -17442,34 +17944,6 @@ func schema_openshift_api_config_v1_ProxyStatus(ref common.ReferenceCallback) co
 						},
 					},
 				},
-			},
-		},
-	}
-}
-
-func schema_openshift_api_config_v1_PublicKey(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "PublicKey defines the root of trust based on a sigstore public key.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"keyData": {
-						SchemaProps: spec.SchemaProps{
-							Description: "keyData is a required field contains inline base64-encoded data for the PEM format public key. keyData must be at most 8192 characters.",
-							Type:        []string{"string"},
-							Format:      "byte",
-						},
-					},
-					"rekorKeyData": {
-						SchemaProps: spec.SchemaProps{
-							Description: "rekorKeyData is an optional field contains inline base64-encoded data for the PEM format from the Rekor public key. rekorKeyData must be at most 8192 characters.",
-							Type:        []string{"string"},
-							Format:      "byte",
-						},
-					},
-				},
-				Required: []string{"keyData"},
 			},
 		},
 	}
@@ -18232,6 +18706,48 @@ func schema_openshift_api_config_v1_SignatureStore(ref common.ReferenceCallback)
 	}
 }
 
+func schema_openshift_api_config_v1_Storage(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Storage provides persistent storage configuration options for gathering jobs. If the type is set to PersistentVolume, then the PersistentVolume must be defined. If the type is set to Ephemeral, then the PersistentVolume must not be defined.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "type is a required field that specifies the type of storage that will be used to store the Insights data archive. Valid values are \"PersistentVolume\" and \"Ephemeral\". When set to Ephemeral, the Insights data archive is stored in the ephemeral storage of the gathering job. When set to PersistentVolume, the Insights data archive is stored in the PersistentVolume that is defined by the persistentVolume field.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"persistentVolume": {
+						SchemaProps: spec.SchemaProps{
+							Description: "persistentVolume is an optional field that specifies the PersistentVolume that will be used to store the Insights data archive. The PersistentVolume must be created in the openshift-insights namespace.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.PersistentVolumeConfig"),
+						},
+					},
+				},
+				Required: []string{"type"},
+			},
+			VendorExtensible: spec.VendorExtensible{
+				Extensions: spec.Extensions{
+					"x-kubernetes-unions": []interface{}{
+						map[string]interface{}{
+							"discriminator": "type",
+							"fields-to-discriminateBy": map[string]interface{}{
+								"persistentVolume": "PersistentVolume",
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.PersistentVolumeConfig"},
+	}
+}
+
 func schema_openshift_api_config_v1_StringSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -18338,7 +18854,7 @@ func schema_openshift_api_config_v1_TLSProfileSpec(ref common.ReferenceCallback)
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "ciphers is used to specify the cipher algorithms that are negotiated during the TLS handshake.  Operators may remove entries their operands do not support.  For example, to use DES-CBC3-SHA  (yaml):\n\n  ciphers:\n    - DES-CBC3-SHA",
+							Description: "ciphers is used to specify the cipher algorithms that are negotiated during the TLS handshake. Operators may remove entries that their operands do not support. For example, to use only ECDHE-RSA-AES128-GCM-SHA256 (yaml):\n\n  ciphers:\n    - ECDHE-RSA-AES128-GCM-SHA256\n\nTLS 1.3 cipher suites (e.g. TLS_AES_128_GCM_SHA256) are not configurable and are always enabled when TLS 1.3 is negotiated.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -18353,7 +18869,7 @@ func schema_openshift_api_config_v1_TLSProfileSpec(ref common.ReferenceCallback)
 					},
 					"minTLSVersion": {
 						SchemaProps: spec.SchemaProps{
-							Description: "minTLSVersion is used to specify the minimal version of the TLS protocol that is negotiated during the TLS handshake. For example, to use TLS versions 1.1, 1.2 and 1.3 (yaml):\n\n  minTLSVersion: VersionTLS11\n\nNOTE: currently the highest minTLSVersion allowed is VersionTLS12",
+							Description: "minTLSVersion is used to specify the minimal version of the TLS protocol that is negotiated during the TLS handshake. For example, to use TLS versions 1.1, 1.2 and 1.3 (yaml):\n\n  minTLSVersion: VersionTLS11",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -18375,7 +18891,7 @@ func schema_openshift_api_config_v1_TLSSecurityProfile(ref common.ReferenceCallb
 				Properties: map[string]spec.Schema{
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "type is one of Old, Intermediate, Modern or Custom. Custom provides the ability to specify individual TLS security profile parameters. Old, Intermediate and Modern are TLS security profiles based on:\n\nhttps://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_configurations\n\nThe profiles are intent based, so they may change over time as new ciphers are developed and existing ciphers are found to be insecure.  Depending on precisely which ciphers are available to a process, the list may be reduced.\n\nNote that the Modern profile is currently not supported because it is not yet well adopted by common software libraries.",
+							Description: "type is one of Old, Intermediate, Modern or Custom. Custom provides the ability to specify individual TLS security profile parameters.\n\nThe profiles are based on version 5.7 of the Mozilla Server Side TLS configuration guidelines. The cipher lists consist of the configuration's \"ciphersuites\" followed by the Go-specific \"ciphers\" from the guidelines. See: https://ssl-config.mozilla.org/guidelines/5.7.json\n\nThe profiles are intent based, so they may change over time as new ciphers are developed and existing ciphers are found to be insecure. Depending on precisely which ciphers are available to a process, the list may be reduced.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -18383,25 +18899,25 @@ func schema_openshift_api_config_v1_TLSSecurityProfile(ref common.ReferenceCallb
 					},
 					"old": {
 						SchemaProps: spec.SchemaProps{
-							Description: "old is a TLS security profile based on:\n\nhttps://wiki.mozilla.org/Security/Server_Side_TLS#Old_backward_compatibility\n\nand looks like this (yaml):\n\n  ciphers:\n\n    - TLS_AES_128_GCM_SHA256\n\n    - TLS_AES_256_GCM_SHA384\n\n    - TLS_CHACHA20_POLY1305_SHA256\n\n    - ECDHE-ECDSA-AES128-GCM-SHA256\n\n    - ECDHE-RSA-AES128-GCM-SHA256\n\n    - ECDHE-ECDSA-AES256-GCM-SHA384\n\n    - ECDHE-RSA-AES256-GCM-SHA384\n\n    - ECDHE-ECDSA-CHACHA20-POLY1305\n\n    - ECDHE-RSA-CHACHA20-POLY1305\n\n    - DHE-RSA-AES128-GCM-SHA256\n\n    - DHE-RSA-AES256-GCM-SHA384\n\n    - DHE-RSA-CHACHA20-POLY1305\n\n    - ECDHE-ECDSA-AES128-SHA256\n\n    - ECDHE-RSA-AES128-SHA256\n\n    - ECDHE-ECDSA-AES128-SHA\n\n    - ECDHE-RSA-AES128-SHA\n\n    - ECDHE-ECDSA-AES256-SHA384\n\n    - ECDHE-RSA-AES256-SHA384\n\n    - ECDHE-ECDSA-AES256-SHA\n\n    - ECDHE-RSA-AES256-SHA\n\n    - DHE-RSA-AES128-SHA256\n\n    - DHE-RSA-AES256-SHA256\n\n    - AES128-GCM-SHA256\n\n    - AES256-GCM-SHA384\n\n    - AES128-SHA256\n\n    - AES256-SHA256\n\n    - AES128-SHA\n\n    - AES256-SHA\n\n    - DES-CBC3-SHA\n\n  minTLSVersion: VersionTLS10",
+							Description: "old is a TLS profile for use when services need to be accessed by very old clients or libraries and should be used only as a last resort.\n\nThis profile is equivalent to a Custom profile specified as:\n  minTLSVersion: VersionTLS10\n  ciphers:\n    - TLS_AES_128_GCM_SHA256\n    - TLS_AES_256_GCM_SHA384\n    - TLS_CHACHA20_POLY1305_SHA256\n    - ECDHE-ECDSA-AES128-GCM-SHA256\n    - ECDHE-RSA-AES128-GCM-SHA256\n    - ECDHE-ECDSA-AES256-GCM-SHA384\n    - ECDHE-RSA-AES256-GCM-SHA384\n    - ECDHE-ECDSA-CHACHA20-POLY1305\n    - ECDHE-RSA-CHACHA20-POLY1305\n    - ECDHE-ECDSA-AES128-SHA256\n    - ECDHE-RSA-AES128-SHA256\n    - ECDHE-ECDSA-AES128-SHA\n    - ECDHE-RSA-AES128-SHA\n    - ECDHE-ECDSA-AES256-SHA\n    - ECDHE-RSA-AES256-SHA\n    - AES128-GCM-SHA256\n    - AES256-GCM-SHA384\n    - AES128-SHA256\n    - AES128-SHA\n    - AES256-SHA\n    - DES-CBC3-SHA",
 							Ref:         ref("github.com/openshift/api/config/v1.OldTLSProfile"),
 						},
 					},
 					"intermediate": {
 						SchemaProps: spec.SchemaProps{
-							Description: "intermediate is a TLS security profile based on:\n\nhttps://wiki.mozilla.org/Security/Server_Side_TLS#Intermediate_compatibility_.28recommended.29\n\nand looks like this (yaml):\n\n  ciphers:\n\n    - TLS_AES_128_GCM_SHA256\n\n    - TLS_AES_256_GCM_SHA384\n\n    - TLS_CHACHA20_POLY1305_SHA256\n\n    - ECDHE-ECDSA-AES128-GCM-SHA256\n\n    - ECDHE-RSA-AES128-GCM-SHA256\n\n    - ECDHE-ECDSA-AES256-GCM-SHA384\n\n    - ECDHE-RSA-AES256-GCM-SHA384\n\n    - ECDHE-ECDSA-CHACHA20-POLY1305\n\n    - ECDHE-RSA-CHACHA20-POLY1305\n\n    - DHE-RSA-AES128-GCM-SHA256\n\n    - DHE-RSA-AES256-GCM-SHA384\n\n  minTLSVersion: VersionTLS12",
+							Description: "intermediate is a TLS profile for use when you do not need compatibility with legacy clients and want to remain highly secure while being compatible with most clients currently in use.\n\nThis profile is equivalent to a Custom profile specified as:\n  minTLSVersion: VersionTLS12\n  ciphers:\n    - TLS_AES_128_GCM_SHA256\n    - TLS_AES_256_GCM_SHA384\n    - TLS_CHACHA20_POLY1305_SHA256\n    - ECDHE-ECDSA-AES128-GCM-SHA256\n    - ECDHE-RSA-AES128-GCM-SHA256\n    - ECDHE-ECDSA-AES256-GCM-SHA384\n    - ECDHE-RSA-AES256-GCM-SHA384\n    - ECDHE-ECDSA-CHACHA20-POLY1305\n    - ECDHE-RSA-CHACHA20-POLY1305",
 							Ref:         ref("github.com/openshift/api/config/v1.IntermediateTLSProfile"),
 						},
 					},
 					"modern": {
 						SchemaProps: spec.SchemaProps{
-							Description: "modern is a TLS security profile based on:\n\nhttps://wiki.mozilla.org/Security/Server_Side_TLS#Modern_compatibility\n\nand looks like this (yaml):\n\n  ciphers:\n\n    - TLS_AES_128_GCM_SHA256\n\n    - TLS_AES_256_GCM_SHA384\n\n    - TLS_CHACHA20_POLY1305_SHA256\n\n  minTLSVersion: VersionTLS13",
+							Description: "modern is a TLS security profile for use with clients that support TLS 1.3 and do not need backward compatibility for older clients.\n\nThis profile is equivalent to a Custom profile specified as:\n  minTLSVersion: VersionTLS13\n  ciphers:\n    - TLS_AES_128_GCM_SHA256\n    - TLS_AES_256_GCM_SHA384\n    - TLS_CHACHA20_POLY1305_SHA256",
 							Ref:         ref("github.com/openshift/api/config/v1.ModernTLSProfile"),
 						},
 					},
 					"custom": {
 						SchemaProps: spec.SchemaProps{
-							Description: "custom is a user-defined TLS security profile. Be extremely careful using a custom profile as invalid configurations can be catastrophic. An example custom profile looks like this:\n\n  ciphers:\n\n    - ECDHE-ECDSA-CHACHA20-POLY1305\n\n    - ECDHE-RSA-CHACHA20-POLY1305\n\n    - ECDHE-RSA-AES128-GCM-SHA256\n\n    - ECDHE-ECDSA-AES128-GCM-SHA256\n\n  minTLSVersion: VersionTLS11",
+							Description: "custom is a user-defined TLS security profile. Be extremely careful using a custom profile as invalid configurations can be catastrophic. An example custom profile looks like this:\n\n  minTLSVersion: VersionTLS11\n  ciphers:\n    - ECDHE-ECDSA-CHACHA20-POLY1305\n    - ECDHE-RSA-CHACHA20-POLY1305\n    - ECDHE-RSA-AES128-GCM-SHA256\n    - ECDHE-ECDSA-AES128-GCM-SHA256",
 							Ref:         ref("github.com/openshift/api/config/v1.CustomTLSProfile"),
 						},
 					},
@@ -18569,14 +19085,20 @@ func schema_openshift_api_config_v1_TokenClaimMapping(ref common.ReferenceCallba
 				Properties: map[string]spec.Schema{
 					"claim": {
 						SchemaProps: spec.SchemaProps{
-							Description: "claim is a required field that configures the JWT token claim whose value is assigned to the cluster identity field associated with this mapping.",
+							Description: "claim is an optional field for specifying the JWT token claim that is used in the mapping. The value of this claim will be assigned to the field in which this mapping is associated. claim must not exceed 256 characters in length. When set to the empty string `\"\"`, this means that no named claim should be used for the group mapping. claim is required when the ExternalOIDCWithUpstreamParity feature gate is not enabled.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
+					"expression": {
+						SchemaProps: spec.SchemaProps{
+							Description: "expression is an optional CEL expression used to derive group values from JWT claims.\n\nCEL expressions have access to the token claims through a CEL variable, 'claims'.\n\nexpression must be at least 1 character and must not exceed 1024 characters in length .\n\nWhen specified, claim must not be set or be explicitly set to the empty string (`\"\"`).",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"claim"},
 			},
 		},
 	}
@@ -18597,14 +19119,14 @@ func schema_openshift_api_config_v1_TokenClaimMappings(ref common.ReferenceCallb
 					},
 					"groups": {
 						SchemaProps: spec.SchemaProps{
-							Description: "groups is an optional field that configures how the groups of a cluster identity should be constructed from the claims in a JWT token issued by the identity provider. When referencing a claim, if the claim is present in the JWT token, its value must be a list of groups separated by a comma (','). For example - '\"example\"' and '\"exampleOne\", \"exampleTwo\", \"exampleThree\"' are valid claim values.",
+							Description: "groups is an optional field that configures how the groups of a cluster identity should be constructed from the claims in a JWT token issued by the identity provider.\n\nWhen referencing a claim, if the claim is present in the JWT token, its value must be a list of groups separated by a comma (',').\n\nFor example - '\"example\"' and '\"exampleOne\", \"exampleTwo\", \"exampleThree\"' are valid claim values.",
 							Default:     map[string]interface{}{},
 							Ref:         ref("github.com/openshift/api/config/v1.PrefixedClaimMapping"),
 						},
 					},
 					"uid": {
 						SchemaProps: spec.SchemaProps{
-							Description: "uid is an optional field for configuring the claim mapping used to construct the uid for the cluster identity.\n\nWhen using uid.claim to specify the claim it must be a single string value. When using uid.expression the expression must result in a single string value.\n\nWhen omitted, this means the user has no opinion and the platform is left to choose a default, which is subject to change over time. The current default is to use the 'sub' claim.",
+							Description: "uid is an optional field for configuring the claim mapping used to construct the uid for the cluster identity.\n\nWhen using uid.claim to specify the claim it must be a single string value. When using uid.expression the expression must result in a single string value.\n\nWhen omitted, this means the user has no opinion and the platform is left to choose a default, which is subject to change over time.\n\nThe current default is to use the 'sub' claim.",
 							Ref:         ref("github.com/openshift/api/config/v1.TokenClaimOrExpressionMapping"),
 						},
 					},
@@ -18618,7 +19140,7 @@ func schema_openshift_api_config_v1_TokenClaimMappings(ref common.ReferenceCallb
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "extra is an optional field for configuring the mappings used to construct the extra attribute for the cluster identity. When omitted, no extra attributes will be present on the cluster identity. key values for extra mappings must be unique. A maximum of 32 extra attribute mappings may be provided.",
+							Description: "extra is an optional field for configuring the mappings used to construct the extra attribute for the cluster identity. When omitted, no extra attributes will be present on the cluster identity.\n\nkey values for extra mappings must be unique. A maximum of 32 extra attribute mappings may be provided.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -18666,15 +19188,43 @@ func schema_openshift_api_config_v1_TokenClaimOrExpressionMapping(ref common.Ref
 	}
 }
 
-func schema_openshift_api_config_v1_TokenClaimValidationRule(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_openshift_api_config_v1_TokenClaimValidationCELRule(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
+					"expression": {
+						SchemaProps: spec.SchemaProps{
+							Description: "expression is a CEL expression evaluated against token claims. expression is required, must be at least 1 character in length and must not exceed 1024 characters. The expression must return a boolean value where 'true' signals a valid token and 'false' an invalid one.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "message is a required human-readable message to be logged by the Kubernetes API server if the CEL expression defined in 'expression' fails. message must be at least 1 character in length and must not exceed 256 characters.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"expression", "message"},
+			},
+		},
+	}
+}
+
+func schema_openshift_api_config_v1_TokenClaimValidationRule(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TokenClaimValidationRule represents a validation rule based on token claims. If type is RequiredClaim, requiredClaim must be set. If Type is CEL, CEL must be set and RequiredClaim must be omitted.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "type is an optional field that configures the type of the validation rule.\n\nAllowed values are 'RequiredClaim' and omitted (not provided or an empty string).\n\nWhen set to 'RequiredClaim', the Kubernetes API server will be configured to validate that the incoming JWT contains the required claim and that its value matches the required value.\n\nDefaults to 'RequiredClaim'.",
+							Description: "type is an optional field that configures the type of the validation rule.\n\nAllowed values are \"RequiredClaim\" and \"CEL\".\n\nWhen set to 'RequiredClaim', the Kubernetes API server will be configured to validate that the incoming JWT contains the required claim and that its value matches the required value.\n\nWhen set to 'CEL', the Kubernetes API server will be configured to validate the incoming JWT against the configured CEL expression.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -18683,8 +19233,15 @@ func schema_openshift_api_config_v1_TokenClaimValidationRule(ref common.Referenc
 					},
 					"requiredClaim": {
 						SchemaProps: spec.SchemaProps{
-							Description: "requiredClaim is an optional field that configures the required claim and value that the Kubernetes API server will use to validate if an incoming JWT is valid for this identity provider.",
+							Description: "requiredClaim allows configuring a required claim name and its expected value. This field is required when `type` is set to RequiredClaim, and must be omitted when `type` is set to any other value. The Kubernetes API server uses this field to validate if an incoming JWT is valid for this identity provider.",
 							Ref:         ref("github.com/openshift/api/config/v1.TokenRequiredClaim"),
+						},
+					},
+					"cel": {
+						SchemaProps: spec.SchemaProps{
+							Description: "cel holds the CEL expression and message for validation. Must be set when Type is \"CEL\", and forbidden otherwise.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/openshift/api/config/v1.TokenClaimValidationCELRule"),
 						},
 					},
 				},
@@ -18692,7 +19249,7 @@ func schema_openshift_api_config_v1_TokenClaimValidationRule(ref common.Referenc
 			},
 		},
 		Dependencies: []string{
-			"github.com/openshift/api/config/v1.TokenRequiredClaim"},
+			"github.com/openshift/api/config/v1.TokenClaimValidationCELRule", "github.com/openshift/api/config/v1.TokenRequiredClaim"},
 	}
 }
 
@@ -18772,6 +19329,13 @@ func schema_openshift_api_config_v1_TokenIssuer(ref common.ReferenceCallback) co
 							Ref:         ref("github.com/openshift/api/config/v1.ConfigMapNameReference"),
 						},
 					},
+					"discoveryURL": {
+						SchemaProps: spec.SchemaProps{
+							Description: "discoveryURL is an optional field that, if specified, overrides the default discovery endpoint used to retrieve OIDC configuration metadata. By default, the discovery URL is derived from `issuerURL` as \"{issuerURL}/.well-known/openid-configuration\".\n\nThe discoveryURL must be a valid absolute HTTPS URL. It must not contain query parameters, user information, or fragments. Additionally, it must differ from the value of `issuerURL` (ignoring trailing slashes). The discoveryURL value must be at least 1 character long and no longer than 2048 characters.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"issuerURL", "audiences"},
 			},
@@ -18805,6 +19369,34 @@ func schema_openshift_api_config_v1_TokenRequiredClaim(ref common.ReferenceCallb
 					},
 				},
 				Required: []string{"claim", "requiredValue"},
+			},
+		},
+	}
+}
+
+func schema_openshift_api_config_v1_TokenUserValidationRule(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TokenUserValidationRule provides a CEL-based rule used to validate a token subject. Each rule contains a CEL expression that is evaluated against the token’s claims.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"expression": {
+						SchemaProps: spec.SchemaProps{
+							Description: "expression is a required CEL expression that performs a validation on cluster user identity attributes like username, groups, etc.\n\nThe expression must evaluate to a boolean value. When the expression evaluates to 'true', the cluster user identity is considered valid. When the expression evaluates to 'false', the cluster user identity is not considered valid. expression must be at least 1 character in length and must not exceed 1024 characters.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "message is a required human-readable message to be logged by the Kubernetes API server if the CEL expression defined in 'expression' fails. message must be at least 1 character in length and must not exceed 256 characters.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"expression", "message"},
 			},
 		},
 	}
@@ -18849,9 +19441,41 @@ func schema_openshift_api_config_v1_Update(ref common.ReferenceCallback) common.
 							Format:      "",
 						},
 					},
+					"acceptRisks": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "acceptRisks is an optional set of names of conditional update risks that are considered acceptable. A conditional update is performed only if all of its risks are acceptable. This list may contain entries that apply to current, previous or future updates. The entries therefore may not map directly to a risk in .status.conditionalUpdateRisks. acceptRisks must not contain more than 1000 entries. Entries in this list must be unique.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/openshift/api/config/v1.AcceptRisk"),
+									},
+								},
+							},
+						},
+					},
+					"mode": {
+						SchemaProps: spec.SchemaProps{
+							Description: "mode determines how an update should be processed. The only valid value is \"Preflight\". When omitted, the cluster performs a normal update by applying the specified version or image to the cluster. This is the standard update behavior. When set to \"Preflight\", the cluster runs compatibility checks against the target release without performing an actual update. Compatibility results, including any detected risks, are reported in status.conditionalUpdates and status.conditionalUpdateRisks alongside risks from the update recommendation service. This allows administrators to assess update readiness and address issues before committing to the update. Preflight mode is particularly useful for skip-level updates where upgrade compatibility needs to be verified across multiple minor versions. When mode is set to \"Preflight\", the same rules for version, image, and architecture apply as for normal updates.\n\nPossible enum values:\n - `\"Preflight\"` allows an update to be checked for compatibility without committing to updating the cluster.",
+							Type:        []string{"string"},
+							Format:      "",
+							Enum:        []interface{}{"Preflight"},
+						},
+					},
 				},
 			},
 		},
+		Dependencies: []string{
+			"github.com/openshift/api/config/v1.AcceptRisk"},
 	}
 }
 
@@ -18908,7 +19532,7 @@ func schema_openshift_api_config_v1_UpdateHistory(ref common.ReferenceCallback) 
 					},
 					"acceptedRisks": {
 						SchemaProps: spec.SchemaProps{
-							Description: "acceptedRisks records risks which were accepted to initiate the update. For example, it may menition an Upgradeable=False or missing signature that was overridden via desiredUpdate.force, or an update that was initiated despite not being in the availableUpdates set of recommended update targets.",
+							Description: "acceptedRisks records risks which were accepted to initiate the update. For example, it may mention an Upgradeable=False or missing signature that was overridden via desiredUpdate.force, or an update that was initiated despite not being in the availableUpdates set of recommended update targets.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -18930,15 +19554,21 @@ func schema_openshift_api_config_v1_UsernameClaimMapping(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"claim": {
 						SchemaProps: spec.SchemaProps{
-							Description: "claim is a required field that configures the JWT token claim whose value is assigned to the cluster identity field associated with this mapping.\n\nclaim must not be an empty string (\"\") and must not exceed 256 characters.",
-							Default:     "",
+							Description: "claim is an optional field that configures the JWT token claim whose value is assigned to the cluster identity field associated with this mapping. claim is required when the ExternalOIDCWithUpstreamParity feature gate is not enabled. When the ExternalOIDCWithUpstreamParity feature gate is enabled, claim must not be set when expression is set.\n\nclaim must not be an empty string (\"\") and must not exceed 256 characters.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"expression": {
+						SchemaProps: spec.SchemaProps{
+							Description: "expression is an optional CEL expression used to derive the username from JWT claims.\n\nCEL expressions have access to the token claims through a CEL variable, 'claims'.\n\nexpression must be at least 1 character and must not exceed 1024 characters in length. expression must not be set when claim is set.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"prefixPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "prefixPolicy is an optional field that configures how a prefix should be applied to the value of the JWT claim specified in the 'claim' field.\n\nAllowed values are 'Prefix', 'NoPrefix', and omitted (not provided or an empty string).\n\nWhen set to 'Prefix', the value specified in the prefix field will be prepended to the value of the JWT claim. The prefix field must be set when prefixPolicy is 'Prefix'.\n\nWhen set to 'NoPrefix', no prefix will be prepended to the value of the JWT claim.\n\nWhen omitted, this means no opinion and the platform is left to choose any prefixes that are applied which is subject to change over time. Currently, the platform prepends `{issuerURL}#` to the value of the JWT claim when the claim is not 'email'. As an example, consider the following scenario:\n   `prefix` is unset, `issuerURL` is set to `https://myoidc.tld`,\n   the JWT claims include \"username\":\"userA\" and \"email\":\"userA@myoidc.tld\",\n   and `claim` is set to:\n   - \"username\": the mapped value will be \"https://myoidc.tld#userA\"\n   - \"email\": the mapped value will be \"userA@myoidc.tld\"",
+							Description: "prefixPolicy is an optional field that configures how a prefix should be applied to the value of the JWT claim specified in the 'claim' field.\n\nAllowed values are 'Prefix', 'NoPrefix', and omitted (not provided or an empty string).\n\nWhen set to 'Prefix', the value specified in the prefix field will be prepended to the value of the JWT claim. The prefix field must be set when prefixPolicy is 'Prefix'. Must not be set to 'Prefix' when expression is set. When set to 'NoPrefix', no prefix will be prepended to the value of the JWT claim. When omitted, this means no opinion and the platform is left to choose any prefixes that are applied which is subject to change over time. Currently, the platform prepends `{issuerURL}#` to the value of the JWT claim when the claim is not 'email'.\n\nAs an example, consider the following scenario:\n\n   `prefix` is unset, `issuerURL` is set to `https://myoidc.tld`,\n   the JWT claims include \"username\":\"userA\" and \"email\":\"userA@myoidc.tld\",\n   and `claim` is set to:\n   - \"username\": the mapped value will be \"https://myoidc.tld#userA\"\n   - \"email\": the mapped value will be \"userA@myoidc.tld\"",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -18952,7 +19582,6 @@ func schema_openshift_api_config_v1_UsernameClaimMapping(ref common.ReferenceCal
 						},
 					},
 				},
-				Required: []string{"claim"},
 			},
 			VendorExtensible: spec.VendorExtensible{
 				Extensions: spec.Extensions{
@@ -18960,8 +19589,9 @@ func schema_openshift_api_config_v1_UsernameClaimMapping(ref common.ReferenceCal
 						map[string]interface{}{
 							"discriminator": "prefixPolicy",
 							"fields-to-discriminateBy": map[string]interface{}{
-								"claim":  "Claim",
-								"prefix": "Prefix",
+								"claim":      "Claim",
+								"expression": "Expression",
+								"prefix":     "Prefix",
 							},
 						},
 					},

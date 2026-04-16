@@ -170,9 +170,9 @@ API rule violation: names_match,github.com/openshift/api/config/v1,GenericAPISer
 API rule violation: names_match,github.com/openshift/api/config/v1,IdentityProviderConfig,GitHub
 API rule violation: names_match,github.com/openshift/api/config/v1,IdentityProviderConfig,GitLab
 API rule violation: names_match,github.com/openshift/api/config/v1,IdentityProviderConfig,HTPasswd
+API rule violation: names_match,github.com/openshift/api/config/v1,ImagePolicyPKIRootOfTrust,CertificateAuthorityIntermediatesData
+API rule violation: names_match,github.com/openshift/api/config/v1,ImagePolicyPKIRootOfTrust,CertificateAuthorityRootsData
 API rule violation: names_match,github.com/openshift/api/config/v1,InfrastructureStatus,APIServerInternalURL
-API rule violation: names_match,github.com/openshift/api/config/v1,PKI,CertificateAuthorityIntermediatesData
-API rule violation: names_match,github.com/openshift/api/config/v1,PKI,CertificateAuthorityRootsData
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformSpec,BareMetal
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformSpec,IBMCloud
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformSpec,OpenStack
@@ -315,6 +315,7 @@ API rule violation: streaming_list_type_json_tags,github.com/openshift/api/confi
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,ImageTagMirrorSetList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,InfrastructureList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,IngressList,ListMeta
+API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,InsightsDataGatherList,Items
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,NetworkList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,NodeList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,OAuthList,ListMeta
