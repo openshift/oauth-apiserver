@@ -171,3 +171,5 @@ replace (
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.35.2
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.35.2
 )
+
+replace github.com/openshift/build-machinery-go => github.com/everettraven/openshift-build-machinery-go v0.0.0-20260416140544-f3d8b219632f
