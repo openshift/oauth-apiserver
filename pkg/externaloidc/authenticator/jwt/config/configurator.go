@@ -8,11 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"k8s.io/apiserver/pkg/apis/apiserver"
-	apiserverv1 "k8s.io/apiserver/pkg/apis/apiserver/v1"
-	"k8s.io/apiserver/pkg/apis/apiserver/validation"
-	authenticationcel "k8s.io/apiserver/pkg/authentication/cel"
-	"k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/validation"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc"
+	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 	"k8s.io/klog/v2"
 
 	"k8s.io/apiserver/pkg/authentication/authenticator"
@@ -21,6 +20,8 @@ import (
 	"k8s.io/kubernetes/pkg/util/filesystem"
 	"sigs.k8s.io/yaml"
 
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	authenticationv1alpha1 "github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/v1alpha1"
 	"github.com/spf13/pflag"
 )
 
@@ -59,7 +60,7 @@ func (c *Configurator) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.configFile, "config", "", "path to the authentication configuration file")
 }
 
-func (c *Configurator) Validate() (*apiserver.AuthenticationConfiguration, string, error) {
+func (c *Configurator) Validate() (*authentication.AuthenticationConfiguration, string, error) {
 	if c.configFile == "" {
 		return nil, "", errors.New("configuration file must be specified")
 	}
@@ -69,8 +70,8 @@ func (c *Configurator) Validate() (*apiserver.AuthenticationConfiguration, strin
 		return nil, "", fmt.Errorf("reading authentication configuration from config file: %w", err)
 	}
 
-	compiler := authenticationcel.NewDefaultCompiler()
-	fieldErrs := validation.ValidateAuthenticationConfiguration(compiler, authnConfig, nil)
+	compiler := cel.NewCompiler()
+	fieldErrs := validation.ValidateAuthenticationConfiguration(compiler, authnConfig)
 	if err := fieldErrs.ToAggregate(); err != nil {
 		return nil, "", fmt.Errorf("validating authentication configuration: %w", err)
 	}
@@ -118,7 +119,7 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 	}
 
 	wrappedCtx, cancel := context.WithCancel(ctx)
-	compiler := authenticationcel.NewDefaultCompiler()
+	compiler := cel.NewCompiler()
 	tokenAuthenticator, err := TokenAuthenticatorForAuthenticationConfiguration(wrappedCtx, authnCfg, compiler)
 	if err != nil {
 		defer cancel()
@@ -138,7 +139,7 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 	return nil
 }
 
-func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, cfgPath string) (*apiserver.AuthenticationConfiguration, string, error) {
+func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, cfgPath string) (*authentication.AuthenticationConfiguration, string, error) {
 	if cfgPath == "" {
 		return nil, "", errors.New("configuration file must be specified")
 	}
@@ -150,15 +151,15 @@ func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, 
 
 	configHash := sha256.Sum256(configBytes)
 
-	config := &apiserverv1.AuthenticationConfiguration{}
+	config := &authenticationv1alpha1.AuthenticationConfiguration{}
 	err = yaml.UnmarshalStrict(configBytes, config)
 	if err != nil {
 		return nil, "", fmt.Errorf("unmarshalling configuration: %w", err)
 	}
 
-	out := &apiserver.AuthenticationConfiguration{}
+	out := &authentication.AuthenticationConfiguration{}
 
-	err = apiserverv1.Convert_v1_AuthenticationConfiguration_To_apiserver_AuthenticationConfiguration(config, out, nil)
+	err = authenticationv1alpha1.Convert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(config, out, nil)
 	if err != nil {
 		return nil, "", fmt.Errorf("converting external representation to internal representation: %w", err)
 	}
@@ -166,11 +167,11 @@ func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, 
 	return out, string(configHash[:]), nil
 }
 
-func TokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *apiserver.AuthenticationConfiguration, compiler authenticationcel.Compiler) (authenticator.Token, error) {
+func TokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *authentication.AuthenticationConfiguration, compiler oidc.Compiler) (authenticator.Token, error) {
 	jwtAuthenticators := []authenticator.Token{}
 
 	for _, jwt := range cfg.JWT {
-		var caContentProvider oidc.CAContentProvider
+		var caContentProvider k8soidc.CAContentProvider
 		var err error
 		if len(jwt.Issuer.CertificateAuthority) > 0 {
 			caContentProvider, err = dynamiccertificates.NewStaticCAContent("oidc-authenticator", []byte(jwt.Issuer.CertificateAuthority))
@@ -180,7 +181,7 @@ func TokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *
 		}
 
 		tokenAuthenticator, err := oidc.New(ctx, oidc.Options{
-			JWTAuthenticator:  jwt,
+			Authenticator:     jwt,
 			CAContentProvider: caContentProvider,
 			Compiler:          compiler,
 		})
