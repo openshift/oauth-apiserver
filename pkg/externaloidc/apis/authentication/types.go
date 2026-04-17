@@ -349,8 +349,9 @@ type UserValidationRule struct {
 
 // ExternalClaimsSource provides the configuration for a single external claim source.
 type ExternalClaimsSource struct {
-	// authentication is a required field that configures how the apiserver authenticates with an external claims source.
-	// +required
+	// authentication is an optional field that configures how the apiserver authenticates with an external claims source.
+	// When no specified, anonymous authentication is used.
+	// +optional
 	Authentication *Authentication
 	// tls is an optional field that configures the http client TLS
 	// settings when fetching external claims from this source.

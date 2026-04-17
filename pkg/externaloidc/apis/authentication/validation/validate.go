@@ -27,6 +27,9 @@ func ValidateAuthenticationConfiguration(compiler oidc.Compiler, c *authenticati
 	errors = append(errors, validation.ValidateAuthenticationConfiguration(compiler, conversion.ConvertAuthenticationConfigurationToApiserverAuthenticationConfiguration(c), nil)...)
 
 	// Now validate our custom fields
+	for i, jwt := range c.JWT {
+		errors = append(errors, validateExternalClaimsSources(compiler, jwt.ExternalClaimsSources, root.Index(i).Child("externalClaimsSources"))...)
+	}
 
 	return errors
 }
@@ -251,13 +254,12 @@ func validateExternalClaimsSourceTLS(compiler oidc.Compiler, tls *authentication
 		return field.ErrorList{field.Invalid(path.Child("certificateAuthority"), *tls.CertificateAuthority, "certificateAuthority must not be empty and must be a valid PEM-encoded certificate")}
 	}
 
-	// TODO: Export this from upstream
-	return validateCertificateAuthority(*tls.CertificateAuthority, path.Child("certificateAuthority"))
+	return validation.ValidateCertificateAuthority(*tls.CertificateAuthority, path.Child("certificateAuthority"))
 }
 
 func validateExternalClaimsSourceAuthentication(authn *authentication.Authentication, path *field.Path) field.ErrorList {
 	if authn == nil {
-		return field.ErrorList{field.Required(path, "authentication is required")}
+		return nil
 	}
 
 	allowedTypes := sets.New(authentication.AuthenticationTypeRequestProvidedToken)

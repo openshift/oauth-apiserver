@@ -2,12 +2,14 @@ package oidc
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/coreos/go-oidc"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/conversion"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/resolvers/externalclaims"
 	authenticationcel "k8s.io/apiserver/pkg/authentication/cel"
 	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 )
@@ -63,6 +65,11 @@ type Compiler interface {
 }
 
 func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealthCheck, error) {
+	externalClaimsExpander, err := externalclaims.NewClaimsResolver(opts.Compiler, nil, opts.Authenticator.ExternalClaimsSources...)
+	if err != nil {
+		return nil, fmt.Errorf("building external claims resolver: %w", err)
+	}
+
 	k8sOpts := k8soidc.Options{
 		JWTAuthenticator:     conversion.ConvertAuthenticatorToApiserverJWTAuthenticator(opts.Authenticator),
 		KeySet:               opts.KeySet,
@@ -72,6 +79,9 @@ func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealt
 		SupportedSigningAlgs: opts.SupportedSigningAlgs,
 		DisallowedIssuers:    opts.DisallowedIssuers,
 		APIServerID:          opts.APIServerID,
+		ClaimsExpanders: []k8soidc.ClaimsExpander{
+			externalClaimsExpander,
+		},
 	}
 
 	return k8soidc.New(ctx, k8sOpts)
