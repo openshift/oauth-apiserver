@@ -65,7 +65,7 @@ type Compiler interface {
 }
 
 func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealthCheck, error) {
-	externalClaimsExpander, err := externalclaims.NewClaimsResolver(opts.Compiler, nil, opts.Authenticator.ExternalClaimsSources...)
+	externalClaimsExpander, err := externalclaims.NewClaimsResolver(opts.Compiler, opts.Authenticator.ExternalClaimsSources...)
 	if err != nil {
 		return nil, fmt.Errorf("building external claims resolver: %w", err)
 	}

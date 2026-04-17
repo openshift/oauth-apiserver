@@ -4,7 +4,9 @@ go 1.25.0
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
+	github.com/coreos/go-oidc v2.3.0+incompatible
 	github.com/google/btree v1.1.3
+	github.com/google/cel-go v0.26.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/jteeuwen/go-bindata v3.0.8-0.20151023091102-a0ff2567cfb7+incompatible
@@ -41,7 +43,6 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/coreos/go-oidc v2.3.0+incompatible // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -60,7 +61,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/cel-go v0.26.0 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
@@ -147,7 +147,7 @@ replace (
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.35.2
 	k8s.io/apimachinery => k8s.io/apimachinery v0.35.2
 	// k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20260227052614-9120debab75e // points to openshift-apiserver-4.22-kubernetes-1.35.2
-	k8s.io/apiserver => ../kubernetes-apiserver // points to openshift-apiserver-4.22-kubernetes-1.35.2
+	k8s.io/apiserver => github.com/everettraven/openshift-kubernetes-apiserver v0.0.0-20260417181735-0336862eafe5
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.35.2
 	k8s.io/client-go => k8s.io/client-go v0.35.2
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.35.2

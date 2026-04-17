@@ -45,6 +45,8 @@ github.com/emicklei/go-restful/v3 v3.12.2 h1:DhwDP0vY3k8ZzE0RunuJy8GhNpPL6zqLkDf
 github.com/emicklei/go-restful/v3 v3.12.2/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/everettraven/openshift-build-machinery-go v0.0.0-20260416140544-f3d8b219632f h1:PFabBayDakvIU+v+0p6rg+g+18Z/891ukuK4bCdHChU=
 github.com/everettraven/openshift-build-machinery-go v0.0.0-20260416140544-f3d8b219632f/go.mod h1:8jcm8UPtg2mCAsxfqKil1xrmRMI3a+XU2TZ9fF8A7TE=
+github.com/everettraven/openshift-kubernetes-apiserver v0.0.0-20260417181735-0336862eafe5 h1:+9DRQ8gQwg9HZrfiO4L5RaheDcS0SUt/tZlZY2Gbk/M=
+github.com/everettraven/openshift-kubernetes-apiserver v0.0.0-20260417181735-0336862eafe5/go.mod h1:CROJUAu0tfjZLyYgSeBsBan2T7LUJGh0ucWwTCSSk7g=
 github.com/felixge/fgprof v0.9.3/go.mod h1:RdbpDgzqYVh/T9fPELJyV7EYJuHB55UTEULNun8eiPw=
 github.com/felixge/fgprof v0.9.4 h1:ocDNwMFlnA0NU0zSB3I52xkO4sFXk80VK9lXjLClu88=
 github.com/felixge/fgprof v0.9.4/go.mod h1:yKl+ERSa++RYOs32d8K6WEXCB4uXdLls4ZaZPpayhMM=
