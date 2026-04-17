@@ -124,6 +124,8 @@ type Options struct {
 
 	// now is used for testing. It defaults to time.Now.
 	now func() time.Time
+
+	ClaimsExpanders []ClaimsExpander
 }
 
 // Subset of dynamiccertificates.CAContentProvider that can be used to dynamically load root CAs.
@@ -214,6 +216,8 @@ type jwtAuthenticator struct {
 	requiredClaims map[string]string
 
 	healthCheck atomic.Pointer[errorHolder]
+
+	claimsExpanders []ClaimsExpander
 }
 
 // idTokenVerifier is a wrapper around oidc.IDTokenVerifier. It uses the oidc.IDTokenVerifier
@@ -405,6 +409,7 @@ func New(lifecycleCtx context.Context, opts Options) (AuthenticatorTokenWithHeal
 	authn := &jwtAuthenticator{
 		jwtAuthenticator: opts.JWTAuthenticator,
 		resolver:         resolver,
+		claimsExpanders:  opts.ClaimsExpanders,
 		celMapper:        celMapper,
 		requiredClaims:   requiredClaims,
 	}
@@ -879,6 +884,13 @@ func (a *jwtAuthenticator) AuthenticateToken(ctx context.Context, token string) 
 	if a.resolver != nil {
 		if err := a.resolver.expand(ctx, c); err != nil {
 			return nil, false, fmt.Errorf("oidc: could not expand distributed claims: %v", err)
+		}
+	}
+
+	wrappedCtx := context.WithValue(ctx, RequestProvidedTokenContextKey, token)
+	for _, claimsExpander := range a.claimsExpanders {
+		if err := claimsExpander.ExpandClaims(wrappedCtx, ClaimsMap(c)); err != nil {
+			return nil, false, fmt.Errorf("oidc: could not expand additional claims: %v", err)
 		}
 	}
 
