@@ -7,12 +7,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	userapi "github.com/openshift/api/user/v1"
-	"github.com/openshift/client-go/user/clientset/versioned/typed/user/v1/fake"
+	userclient "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 )
 
 type UserRegistry struct {
-	// included to fill out the interface for testing
-	*fake.FakeUsers
+	userclient.UserInterface
 
 	GetErr   map[string]error
 	GetUsers map[string]*userapi.User

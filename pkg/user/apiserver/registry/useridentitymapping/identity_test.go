@@ -7,7 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	userapi "github.com/openshift/api/user/v1"
-	"github.com/openshift/client-go/user/clientset/versioned/typed/user/v1/fake"
+	userclient "github.com/openshift/client-go/user/clientset/versioned/typed/user/v1"
 )
 
 type Action struct {
@@ -16,7 +16,7 @@ type Action struct {
 }
 
 type IdentityRegistry struct {
-	*fake.FakeIdentities
+	userclient.IdentityInterface
 
 	GetErr        map[string]error
 	GetIdentities map[string]*userapi.Identity

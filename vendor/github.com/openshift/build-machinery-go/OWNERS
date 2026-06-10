@@ -1,7 +1,9 @@
 reviewers:
+  - control-plane-approvers
   - 2uasimojo
-  - deads2k
-  - soltysh
+  - jsafrane
+  - sanchezl
 approvers:
-  - soltysh
-  - deads2k
+  - control-plane-approvers
+  - jsafrane
+  - sanchezl
