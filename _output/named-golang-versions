@@ -1,0 +1,3 @@
+images/Dockerfile.rhel7: 1.23
+.ci-operator.yaml: 1.23
+go.mod: 1.23
