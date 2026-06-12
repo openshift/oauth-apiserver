@@ -21,7 +21,6 @@ import (
 	"crypto/sha256"
 	"encoding/base32"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -37,7 +36,6 @@ import (
 	"golang.org/x/crypto/cryptobyte"
 	jsonpatch "gopkg.in/evanphx/json-patch.v4"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -73,16 +71,15 @@ import (
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	utilflowcontrol "k8s.io/apiserver/pkg/util/flowcontrol"
 	flowcontrolrequest "k8s.io/apiserver/pkg/util/flowcontrol/request"
-	utilversion "k8s.io/apiserver/pkg/util/version"
 	"k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
-	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/component-base/featuregate"
 	"k8s.io/component-base/logs"
 	"k8s.io/component-base/metrics/features"
 	"k8s.io/component-base/metrics/prometheus/slis"
 	"k8s.io/component-base/tracing"
+	utilversion "k8s.io/component-base/version"
+	"k8s.io/component-base/zpages/flagz"
 	"k8s.io/klog/v2"
 	openapicommon "k8s.io/kube-openapi/pkg/common"
 	"k8s.io/kube-openapi/pkg/spec3"
@@ -193,6 +190,7 @@ type Config struct {
 	LivezChecks []healthz.HealthChecker
 	// The default set of readyz-only checks. There might be more added via AddReadyzChecks dynamically.
 	ReadyzChecks []healthz.HealthChecker
+	Flagz        flagz.Reader
 	// LegacyAPIGroupPrefixes is used to set up URL parsing for authorization and for validating requests
 	// to InstallLegacyAPIGroup. New API servers don't generally have legacy groups at all.
 	LegacyAPIGroupPrefixes sets.String
@@ -280,9 +278,6 @@ type Config struct {
 	// rejected with a 429 status code and a 'Retry-After' response.
 	ShutdownSendRetryAfter bool
 
-	// EventSink receives events about the life cycle of the API server, e.g. readiness, serving, signals and termination.
-	EventSink EventSink
-
 	//===========================================================================
 	// values below here are targets for removal
 	//===========================================================================
@@ -321,11 +316,6 @@ type Config struct {
 	// This grace period is orthogonal to other grace periods, and
 	// it is not overridden by any other grace period.
 	ShutdownWatchTerminationGracePeriod time.Duration
-}
-
-// EventSink allows to create events.
-type EventSink interface {
-	Create(event *corev1.Event) (*corev1.Event, error)
 }
 
 type RecommendedConfig struct {
@@ -724,10 +714,6 @@ func (c *Config) Complete(informers informers.SharedInformerFactory) CompletedCo
 		c.DiscoveryAddresses = discovery.DefaultAddresses{DefaultAddress: c.ExternalAddress}
 	}
 
-	if c.EventSink == nil {
-		c.EventSink = nullEventSink{}
-	}
-
 	AuthorizeClientBearerToken(c.LoopbackClientConfig, &c.Authentication, &c.Authorization)
 
 	if c.RequestInfoResolver == nil {
@@ -755,62 +741,13 @@ func (c *Config) Complete(informers informers.SharedInformerFactory) CompletedCo
 // Complete fills in any fields not set that are required to have valid data and can be derived
 // from other fields. If you're going to `ApplyOptions`, do that first. It's mutating the receiver.
 func (c *RecommendedConfig) Complete() CompletedConfig {
-	if c.ClientConfig != nil {
-		ref, err := eventReference()
-		if err != nil {
-			klog.Warningf("Failed to derive event reference, won't create events: %v", err)
-			c.EventSink = nullEventSink{}
-		} else {
-			ns := ref.Namespace
-			if len(ns) == 0 {
-				ns = "default"
-			}
-			c.EventSink = &v1.EventSinkImpl{
-				Interface: kubernetes.NewForConfigOrDie(c.ClientConfig).CoreV1().Events(ns),
-			}
-		}
-	}
-
 	return c.Config.Complete(c.SharedInformerFactory)
 }
 
-var allowedMediaTypes = []string{
+var defaultAllowedMediaTypes = []string{
 	runtime.ContentTypeJSON,
 	runtime.ContentTypeYAML,
 	runtime.ContentTypeProtobuf,
-}
-
-func eventReference() (*corev1.ObjectReference, error) {
-	ns := os.Getenv("POD_NAMESPACE")
-	pod := os.Getenv("POD_NAME")
-	if len(ns) == 0 && len(pod) > 0 {
-		serviceAccountNamespaceFile := "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
-		if _, err := os.Stat(serviceAccountNamespaceFile); err == nil {
-			bs, err := ioutil.ReadFile(serviceAccountNamespaceFile)
-			if err != nil {
-				return nil, err
-			}
-			ns = string(bs)
-		}
-	}
-	if len(ns) == 0 {
-		pod = ""
-		ns = "kube-system"
-	}
-	if len(pod) == 0 {
-		return &corev1.ObjectReference{
-			Kind:       "Namespace",
-			Name:       ns,
-			APIVersion: "v1",
-		}, nil
-	}
-
-	return &corev1.ObjectReference{
-		Kind:       "Pod",
-		Namespace:  ns,
-		Name:       pod,
-		APIVersion: "v1",
-	}, nil
 }
 
 // New creates a new server which logically combines the handling chain with the passed server.
@@ -819,6 +756,10 @@ func eventReference() (*corev1.ObjectReference, error) {
 func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*GenericAPIServer, error) {
 	if c.Serializer == nil {
 		return nil, fmt.Errorf("Genericapiserver.New() called with config.Serializer == nil")
+	}
+	allowedMediaTypes := defaultAllowedMediaTypes
+	if utilfeature.DefaultFeatureGate.Enabled(genericfeatures.CBORServingAndStorage) {
+		allowedMediaTypes = append(allowedMediaTypes, runtime.ContentTypeCBOR)
 	}
 	for _, info := range c.Serializer.SupportedMediaTypes() {
 		var ok bool
@@ -902,8 +843,6 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 		FeatureGate:      c.FeatureGate,
 
 		muxAndDiscoveryCompleteSignals: map[string]<-chan struct{}{},
-
-		eventSink: c.EventSink,
 	}
 
 	if c.FeatureGate.Enabled(genericfeatures.AggregatedDiscoveryEndpoint) {
@@ -914,14 +853,6 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 		s.AggregatedDiscoveryGroupManager = manager
 		s.AggregatedLegacyDiscoveryGroupManager = discoveryendpoint.NewResourceManager("api")
 	}
-
-	ref, err := eventReference()
-	if err != nil {
-		klog.Warningf("Failed to derive event reference, won't create events: %v", err)
-		c.EventSink = nullEventSink{}
-	}
-	s.eventRef = ref
-
 	for {
 		if c.JSONPatchMaxCopyBytes <= 0 {
 			break
@@ -961,8 +892,8 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	genericApiServerHookName := "generic-apiserver-start-informers"
 	if c.SharedInformerFactory != nil {
 		if !s.isPostStartHookRegistered(genericApiServerHookName) {
-			err := s.AddPostStartHook(genericApiServerHookName, func(context PostStartHookContext) error {
-				c.SharedInformerFactory.Start(context.StopCh)
+			err := s.AddPostStartHook(genericApiServerHookName, func(hookContext PostStartHookContext) error {
+				c.SharedInformerFactory.Start(hookContext.Done())
 				return nil
 			})
 			if err != nil {
@@ -979,8 +910,8 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	const priorityAndFairnessConfigConsumerHookName = "priority-and-fairness-config-consumer"
 	if s.isPostStartHookRegistered(priorityAndFairnessConfigConsumerHookName) {
 	} else if c.FlowControl != nil {
-		err := s.AddPostStartHook(priorityAndFairnessConfigConsumerHookName, func(context PostStartHookContext) error {
-			go c.FlowControl.Run(context.StopCh)
+		err := s.AddPostStartHook(priorityAndFairnessConfigConsumerHookName, func(hookContext PostStartHookContext) error {
+			go c.FlowControl.Run(hookContext.Done())
 			return nil
 		})
 		if err != nil {
@@ -995,8 +926,8 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	if c.FlowControl != nil {
 		const priorityAndFairnessFilterHookName = "priority-and-fairness-filter"
 		if !s.isPostStartHookRegistered(priorityAndFairnessFilterHookName) {
-			err := s.AddPostStartHook(priorityAndFairnessFilterHookName, func(context PostStartHookContext) error {
-				genericfilters.StartPriorityAndFairnessWatermarkMaintenance(context.StopCh)
+			err := s.AddPostStartHook(priorityAndFairnessFilterHookName, func(hookContext PostStartHookContext) error {
+				genericfilters.StartPriorityAndFairnessWatermarkMaintenance(hookContext.Done())
 				return nil
 			})
 			if err != nil {
@@ -1006,8 +937,8 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	} else {
 		const maxInFlightFilterHookName = "max-in-flight-filter"
 		if !s.isPostStartHookRegistered(maxInFlightFilterHookName) {
-			err := s.AddPostStartHook(maxInFlightFilterHookName, func(context PostStartHookContext) error {
-				genericfilters.StartMaxInFlightWatermarkMaintenance(context.StopCh)
+			err := s.AddPostStartHook(maxInFlightFilterHookName, func(hookContext PostStartHookContext) error {
+				genericfilters.StartMaxInFlightWatermarkMaintenance(hookContext.Done())
 				return nil
 			})
 			if err != nil {
@@ -1020,8 +951,8 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	if c.StorageObjectCountTracker != nil {
 		const storageObjectCountTrackerHookName = "storage-object-count-tracker-hook"
 		if !s.isPostStartHookRegistered(storageObjectCountTrackerHookName) {
-			if err := s.AddPostStartHook(storageObjectCountTrackerHookName, func(context PostStartHookContext) error {
-				go c.StorageObjectCountTracker.RunUntil(context.StopCh)
+			if err := s.AddPostStartHook(storageObjectCountTrackerHookName, func(hookContext PostStartHookContext) error {
+				go c.StorageObjectCountTracker.RunUntil(hookContext.Done())
 				return nil
 			}); err != nil {
 				return nil, err
@@ -1050,7 +981,7 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 
 	s.listedPathProvider = routes.ListedPathProviders{s.listedPathProvider, delegationTarget}
 
-	installAPI(s, c.Config)
+	installAPI(name, s, c.Config)
 
 	// use the UnprotectedHandler from the delegation target to ensure that we don't attempt to double authenticator, authorize,
 	// or some other part of the filter chain in delegation cases.
@@ -1147,7 +1078,7 @@ func DefaultBuildHandlerChain(apiHandler http.Handler, c *Config) http.Handler {
 	return handler
 }
 
-func installAPI(s *GenericAPIServer, c *Config) {
+func installAPI(name string, s *GenericAPIServer, c *Config) {
 	if c.EnableIndex {
 		routes.Index{}.Install(s.listedPathProvider, s.Handler.NonGoRestfulMux)
 	}
@@ -1245,7 +1176,7 @@ func AuthorizeClientBearerToken(loopback *restclient.Config, authn *Authenticati
 	tokens[privilegedLoopbackToken] = &user.DefaultInfo{
 		Name:   user.APIServerUser,
 		UID:    uid,
-		Groups: []string{user.SystemPrivilegedGroup},
+		Groups: []string{user.AllAuthenticated, user.SystemPrivilegedGroup},
 	}
 
 	tokenAuthenticator := authenticatorfactory.NewFromTokens(tokens, authn.APIAudiences)
@@ -1259,10 +1190,4 @@ func SetHostnameFuncForTests(name string) {
 		err = nil
 		return
 	}
-}
-
-type nullEventSink struct{}
-
-func (nullEventSink) Create(event *corev1.Event) (*corev1.Event, error) {
-	return nil, nil
 }
