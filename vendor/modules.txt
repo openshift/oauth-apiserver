@@ -219,7 +219,7 @@ github.com/openshift/build-machinery-go/make/targets/golang
 github.com/openshift/build-machinery-go/make/targets/openshift
 github.com/openshift/build-machinery-go/make/targets/openshift/operator
 github.com/openshift/build-machinery-go/scripts
-# github.com/openshift/client-go v0.0.0-20250425165505-5f55ff6979a1
+# github.com/openshift/client-go v0.0.0-20250125113824-8e1f0b8fa9a7
 ## explicit; go 1.23.0
 github.com/openshift/client-go/oauth/applyconfigurations
 github.com/openshift/client-go/oauth/applyconfigurations/internal
@@ -719,7 +719,7 @@ gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# k8s.io/api v0.32.3 => k8s.io/api v0.32.1
+# k8s.io/api v0.32.1 => k8s.io/api v0.32.1
 ## explicit; go 1.23.0
 k8s.io/api/admission/v1
 k8s.io/api/admission/v1beta1
@@ -826,7 +826,7 @@ k8s.io/apiextensions-apiserver/pkg/generated/openapi
 k8s.io/apiextensions-apiserver/pkg/registry/customresource
 k8s.io/apiextensions-apiserver/pkg/registry/customresource/tableconvertor
 k8s.io/apiextensions-apiserver/pkg/registry/customresourcedefinition
-# k8s.io/apimachinery v0.32.3 => k8s.io/apimachinery v0.32.1
+# k8s.io/apimachinery v0.32.1 => k8s.io/apimachinery v0.32.1
 ## explicit; go 1.23.0
 k8s.io/apimachinery/pkg/api/apitesting
 k8s.io/apimachinery/pkg/api/apitesting/fuzzer

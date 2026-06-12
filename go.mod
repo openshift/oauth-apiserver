@@ -14,14 +14,14 @@ require (
 	github.com/openshift/api v0.0.0-20251217143335-482f1b56dcc4
 	github.com/openshift/apiserver-library-go v0.0.0-20250127121756-dc9a973f14ce
 	github.com/openshift/build-machinery-go v0.0.0-20250102153059-e85a1a7ecb5c
-	github.com/openshift/client-go v0.0.0-20250425165505-5f55ff6979a1
+	github.com/openshift/client-go v0.0.0-20250125113824-8e1f0b8fa9a7
 	github.com/openshift/library-go v0.0.0-20260427195752-569ff19cc433
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
-	k8s.io/api v0.32.3
+	k8s.io/api v0.32.1
 	k8s.io/apiextensions-apiserver v0.32.1
-	k8s.io/apimachinery v0.32.3
+	k8s.io/apimachinery v0.32.1
 	k8s.io/apiserver v0.32.1
 	k8s.io/client-go v0.32.1
 	k8s.io/code-generator v0.32.1
