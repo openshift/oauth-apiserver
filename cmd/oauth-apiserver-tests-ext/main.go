@@ -61,9 +61,20 @@ func prepareOperatorTestsRegistry() (*oteextension.Registry, error) {
 	registry := oteextension.NewRegistry()
 	extension := oteextension.NewExtension("openshift", "payload", "oauth-apiserver")
 
+	// Parallel-safe, non-disruptive tests run with default (Stable) cluster
+	// health monitoring and no forced serialization.
+	extension.AddSuite(oteextension.Suite{
+		Name:    "openshift/oauth-apiserver/component/parallel",
+		Parents: []string{"openshift/conformance/parallel"},
+		Qualifiers: []string{
+			`name.contains("[Component]") && !name.contains("[Serial]") && !name.contains("[Disruptive]")`,
+		},
+	})
+
 	// Non-disruptive tests run with default (Stable) cluster health monitoring.
 	extension.AddSuite(oteextension.Suite{
 		Name:        "openshift/oauth-apiserver/component/serial",
+		Parents:     []string{"openshift/conformance/serial"},
 		Parallelism: 1,
 		Qualifiers: []string{
 			`name.contains("[Component]") && name.contains("[Serial]") && !name.contains("[Disruptive]")`,

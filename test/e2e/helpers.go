@@ -12,6 +12,7 @@ import (
 
 	authorizationv1 "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -26,7 +27,7 @@ import (
 )
 
 // NewClientConfigForTest returns a config configured to connect to the api server
-func NewClientConfigForTest(t *testing.T) *rest.Config {
+func NewClientConfigForTest(t testing.TB) *rest.Config {
 	loader := clientcmd.NewDefaultClientConfigLoadingRules()
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, &clientcmd.ConfigOverrides{ClusterInfo: api.Cluster{InsecureSkipTLSVerify: true}})
 	config, err := clientConfig.ClientConfig()
@@ -91,7 +92,7 @@ func waitForSelfSAR(interval, timeout time.Duration, c kubernetes.Interface, sel
 
 // PortForwardSvc forwards a remote service's port to localhost
 // portMapping is a string "localPort:remotePort"
-func PortForwardSvc(t *testing.T, svcNS, svcName, portMapping string) context.CancelFunc {
+func PortForwardSvc(t testing.TB, svcNS, svcName, portMapping string) context.CancelFunc {
 	var err error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
@@ -135,7 +136,7 @@ type ResourceTrashbin struct {
 }
 
 // NewResourceTrashbin creates an instance of a ResourceTrashbin
-func NewResourceTrashbin(t *testing.T, adminKubeconfig *rest.Config) *ResourceTrashbin {
+func NewResourceTrashbin(t testing.TB, adminKubeconfig *rest.Config) *ResourceTrashbin {
 	dynamicClient, err := dynamic.NewForConfig(adminKubeconfig)
 	require.NoError(t, err)
 
@@ -158,12 +159,22 @@ func (b *ResourceTrashbin) AddResource(resource schema.GroupVersionResource, obj
 }
 
 // Empty deletes all of the cached resources
-func (b *ResourceTrashbin) Empty(t *testing.T) {
+func (b *ResourceTrashbin) Empty(t testing.TB) {
 	for _, r := range b.resourcesToDelete {
+		// Bound each cleanup request so a stalled Delete cannot block deferred
+		// cleanup indefinitely (the test rest.Config sets no client timeout).
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		err := b.dynamicClient.
 			Resource(r.Resource).
 			Namespace(r.Namespace).
-			Delete(context.Background(), r.Name, metav1.DeleteOptions{})
+			Delete(ctx, r.Name, metav1.DeleteOptions{})
+		cancel()
+		// A resource may already be gone (e.g. deleted by the test itself or via
+		// cascade); only a non-NotFound error means cleanup actually failed.
+		if err != nil && !apierrors.IsNotFound(err) {
+			t.Errorf("failed to delete %v: %v", r, err)
+			continue
+		}
 		t.Logf("Deleted %v, err: %v", r, err)
 	}
 
