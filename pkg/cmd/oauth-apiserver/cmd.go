@@ -56,7 +56,7 @@ func NewOAuthAPIServerOptions(out io.Writer, featureGate featuregate.MutableFeat
 			serverscheme.Codecs.LegacyCodec(serverscheme.Scheme.PrioritizedVersionsAllGroups()...),
 		),
 		TokenValidationOptions: tokenvalidationoptions.NewTokenValidationOptions(),
-		FeatureGateOptions:     features.NewFeatureGateOptionsOrDie(featureGate, apifeatures.SelfManaged),
+		FeatureGateOptions:     features.NewFeatureGateOptionsOrDie(featureGate, 4, apifeatures.SelfManaged),
 		Output:                 out,
 	}
 	return o

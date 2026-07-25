@@ -134,7 +134,6 @@ API rule violation: list_type_missing,github.com/openshift/api/project/v1,Projec
 API rule violation: list_type_missing,github.com/openshift/api/project/v1,ProjectStatus,Conditions
 API rule violation: list_type_missing,github.com/openshift/api/user/v1,User,Groups
 API rule violation: list_type_missing,github.com/openshift/api/user/v1,User,Identities
-API rule violation: list_type_missing,k8s.io/api/storagemigration/v1alpha1,StorageVersionMigrationList,Items
 API rule violation: names_match,github.com/openshift/api/authorization/v1,Action,Group
 API rule violation: names_match,github.com/openshift/api/authorization/v1,Action,Version
 API rule violation: names_match,github.com/openshift/api/authorization/v1,GroupRestriction,Selectors
@@ -171,9 +170,9 @@ API rule violation: names_match,github.com/openshift/api/config/v1,GenericAPISer
 API rule violation: names_match,github.com/openshift/api/config/v1,IdentityProviderConfig,GitHub
 API rule violation: names_match,github.com/openshift/api/config/v1,IdentityProviderConfig,GitLab
 API rule violation: names_match,github.com/openshift/api/config/v1,IdentityProviderConfig,HTPasswd
+API rule violation: names_match,github.com/openshift/api/config/v1,ImagePolicyPKIRootOfTrust,CertificateAuthorityIntermediatesData
+API rule violation: names_match,github.com/openshift/api/config/v1,ImagePolicyPKIRootOfTrust,CertificateAuthorityRootsData
 API rule violation: names_match,github.com/openshift/api/config/v1,InfrastructureStatus,APIServerInternalURL
-API rule violation: names_match,github.com/openshift/api/config/v1,PKI,CertificateAuthorityIntermediatesData
-API rule violation: names_match,github.com/openshift/api/config/v1,PKI,CertificateAuthorityRootsData
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformSpec,BareMetal
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformSpec,IBMCloud
 API rule violation: names_match,github.com/openshift/api/config/v1,PlatformSpec,OpenStack
@@ -303,6 +302,7 @@ API rule violation: names_match,k8s.io/client-go/pkg/apis/clientauthentication/v
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,APIServerList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,AuthenticationList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,BuildList,ListMeta
+API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,CRIOCredentialProviderConfigList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,ClusterImagePolicyList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,ClusterOperatorList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,ClusterVersionList,ListMeta
@@ -316,6 +316,7 @@ API rule violation: streaming_list_type_json_tags,github.com/openshift/api/confi
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,ImageTagMirrorSetList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,InfrastructureList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,IngressList,ListMeta
+API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,InsightsDataGatherList,Items
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,NetworkList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,NodeList,ListMeta
 API rule violation: streaming_list_type_json_tags,github.com/openshift/api/config/v1,OAuthList,ListMeta

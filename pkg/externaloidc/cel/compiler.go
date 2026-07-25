@@ -23,7 +23,7 @@ func NewCompiler() *compiler {
 	responseType := apiservercel.NewMapType(apiservercel.StringType, apiservercel.DynType, -1)
 
 	extendableCompiler := authenticationcel.NewExtendableCompiler(
-		environment.MustBaseEnvSet(environment.DefaultCompatibilityVersion(), true),
+		environment.MustBaseEnvSet(environment.DefaultCompatibilityVersion()),
 		authenticationcel.NewEnvironmentSet(
 			responseVarName,
 			[]cel.EnvOption{cel.Variable(responseVarName, responseType.CelType())},
