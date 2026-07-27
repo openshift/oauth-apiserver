@@ -12,6 +12,7 @@ import (
 	"k8s.io/apiserver/pkg/authentication/token/union"
 	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
+	apiserverfilesystem "k8s.io/apiserver/pkg/util/filesystem"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/util/filesystem"
 	"sigs.k8s.io/yaml"
@@ -88,7 +89,7 @@ func (c *Configurator) Run(ctx context.Context) error {
 		return fmt.Errorf("loading configuration: %w", err)
 	}
 
-	go filesystem.WatchUntil(ctx, time.Minute, c.configFile, func() {
+	go apiserverfilesystem.WatchUntil(ctx, time.Minute, c.configFile, func() {
 		err := c.handleConfigChange(ctx)
 		if err != nil {
 			klog.Errorf("reloading configuration: %v", err)
