@@ -149,7 +149,10 @@ func TestAddFlags(t *testing.T) {
 			},
 			Audit: &genericapiserveroptions.AuditOptions{
 				LogOptions: genericapiserveroptions.AuditLogOptions{
-					Format: "json",
+					MaxAge:     366,
+					MaxBackups: 100,
+					MaxSize:    100,
+					Format:     "json",
 					BatchOptions: genericapiserveroptions.AuditBatchOptions{
 						Mode: "blocking",
 						BatchConfig: auditbuffered.BatchConfig{
@@ -217,7 +220,7 @@ func TestAddFlags(t *testing.T) {
 	target.GenericServerRunOptions.ComponentGlobalsRegistry = nil
 	target.FeatureGateOptions = nil
 
-	if diff := cmp.Diff(expected, target, cmpopts.IgnoreUnexported(admission.Plugins{})); diff != "" {
+	if diff := cmp.Diff(expected, target, cmpopts.IgnoreUnexported(admission.Plugins{}, genericapiserveroptions.SecureServingOptionsWithLoopback{})); diff != "" {
 		t.Errorf("unexpected run options,\ndiff:\n%s", diff)
 	}
 }
