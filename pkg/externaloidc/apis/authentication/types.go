@@ -98,6 +98,9 @@ type Issuer struct {
 	// A discovery url that is exposed using kubernetes service 'oidc' in namespace 'oidc-namespace'
 	// and discovery information is available at '/.well-known/openid-configuration'.
 	// discoveryURL: "https://oidc.oidc-namespace/.well-known/openid-configuration"
+	// When an HTTP(S) proxy is configured, add this short service name to NO_PROXY.
+	// Alternatively, use the fully qualified service name, which can be covered by
+	// a NO_PROXY entry such as ".svc" or ".cluster.local".
 	// certificateAuthority is used to verify the TLS connection and the hostname on the leaf certificate
 	// must be set to 'oidc.oidc-namespace'.
 	//
