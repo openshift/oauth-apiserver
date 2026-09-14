@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"k8s.io/kubernetes/pkg/util/filesystem"
 )
 
 func TestConfigurator_Run(t *testing.T) {
@@ -107,5 +109,34 @@ jwt:
 				}
 			}
 		})
+	}
+}
+
+func TestProxyCAContentFromFile(t *testing.T) {
+	proxyCAContent, err := proxyCAContentFromFile("")
+	if err != nil {
+		t.Fatalf("loading an empty proxy CA path: %v", err)
+	}
+	if proxyCAContent != nil {
+		t.Fatal("expected no proxy CA content for an empty path")
+	}
+
+	if _, err := proxyCAContentFromFile("/nonexistent/proxy-ca.pem"); err == nil {
+		t.Fatal("expected an error for a nonexistent proxy CA file")
+	}
+}
+
+func TestAuthenticationConfigurationFromConfigurationFileReadsProxyTrustedCA(t *testing.T) {
+	configFile := filepath.Join(t.TempDir(), "auth-config.json")
+	if err := os.WriteFile(configFile, []byte(`{"proxyTrustedCA":"/etc/proxy-ca/ca-bundle.crt"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	config, _, err := AuthenticationConfigurationFromConfigurationFile(&filesystem.DefaultFs{}, configFile)
+	if err != nil {
+		t.Fatalf("reading authentication configuration: %v", err)
+	}
+	if got, want := config.ProxyTrustedCA, "/etc/proxy-ca/ca-bundle.crt"; got != want {
+		t.Fatalf("proxy trusted CA = %q, want %q", got, want)
 	}
 }

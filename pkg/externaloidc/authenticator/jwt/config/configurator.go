@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
@@ -39,6 +40,7 @@ type authenticatorWithCancel struct {
 
 type Configurator struct {
 	configFile              string
+	proxyCAContent          *dynamiccertificates.DynamicFileCAContent
 	authenticatorWithCancel *authenticatorWithCancel
 	fs                      filesystem.Filesystem
 	configHash              string
@@ -118,9 +120,14 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 		return nil
 	}
 
+	proxyCAContent, err := proxyCAContentFromFile(authnCfg.ProxyTrustedCA)
+	if err != nil {
+		return err
+	}
+
 	wrappedCtx, cancel := context.WithCancel(ctx)
 	compiler := externaloidccel.NewCompiler()
-	tokenAuthenticator, err := TokenAuthenticatorForAuthenticationConfiguration(wrappedCtx, authnCfg, compiler)
+	tokenAuthenticator, err := tokenAuthenticatorForAuthenticationConfiguration(wrappedCtx, authnCfg, compiler, proxyCAContent)
 	if err != nil {
 		defer cancel()
 		return fmt.Errorf("creating token authenticator: %w", err)
@@ -134,9 +141,28 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 		authenticator: tokenAuthenticator,
 		cancel:        cancel,
 	}
+	c.proxyCAContent = proxyCAContent
 	c.configHash = cfgHash
+	if proxyCAContent != nil {
+		go proxyCAContent.Run(ctx, 1)
+	}
 
 	return nil
+}
+
+// proxyCAContentFromFile loads the initial component-proxy CA bundle. The
+// returned DynamicFileCAContent is shared by every issuer transport created
+// for the rendered authentication configuration.
+func proxyCAContentFromFile(proxyCAFile string) (*dynamiccertificates.DynamicFileCAContent, error) {
+	if proxyCAFile == "" {
+		return nil, nil
+	}
+
+	proxyCAContent, err := dynamiccertificates.NewDynamicCAContentFromFile("proxy-ca", proxyCAFile)
+	if err != nil {
+		return nil, fmt.Errorf("loading proxy CA from %q: %w", proxyCAFile, err)
+	}
+	return proxyCAContent, nil
 }
 
 func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, cfgPath string) (*authentication.AuthenticationConfiguration, string, error) {
@@ -168,12 +194,22 @@ func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, 
 }
 
 func TokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *authentication.AuthenticationConfiguration, compiler oidc.Compiler) (authenticator.Token, error) {
+	return tokenAuthenticatorForAuthenticationConfiguration(ctx, cfg, compiler, nil)
+}
+
+func tokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *authentication.AuthenticationConfiguration, compiler oidc.Compiler, proxyCAContent *dynamiccertificates.DynamicFileCAContent) (authenticator.Token, error) {
 	jwtAuthenticators := []authenticator.Token{}
 
 	for _, jwt := range cfg.JWT {
 		var caContentProvider k8soidc.CAContentProvider
+		var client *http.Client
 		var err error
-		if len(jwt.Issuer.CertificateAuthority) > 0 {
+		if proxyCAContent != nil {
+			client, err = newDynamicCAHTTPClient(proxyCAContent, []byte(jwt.Issuer.CertificateAuthority))
+			if err != nil {
+				return nil, fmt.Errorf("creating proxy-aware HTTP client: %w", err)
+			}
+		} else if len(jwt.Issuer.CertificateAuthority) > 0 {
 			caContentProvider, err = dynamiccertificates.NewStaticCAContent("oidc-authenticator", []byte(jwt.Issuer.CertificateAuthority))
 			if err != nil {
 				return nil, fmt.Errorf("creating CA content provider: %w", err)
@@ -183,6 +219,7 @@ func TokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *
 		tokenAuthenticator, err := oidc.New(ctx, oidc.Options{
 			JWTAuthenticator:  jwt,
 			CAContentProvider: caContentProvider,
+			Client:            client,
 			Compiler:          compiler,
 		})
 		if err != nil {
