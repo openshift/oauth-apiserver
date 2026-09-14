@@ -11,7 +11,7 @@ require (
 	github.com/openshift-eng/openshift-tests-extension v0.0.0-20260408205138-ec501c2bf4a5
 	github.com/openshift/api v0.0.0-20260413132630-e010a985205d
 	github.com/openshift/apiserver-library-go v0.0.0-20251105084845-112ef95500de
-	github.com/openshift/build-machinery-go v0.0.0-20251023084048-5d77c1a5e5af
+	github.com/openshift/build-machinery-go v0.0.0-20260902143904-520f675c892b
 	github.com/openshift/client-go v0.0.0-20251205093018-96a6cbc1420c
 	github.com/openshift/library-go v0.0.0-20260309173530-9ed71ac3148f
 	github.com/spf13/cobra v1.9.1
