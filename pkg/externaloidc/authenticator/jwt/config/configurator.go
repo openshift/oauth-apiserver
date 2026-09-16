@@ -13,11 +13,11 @@ import (
 	"k8s.io/apiserver/pkg/authentication/token/union"
 	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	apiserverfilesystem "k8s.io/apiserver/pkg/util/filesystem"
-	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/util/filesystem"
 	"sigs.k8s.io/yaml"
 
+	"github.com/openshift/library-go/pkg/network"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
 	authenticationv1alpha1 "github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/v1alpha1"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/validation"
@@ -144,7 +144,7 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 	c.proxyCAContent = proxyCAContent
 	c.configHash = cfgHash
 	if proxyCAContent != nil {
-		go proxyCAContent.Run(ctx, 1)
+		go proxyCAContent.Run(wrappedCtx, 1)
 	}
 
 	return nil
@@ -193,34 +193,27 @@ func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, 
 	return out, string(configHash[:]), nil
 }
 
-func TokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *authentication.AuthenticationConfiguration, compiler oidc.Compiler) (authenticator.Token, error) {
-	return tokenAuthenticatorForAuthenticationConfiguration(ctx, cfg, compiler, nil)
-}
-
 func tokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *authentication.AuthenticationConfiguration, compiler oidc.Compiler, proxyCAContent *dynamiccertificates.DynamicFileCAContent) (authenticator.Token, error) {
-	jwtAuthenticators := []authenticator.Token{}
+	jwtAuthenticators := make([]authenticator.Token, 0, len(cfg.JWT))
 
 	for _, jwt := range cfg.JWT {
-		var caContentProvider k8soidc.CAContentProvider
-		var client *http.Client
-		var err error
+		var opts []network.TransportOption
+		if len(jwt.Issuer.CertificateAuthority) > 0 {
+			opts = append(opts, network.WithCAData("issuer CA", []byte(jwt.Issuer.CertificateAuthority)))
+		}
 		if proxyCAContent != nil {
-			client, err = newDynamicCAHTTPClient(proxyCAContent, []byte(jwt.Issuer.CertificateAuthority))
-			if err != nil {
-				return nil, fmt.Errorf("creating proxy-aware HTTP client: %w", err)
-			}
-		} else if len(jwt.Issuer.CertificateAuthority) > 0 {
-			caContentProvider, err = dynamiccertificates.NewStaticCAContent("oidc-authenticator", []byte(jwt.Issuer.CertificateAuthority))
-			if err != nil {
-				return nil, fmt.Errorf("creating CA content provider: %w", err)
-			}
+			opts = append(opts, network.WithCAContentProvider(proxyCAContent))
+		}
+
+		rt, err := network.NewRoundTripper(opts...)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create HTTP transport for token authenticator: %w", err)
 		}
 
 		tokenAuthenticator, err := oidc.New(ctx, oidc.Options{
-			JWTAuthenticator:  jwt,
-			CAContentProvider: caContentProvider,
-			Client:            client,
-			Compiler:          compiler,
+			JWTAuthenticator: jwt,
+			Client:           &http.Client{Transport: rt},
+			Compiler:         compiler,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("creating token authenticator: %w", err)
