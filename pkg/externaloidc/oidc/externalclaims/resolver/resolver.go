@@ -2,8 +2,6 @@ package resolver
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,9 +14,11 @@ import (
 	"github.com/google/cel-go/cel"
 	"github.com/google/cel-go/common/types"
 
+	"github.com/openshift/library-go/pkg/network/httptransport"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
 	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 	authenticationcel "k8s.io/apiserver/pkg/authentication/cel"
+	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	"k8s.io/klog/v2"
 
 	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
@@ -31,8 +31,8 @@ type Compiler interface {
 	CompileExternalSourceExpression(expressionAccessor authenticationcel.ExpressionAccessor) (authenticationcel.CompilationResult, error)
 }
 
-func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authentication.ExternalClaimsSource) (*externalClaimsResolver, error) {
-	httpClient, err := httpClientForTLSConfig(source.TLS)
+func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authentication.ExternalClaimsSource, proxyCAContentProvider ...dynamiccertificates.CAContentProvider) (*externalClaimsResolver, error) {
+	httpClient, err := httpClientForTLSConfig(source.TLS, proxyCAContentProvider...)
 	if err != nil {
 		return nil, fmt.Errorf("building http client for external source: %w", err)
 	}
@@ -60,29 +60,27 @@ func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authenti
 // of the claim mapping logic to execute, which should be plenty of time.
 const externalSourceRequestTimeout = 500 * time.Millisecond
 
-func httpClientForTLSConfig(tlsCfg *authentication.TLS) (*http.Client, error) {
+func httpClientForTLSConfig(tlsCfg *authentication.TLS, proxyCAContentProvider ...dynamiccertificates.CAContentProvider) (*http.Client, error) {
 	client := &http.Client{
 		Timeout: externalSourceRequestTimeout,
 	}
 
-	if tlsCfg == nil || tlsCfg.CertificateAuthority == nil || len(*tlsCfg.CertificateAuthority) == 0 {
-		return client, nil
+	var opts []httptransport.Option
+	if tlsCfg != nil && tlsCfg.CertificateAuthority != nil && len(*tlsCfg.CertificateAuthority) > 0 {
+		opts = append(opts, httptransport.WithCAData("external claims source CA", []byte(*tlsCfg.CertificateAuthority)))
+	}
+	for _, provider := range proxyCAContentProvider {
+		if provider != nil {
+			opts = append(opts, httptransport.WithCAContentProvider(provider))
+		}
 	}
 
-	caCertPool := x509.NewCertPool()
-
-	if ok := caCertPool.AppendCertsFromPEM([]byte(*tlsCfg.CertificateAuthority)); !ok {
-		return nil, fmt.Errorf("certificate authority does not contain any valid PEM certificates")
-	}
-
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = &tls.Config{
-		RootCAs:    caCertPool,
-		MinVersion: tls.VersionTLS12,
+	transport, err := httptransport.NewRoundTripper(opts...)
+	if err != nil {
+		return nil, err
 	}
 
 	client.Transport = transport
-
 	return client, nil
 }
 

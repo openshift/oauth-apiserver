@@ -1,6 +1,7 @@
 package tokengetters
 
 import (
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,7 +10,26 @@ import (
 	"testing"
 
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 )
+
+type invalidProxyCAContentProvider struct{}
+
+func (invalidProxyCAContentProvider) AddListener(dynamiccertificates.Listener) {}
+func (invalidProxyCAContentProvider) Name() string                             { return "proxy-ca" }
+func (invalidProxyCAContentProvider) CurrentCABundleContent() []byte {
+	return []byte("not a certificate")
+}
+func (invalidProxyCAContentProvider) VerifyOptions() (x509.VerifyOptions, bool) {
+	return x509.VerifyOptions{}, false
+}
+
+func TestHTTPClientForClientCredentialUsesProxyCAContentProvider(t *testing.T) {
+	_, err := httpClientForClientCredential(nil, invalidProxyCAContentProvider{})
+	if err == nil || !strings.Contains(err.Error(), "failed to parse CA content from provider \"proxy-ca\"") {
+		t.Fatalf("expected proxy CA parsing error, got %v", err)
+	}
+}
 
 func TestClientCredential(t *testing.T) {
 	type testcase struct {
@@ -76,7 +96,7 @@ func TestClientCredential(t *testing.T) {
 					}(),
 				},
 			},
-			err: "certificate authority does not contain any valid PEM certificates",
+			err: "applying transport option 0 failed: failed to parse CA certificates from \"client credentials token endpoint CA\"",
 		},
 		{
 			name: "initial token fetch fails, error",

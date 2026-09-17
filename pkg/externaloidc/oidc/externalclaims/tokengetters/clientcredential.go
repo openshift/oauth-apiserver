@@ -2,8 +2,6 @@ package tokengetters
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,7 +9,9 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
+	"github.com/openshift/library-go/pkg/network/httptransport"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 )
 
 // tokenEndpointRequestTimeout is the timeout for HTTP requests to the token endpoint.
@@ -24,12 +24,12 @@ type ClientCredential struct {
 }
 
 // NewClientCredential creates a new ClientCredential token getter from the provided configuration.
-func NewClientCredential(ctx context.Context, cfg *authentication.ClientCredentialConfig) (*ClientCredential, error) {
+func NewClientCredential(ctx context.Context, cfg *authentication.ClientCredentialConfig, proxyCAContentProvider ...dynamiccertificates.CAContentProvider) (*ClientCredential, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("client credential configuration must not be nil")
 	}
 
-	httpClient, err := httpClientForClientCredential(cfg.TLS)
+	httpClient, err := httpClientForClientCredential(cfg.TLS, proxyCAContentProvider...)
 	if err != nil {
 		return nil, fmt.Errorf("building http client for client credential token endpoint: %w", err)
 	}
@@ -66,45 +66,27 @@ func (cc *ClientCredential) GetAccessToken(_ context.Context) (string, error) {
 	return token.AccessToken, nil
 }
 
-func httpClientForClientCredential(tlsCfg *authentication.TLS) (*http.Client, error) {
+func httpClientForClientCredential(tlsCfg *authentication.TLS, proxyCAContentProvider ...dynamiccertificates.CAContentProvider) (*http.Client, error) {
 	client := &http.Client{
 		Timeout: tokenEndpointRequestTimeout,
 	}
 
-	if tlsCfg == nil {
+	opts := []httptransport.Option{}
+	if tlsCfg != nil && tlsCfg.CertificateAuthority != nil && len(*tlsCfg.CertificateAuthority) > 0 {
+		opts = append(opts, httptransport.WithCAData("client credentials token endpoint CA", []byte(*tlsCfg.CertificateAuthority)))
+	}
+	for _, provider := range proxyCAContentProvider {
+		if provider != nil {
+			opts = append(opts, httptransport.WithCAContentProvider(provider))
+		}
+	}
+	if len(opts) == 0 {
 		return client, nil
 	}
-
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-
-	err := modifyTransportRootCAs(transport, tlsCfg.CertificateAuthority)
+	transport, err := httptransport.NewRoundTripper(opts...)
 	if err != nil {
-		return nil, fmt.Errorf("setting client root CAs: %w", err)
+		return nil, err
 	}
-
 	client.Transport = transport
-
 	return client, nil
-}
-
-func modifyTransportRootCAs(transport *http.Transport, certificateAuthority *string) error {
-	if certificateAuthority == nil || len(*certificateAuthority) == 0 {
-		return nil
-	}
-
-	if transport == nil {
-		transport = http.DefaultTransport.(*http.Transport).Clone()
-	}
-
-	if transport.TLSClientConfig == nil {
-		transport.TLSClientConfig = &tls.Config{}
-	}
-
-	caCertPool := x509.NewCertPool()
-	if ok := caCertPool.AppendCertsFromPEM([]byte(*certificateAuthority)); !ok {
-		return fmt.Errorf("certificate authority does not contain any valid PEM certificates")
-	}
-
-	transport.TLSClientConfig.RootCAs = caCertPool
-	return nil
 }

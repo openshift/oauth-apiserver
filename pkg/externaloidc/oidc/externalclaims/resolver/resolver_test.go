@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"context"
+	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -15,9 +16,28 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
 	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
+	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 	"k8s.io/utils/ptr"
 )
+
+type invalidProxyCAContentProvider struct{}
+
+func (invalidProxyCAContentProvider) AddListener(dynamiccertificates.Listener) {}
+func (invalidProxyCAContentProvider) Name() string                             { return "proxy-ca" }
+func (invalidProxyCAContentProvider) CurrentCABundleContent() []byte {
+	return []byte("not a certificate")
+}
+func (invalidProxyCAContentProvider) VerifyOptions() (x509.VerifyOptions, bool) {
+	return x509.VerifyOptions{}, false
+}
+
+func TestHTTPClientForTLSConfigUsesProxyCAContentProvider(t *testing.T) {
+	_, err := httpClientForTLSConfig(nil, invalidProxyCAContentProvider{})
+	if err == nil || !strings.Contains(err.Error(), "failed to parse CA content from provider \"proxy-ca\"") {
+		t.Fatalf("expected proxy CA parsing error, got %v", err)
+	}
+}
 
 func TestNew(t *testing.T) {
 	type testcase struct {
@@ -36,7 +56,7 @@ func TestNew(t *testing.T) {
 					CertificateAuthority: ptr.To("not a real certificate"),
 				},
 			},
-			err: "building http client for external source: certificate authority does not contain any valid PEM certificates",
+			err: "building http client for external source: applying transport option 0 failed: failed to parse CA certificates from \"external claims source CA\"",
 		},
 		{
 			name:     "invalid source, bad source URL path expression",
