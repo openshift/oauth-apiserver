@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"net/http"
 	"sync"
 	"time"
 
@@ -17,7 +16,6 @@ import (
 	"k8s.io/kubernetes/pkg/util/filesystem"
 	"sigs.k8s.io/yaml"
 
-	"github.com/openshift/library-go/pkg/network/httptransport"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
 	authenticationv1alpha1 "github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/v1alpha1"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/validation"
@@ -181,25 +179,27 @@ func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, 
 
 func tokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *authentication.AuthenticationConfiguration, compiler oidc.Compiler, proxyCAContent *dynamiccertificates.DynamicFileCAContent) (authenticator.Token, error) {
 	jwtAuthenticators := make([]authenticator.Token, 0, len(cfg.JWT))
+	// Keep the interface nil when no proxy CA is configured.
+	var proxyCAProvider dynamiccertificates.CAContentProvider
+	if proxyCAContent != nil {
+		proxyCAProvider = proxyCAContent
+	}
 
 	for _, jwt := range cfg.JWT {
-		var opts []httptransport.Option
+		var issuerCAContent dynamiccertificates.CAContentProvider
+		var err error
 		if len(jwt.Issuer.CertificateAuthority) > 0 {
-			opts = append(opts, httptransport.WithCAData("issuer CA", []byte(jwt.Issuer.CertificateAuthority)))
-		}
-		if proxyCAContent != nil {
-			opts = append(opts, httptransport.WithCAContentProvider(proxyCAContent))
-		}
-
-		rt, err := httptransport.NewRoundTripper(opts...)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create HTTP transport for token authenticator: %w", err)
+			issuerCAContent, err = dynamiccertificates.NewStaticCAContent("oidc-authenticator", []byte(jwt.Issuer.CertificateAuthority))
+			if err != nil {
+				return nil, fmt.Errorf("creating issuer CA content provider: %w", err)
+			}
 		}
 
 		tokenAuthenticator, err := oidc.New(ctx, oidc.Options{
-			JWTAuthenticator: jwt,
-			Client:           &http.Client{Transport: rt},
-			Compiler:         compiler,
+			JWTAuthenticator:       jwt,
+			CAContentProvider:      issuerCAContent,
+			ProxyCAContentProvider: proxyCAProvider,
+			Compiler:               compiler,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("creating token authenticator: %w", err)
