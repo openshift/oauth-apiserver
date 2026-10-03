@@ -11,6 +11,7 @@ import (
 	tokenunion "k8s.io/apiserver/pkg/authentication/token/union"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	"k8s.io/apiserver/pkg/server/healthz"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -116,6 +117,11 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 	postStartHooks["openshift.io-StartUserInformer"] = func(ctx genericapiserver.PostStartHookContext) error {
 		go c.ExtraConfig.UserInformers.Start(ctx.Done())
 		return nil
+	}
+
+	// register a readyz check so the server will start reporting ready only when the user's informer has synced.
+	if err := s.GenericAPIServer.AddReadyzChecks(healthz.NewInformerSyncHealthz(c.ExtraConfig.UserInformers)); err != nil {
+		return nil, err
 	}
 
 	c.ExtraConfig.OAuthInformers = oauthinformer.NewSharedInformerFactory(oauthClient, defaultInformerResyncPeriod)
