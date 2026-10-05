@@ -17,8 +17,9 @@ import (
 	"k8s.io/kubernetes/pkg/util/filesystem"
 	"sigs.k8s.io/yaml"
 
+	authenticationv1alpha1 "github.com/openshift/api/authentication/v1alpha1"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
-	authenticationv1alpha1 "github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/v1alpha1"
+	externaloidcv1alpha1 "github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/v1alpha1"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/validation"
 	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc"
@@ -158,9 +159,7 @@ func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, 
 	}
 
 	out := &authentication.AuthenticationConfiguration{}
-
-	err = authenticationv1alpha1.Convert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(config, out, nil)
-	if err != nil {
+	if err := externaloidcv1alpha1.Convert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(config, out, nil); err != nil {
 		return nil, "", fmt.Errorf("converting external representation to internal representation: %w", err)
 	}
 

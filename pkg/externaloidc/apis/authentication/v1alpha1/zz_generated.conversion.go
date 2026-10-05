@@ -8,6 +8,7 @@ package v1alpha1
 import (
 	unsafe "unsafe"
 
+	authenticationv1alpha1 "github.com/openshift/api/authentication/v1alpha1"
 	authentication "github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -20,212 +21,212 @@ func init() {
 // RegisterConversions adds conversion functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterConversions(s *runtime.Scheme) error {
-	if err := s.AddGeneratedConversionFunc((*Authentication)(nil), (*authentication.Authentication)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_Authentication_To_authentication_Authentication(a.(*Authentication), b.(*authentication.Authentication), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.Authentication)(nil), (*authentication.Authentication)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_Authentication_To_authentication_Authentication(a.(*authenticationv1alpha1.Authentication), b.(*authentication.Authentication), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.Authentication)(nil), (*Authentication)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_Authentication_To_v1alpha1_Authentication(a.(*authentication.Authentication), b.(*Authentication), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.Authentication)(nil), (*authenticationv1alpha1.Authentication)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_Authentication_To_v1alpha1_Authentication(a.(*authentication.Authentication), b.(*authenticationv1alpha1.Authentication), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*AuthenticationConfiguration)(nil), (*authentication.AuthenticationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(a.(*AuthenticationConfiguration), b.(*authentication.AuthenticationConfiguration), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.AuthenticationConfiguration)(nil), (*authentication.AuthenticationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(a.(*authenticationv1alpha1.AuthenticationConfiguration), b.(*authentication.AuthenticationConfiguration), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.AuthenticationConfiguration)(nil), (*AuthenticationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_AuthenticationConfiguration_To_v1alpha1_AuthenticationConfiguration(a.(*authentication.AuthenticationConfiguration), b.(*AuthenticationConfiguration), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.AuthenticationConfiguration)(nil), (*authenticationv1alpha1.AuthenticationConfiguration)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_AuthenticationConfiguration_To_v1alpha1_AuthenticationConfiguration(a.(*authentication.AuthenticationConfiguration), b.(*authenticationv1alpha1.AuthenticationConfiguration), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*ClaimMappings)(nil), (*authentication.ClaimMappings)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(a.(*ClaimMappings), b.(*authentication.ClaimMappings), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.ClaimMappings)(nil), (*authentication.ClaimMappings)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(a.(*authenticationv1alpha1.ClaimMappings), b.(*authentication.ClaimMappings), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.ClaimMappings)(nil), (*ClaimMappings)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(a.(*authentication.ClaimMappings), b.(*ClaimMappings), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.ClaimMappings)(nil), (*authenticationv1alpha1.ClaimMappings)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(a.(*authentication.ClaimMappings), b.(*authenticationv1alpha1.ClaimMappings), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*ClaimOrExpression)(nil), (*authentication.ClaimOrExpression)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(a.(*ClaimOrExpression), b.(*authentication.ClaimOrExpression), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.ClaimOrExpression)(nil), (*authentication.ClaimOrExpression)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(a.(*authenticationv1alpha1.ClaimOrExpression), b.(*authentication.ClaimOrExpression), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.ClaimOrExpression)(nil), (*ClaimOrExpression)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(a.(*authentication.ClaimOrExpression), b.(*ClaimOrExpression), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.ClaimOrExpression)(nil), (*authenticationv1alpha1.ClaimOrExpression)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(a.(*authentication.ClaimOrExpression), b.(*authenticationv1alpha1.ClaimOrExpression), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*ClaimValidationRule)(nil), (*authentication.ClaimValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(a.(*ClaimValidationRule), b.(*authentication.ClaimValidationRule), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.ClaimValidationRule)(nil), (*authentication.ClaimValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(a.(*authenticationv1alpha1.ClaimValidationRule), b.(*authentication.ClaimValidationRule), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.ClaimValidationRule)(nil), (*ClaimValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(a.(*authentication.ClaimValidationRule), b.(*ClaimValidationRule), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.ClaimValidationRule)(nil), (*authenticationv1alpha1.ClaimValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(a.(*authentication.ClaimValidationRule), b.(*authenticationv1alpha1.ClaimValidationRule), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*ClientCredentialConfig)(nil), (*authentication.ClientCredentialConfig)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig(a.(*ClientCredentialConfig), b.(*authentication.ClientCredentialConfig), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.ClientCredentialConfig)(nil), (*authentication.ClientCredentialConfig)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig(a.(*authenticationv1alpha1.ClientCredentialConfig), b.(*authentication.ClientCredentialConfig), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.ClientCredentialConfig)(nil), (*ClientCredentialConfig)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig(a.(*authentication.ClientCredentialConfig), b.(*ClientCredentialConfig), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.ClientCredentialConfig)(nil), (*authenticationv1alpha1.ClientCredentialConfig)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig(a.(*authentication.ClientCredentialConfig), b.(*authenticationv1alpha1.ClientCredentialConfig), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*ExternalClaimsSource)(nil), (*authentication.ExternalClaimsSource)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource(a.(*ExternalClaimsSource), b.(*authentication.ExternalClaimsSource), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.ExternalClaimsSource)(nil), (*authentication.ExternalClaimsSource)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource(a.(*authenticationv1alpha1.ExternalClaimsSource), b.(*authentication.ExternalClaimsSource), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.ExternalClaimsSource)(nil), (*ExternalClaimsSource)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource(a.(*authentication.ExternalClaimsSource), b.(*ExternalClaimsSource), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.ExternalClaimsSource)(nil), (*authenticationv1alpha1.ExternalClaimsSource)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource(a.(*authentication.ExternalClaimsSource), b.(*authenticationv1alpha1.ExternalClaimsSource), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*ExternalSourceCondition)(nil), (*authentication.ExternalSourceCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition(a.(*ExternalSourceCondition), b.(*authentication.ExternalSourceCondition), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.ExternalSourceCondition)(nil), (*authentication.ExternalSourceCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition(a.(*authenticationv1alpha1.ExternalSourceCondition), b.(*authentication.ExternalSourceCondition), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.ExternalSourceCondition)(nil), (*ExternalSourceCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition(a.(*authentication.ExternalSourceCondition), b.(*ExternalSourceCondition), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.ExternalSourceCondition)(nil), (*authenticationv1alpha1.ExternalSourceCondition)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition(a.(*authentication.ExternalSourceCondition), b.(*authenticationv1alpha1.ExternalSourceCondition), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*ExtraMapping)(nil), (*authentication.ExtraMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(a.(*ExtraMapping), b.(*authentication.ExtraMapping), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.ExtraMapping)(nil), (*authentication.ExtraMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(a.(*authenticationv1alpha1.ExtraMapping), b.(*authentication.ExtraMapping), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.ExtraMapping)(nil), (*ExtraMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(a.(*authentication.ExtraMapping), b.(*ExtraMapping), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.ExtraMapping)(nil), (*authenticationv1alpha1.ExtraMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(a.(*authentication.ExtraMapping), b.(*authenticationv1alpha1.ExtraMapping), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*Issuer)(nil), (*authentication.Issuer)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_Issuer_To_authentication_Issuer(a.(*Issuer), b.(*authentication.Issuer), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.Issuer)(nil), (*authentication.Issuer)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_Issuer_To_authentication_Issuer(a.(*authenticationv1alpha1.Issuer), b.(*authentication.Issuer), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.Issuer)(nil), (*Issuer)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_Issuer_To_v1alpha1_Issuer(a.(*authentication.Issuer), b.(*Issuer), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.Issuer)(nil), (*authenticationv1alpha1.Issuer)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_Issuer_To_v1alpha1_Issuer(a.(*authentication.Issuer), b.(*authenticationv1alpha1.Issuer), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*JWTAuthenticator)(nil), (*authentication.JWTAuthenticator)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(a.(*JWTAuthenticator), b.(*authentication.JWTAuthenticator), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.JWTAuthenticator)(nil), (*authentication.JWTAuthenticator)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(a.(*authenticationv1alpha1.JWTAuthenticator), b.(*authentication.JWTAuthenticator), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.JWTAuthenticator)(nil), (*JWTAuthenticator)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(a.(*authentication.JWTAuthenticator), b.(*JWTAuthenticator), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.JWTAuthenticator)(nil), (*authenticationv1alpha1.JWTAuthenticator)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(a.(*authentication.JWTAuthenticator), b.(*authenticationv1alpha1.JWTAuthenticator), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*PrefixedClaimOrExpression)(nil), (*authentication.PrefixedClaimOrExpression)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(a.(*PrefixedClaimOrExpression), b.(*authentication.PrefixedClaimOrExpression), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.PrefixedClaimOrExpression)(nil), (*authentication.PrefixedClaimOrExpression)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(a.(*authenticationv1alpha1.PrefixedClaimOrExpression), b.(*authentication.PrefixedClaimOrExpression), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.PrefixedClaimOrExpression)(nil), (*PrefixedClaimOrExpression)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(a.(*authentication.PrefixedClaimOrExpression), b.(*PrefixedClaimOrExpression), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.PrefixedClaimOrExpression)(nil), (*authenticationv1alpha1.PrefixedClaimOrExpression)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(a.(*authentication.PrefixedClaimOrExpression), b.(*authenticationv1alpha1.PrefixedClaimOrExpression), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*SourceURL)(nil), (*authentication.SourceURL)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_SourceURL_To_authentication_SourceURL(a.(*SourceURL), b.(*authentication.SourceURL), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.SourceURL)(nil), (*authentication.SourceURL)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_SourceURL_To_authentication_SourceURL(a.(*authenticationv1alpha1.SourceURL), b.(*authentication.SourceURL), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.SourceURL)(nil), (*SourceURL)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_SourceURL_To_v1alpha1_SourceURL(a.(*authentication.SourceURL), b.(*SourceURL), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.SourceURL)(nil), (*authenticationv1alpha1.SourceURL)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_SourceURL_To_v1alpha1_SourceURL(a.(*authentication.SourceURL), b.(*authenticationv1alpha1.SourceURL), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*SourcedClaimMapping)(nil), (*authentication.SourcedClaimMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(a.(*SourcedClaimMapping), b.(*authentication.SourcedClaimMapping), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.SourcedClaimMapping)(nil), (*authentication.SourcedClaimMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(a.(*authenticationv1alpha1.SourcedClaimMapping), b.(*authentication.SourcedClaimMapping), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.SourcedClaimMapping)(nil), (*SourcedClaimMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(a.(*authentication.SourcedClaimMapping), b.(*SourcedClaimMapping), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.SourcedClaimMapping)(nil), (*authenticationv1alpha1.SourcedClaimMapping)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(a.(*authentication.SourcedClaimMapping), b.(*authenticationv1alpha1.SourcedClaimMapping), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*TLS)(nil), (*authentication.TLS)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_TLS_To_authentication_TLS(a.(*TLS), b.(*authentication.TLS), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.TLS)(nil), (*authentication.TLS)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_TLS_To_authentication_TLS(a.(*authenticationv1alpha1.TLS), b.(*authentication.TLS), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.TLS)(nil), (*TLS)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_TLS_To_v1alpha1_TLS(a.(*authentication.TLS), b.(*TLS), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.TLS)(nil), (*authenticationv1alpha1.TLS)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_TLS_To_v1alpha1_TLS(a.(*authentication.TLS), b.(*authenticationv1alpha1.TLS), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*UserValidationRule)(nil), (*authentication.UserValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(a.(*UserValidationRule), b.(*authentication.UserValidationRule), scope)
+	if err := s.AddGeneratedConversionFunc((*authenticationv1alpha1.UserValidationRule)(nil), (*authentication.UserValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(a.(*authenticationv1alpha1.UserValidationRule), b.(*authentication.UserValidationRule), scope)
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*authentication.UserValidationRule)(nil), (*UserValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule(a.(*authentication.UserValidationRule), b.(*UserValidationRule), scope)
+	if err := s.AddGeneratedConversionFunc((*authentication.UserValidationRule)(nil), (*authenticationv1alpha1.UserValidationRule)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule(a.(*authentication.UserValidationRule), b.(*authenticationv1alpha1.UserValidationRule), scope)
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func autoConvert_v1alpha1_Authentication_To_authentication_Authentication(in *Authentication, out *authentication.Authentication, s conversion.Scope) error {
+func autoConvert_v1alpha1_Authentication_To_authentication_Authentication(in *authenticationv1alpha1.Authentication, out *authentication.Authentication, s conversion.Scope) error {
 	out.Type = (*authentication.AuthenticationType)(unsafe.Pointer(in.Type))
 	out.ClientCredential = (*authentication.ClientCredentialConfig)(unsafe.Pointer(in.ClientCredential))
 	return nil
 }
 
 // Convert_v1alpha1_Authentication_To_authentication_Authentication is an autogenerated conversion function.
-func Convert_v1alpha1_Authentication_To_authentication_Authentication(in *Authentication, out *authentication.Authentication, s conversion.Scope) error {
+func Convert_v1alpha1_Authentication_To_authentication_Authentication(in *authenticationv1alpha1.Authentication, out *authentication.Authentication, s conversion.Scope) error {
 	return autoConvert_v1alpha1_Authentication_To_authentication_Authentication(in, out, s)
 }
 
-func autoConvert_authentication_Authentication_To_v1alpha1_Authentication(in *authentication.Authentication, out *Authentication, s conversion.Scope) error {
-	out.Type = (*AuthenticationType)(unsafe.Pointer(in.Type))
-	out.ClientCredential = (*ClientCredentialConfig)(unsafe.Pointer(in.ClientCredential))
+func autoConvert_authentication_Authentication_To_v1alpha1_Authentication(in *authentication.Authentication, out *authenticationv1alpha1.Authentication, s conversion.Scope) error {
+	out.Type = (*authenticationv1alpha1.AuthenticationType)(unsafe.Pointer(in.Type))
+	out.ClientCredential = (*authenticationv1alpha1.ClientCredentialConfig)(unsafe.Pointer(in.ClientCredential))
 	return nil
 }
 
 // Convert_authentication_Authentication_To_v1alpha1_Authentication is an autogenerated conversion function.
-func Convert_authentication_Authentication_To_v1alpha1_Authentication(in *authentication.Authentication, out *Authentication, s conversion.Scope) error {
+func Convert_authentication_Authentication_To_v1alpha1_Authentication(in *authentication.Authentication, out *authenticationv1alpha1.Authentication, s conversion.Scope) error {
 	return autoConvert_authentication_Authentication_To_v1alpha1_Authentication(in, out, s)
 }
 
-func autoConvert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(in *AuthenticationConfiguration, out *authentication.AuthenticationConfiguration, s conversion.Scope) error {
+func autoConvert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(in *authenticationv1alpha1.AuthenticationConfiguration, out *authentication.AuthenticationConfiguration, s conversion.Scope) error {
 	out.JWT = *(*[]authentication.JWTAuthenticator)(unsafe.Pointer(&in.JWT))
 	return nil
 }
 
 // Convert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration is an autogenerated conversion function.
-func Convert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(in *AuthenticationConfiguration, out *authentication.AuthenticationConfiguration, s conversion.Scope) error {
+func Convert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(in *authenticationv1alpha1.AuthenticationConfiguration, out *authentication.AuthenticationConfiguration, s conversion.Scope) error {
 	return autoConvert_v1alpha1_AuthenticationConfiguration_To_authentication_AuthenticationConfiguration(in, out, s)
 }
 
-func autoConvert_authentication_AuthenticationConfiguration_To_v1alpha1_AuthenticationConfiguration(in *authentication.AuthenticationConfiguration, out *AuthenticationConfiguration, s conversion.Scope) error {
-	out.JWT = *(*[]JWTAuthenticator)(unsafe.Pointer(&in.JWT))
+func autoConvert_authentication_AuthenticationConfiguration_To_v1alpha1_AuthenticationConfiguration(in *authentication.AuthenticationConfiguration, out *authenticationv1alpha1.AuthenticationConfiguration, s conversion.Scope) error {
+	out.JWT = *(*[]authenticationv1alpha1.JWTAuthenticator)(unsafe.Pointer(&in.JWT))
 	return nil
 }
 
 // Convert_authentication_AuthenticationConfiguration_To_v1alpha1_AuthenticationConfiguration is an autogenerated conversion function.
-func Convert_authentication_AuthenticationConfiguration_To_v1alpha1_AuthenticationConfiguration(in *authentication.AuthenticationConfiguration, out *AuthenticationConfiguration, s conversion.Scope) error {
+func Convert_authentication_AuthenticationConfiguration_To_v1alpha1_AuthenticationConfiguration(in *authentication.AuthenticationConfiguration, out *authenticationv1alpha1.AuthenticationConfiguration, s conversion.Scope) error {
 	return autoConvert_authentication_AuthenticationConfiguration_To_v1alpha1_AuthenticationConfiguration(in, out, s)
 }
 
-func autoConvert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(in *ClaimMappings, out *authentication.ClaimMappings, s conversion.Scope) error {
+func autoConvert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(in *authenticationv1alpha1.ClaimMappings, out *authentication.ClaimMappings, s conversion.Scope) error {
 	if err := Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(&in.Username, &out.Username, s); err != nil {
 		return err
 	}
@@ -240,11 +241,11 @@ func autoConvert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(in *Clai
 }
 
 // Convert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings is an autogenerated conversion function.
-func Convert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(in *ClaimMappings, out *authentication.ClaimMappings, s conversion.Scope) error {
+func Convert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(in *authenticationv1alpha1.ClaimMappings, out *authentication.ClaimMappings, s conversion.Scope) error {
 	return autoConvert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(in, out, s)
 }
 
-func autoConvert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(in *authentication.ClaimMappings, out *ClaimMappings, s conversion.Scope) error {
+func autoConvert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(in *authentication.ClaimMappings, out *authenticationv1alpha1.ClaimMappings, s conversion.Scope) error {
 	if err := Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(&in.Username, &out.Username, s); err != nil {
 		return err
 	}
@@ -254,38 +255,38 @@ func autoConvert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(in *auth
 	if err := Convert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(&in.UID, &out.UID, s); err != nil {
 		return err
 	}
-	out.Extra = *(*[]ExtraMapping)(unsafe.Pointer(&in.Extra))
+	out.Extra = *(*[]authenticationv1alpha1.ExtraMapping)(unsafe.Pointer(&in.Extra))
 	return nil
 }
 
 // Convert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings is an autogenerated conversion function.
-func Convert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(in *authentication.ClaimMappings, out *ClaimMappings, s conversion.Scope) error {
+func Convert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(in *authentication.ClaimMappings, out *authenticationv1alpha1.ClaimMappings, s conversion.Scope) error {
 	return autoConvert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(in, out, s)
 }
 
-func autoConvert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(in *ClaimOrExpression, out *authentication.ClaimOrExpression, s conversion.Scope) error {
+func autoConvert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(in *authenticationv1alpha1.ClaimOrExpression, out *authentication.ClaimOrExpression, s conversion.Scope) error {
 	out.Claim = in.Claim
 	out.Expression = in.Expression
 	return nil
 }
 
 // Convert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression is an autogenerated conversion function.
-func Convert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(in *ClaimOrExpression, out *authentication.ClaimOrExpression, s conversion.Scope) error {
+func Convert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(in *authenticationv1alpha1.ClaimOrExpression, out *authentication.ClaimOrExpression, s conversion.Scope) error {
 	return autoConvert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(in, out, s)
 }
 
-func autoConvert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(in *authentication.ClaimOrExpression, out *ClaimOrExpression, s conversion.Scope) error {
+func autoConvert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(in *authentication.ClaimOrExpression, out *authenticationv1alpha1.ClaimOrExpression, s conversion.Scope) error {
 	out.Claim = in.Claim
 	out.Expression = in.Expression
 	return nil
 }
 
 // Convert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression is an autogenerated conversion function.
-func Convert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(in *authentication.ClaimOrExpression, out *ClaimOrExpression, s conversion.Scope) error {
+func Convert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(in *authentication.ClaimOrExpression, out *authenticationv1alpha1.ClaimOrExpression, s conversion.Scope) error {
 	return autoConvert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(in, out, s)
 }
 
-func autoConvert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(in *ClaimValidationRule, out *authentication.ClaimValidationRule, s conversion.Scope) error {
+func autoConvert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(in *authenticationv1alpha1.ClaimValidationRule, out *authentication.ClaimValidationRule, s conversion.Scope) error {
 	out.Claim = in.Claim
 	out.RequiredValue = in.RequiredValue
 	out.Expression = in.Expression
@@ -294,11 +295,11 @@ func autoConvert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationR
 }
 
 // Convert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule is an autogenerated conversion function.
-func Convert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(in *ClaimValidationRule, out *authentication.ClaimValidationRule, s conversion.Scope) error {
+func Convert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(in *authenticationv1alpha1.ClaimValidationRule, out *authentication.ClaimValidationRule, s conversion.Scope) error {
 	return autoConvert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(in, out, s)
 }
 
-func autoConvert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(in *authentication.ClaimValidationRule, out *ClaimValidationRule, s conversion.Scope) error {
+func autoConvert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(in *authentication.ClaimValidationRule, out *authenticationv1alpha1.ClaimValidationRule, s conversion.Scope) error {
 	out.Claim = in.Claim
 	out.RequiredValue = in.RequiredValue
 	out.Expression = in.Expression
@@ -307,11 +308,11 @@ func autoConvert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationR
 }
 
 // Convert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule is an autogenerated conversion function.
-func Convert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(in *authentication.ClaimValidationRule, out *ClaimValidationRule, s conversion.Scope) error {
+func Convert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(in *authentication.ClaimValidationRule, out *authenticationv1alpha1.ClaimValidationRule, s conversion.Scope) error {
 	return autoConvert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(in, out, s)
 }
 
-func autoConvert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig(in *ClientCredentialConfig, out *authentication.ClientCredentialConfig, s conversion.Scope) error {
+func autoConvert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig(in *authenticationv1alpha1.ClientCredentialConfig, out *authentication.ClientCredentialConfig, s conversion.Scope) error {
 	out.ClientID = in.ClientID
 	out.ClientSecret = in.ClientSecret
 	out.TokenEndpoint = in.TokenEndpoint
@@ -321,25 +322,25 @@ func autoConvert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredent
 }
 
 // Convert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig is an autogenerated conversion function.
-func Convert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig(in *ClientCredentialConfig, out *authentication.ClientCredentialConfig, s conversion.Scope) error {
+func Convert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig(in *authenticationv1alpha1.ClientCredentialConfig, out *authentication.ClientCredentialConfig, s conversion.Scope) error {
 	return autoConvert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig(in, out, s)
 }
 
-func autoConvert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig(in *authentication.ClientCredentialConfig, out *ClientCredentialConfig, s conversion.Scope) error {
+func autoConvert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig(in *authentication.ClientCredentialConfig, out *authenticationv1alpha1.ClientCredentialConfig, s conversion.Scope) error {
 	out.ClientID = in.ClientID
 	out.ClientSecret = in.ClientSecret
 	out.TokenEndpoint = in.TokenEndpoint
 	out.Scopes = *(*[]string)(unsafe.Pointer(&in.Scopes))
-	out.TLS = (*TLS)(unsafe.Pointer(in.TLS))
+	out.TLS = (*authenticationv1alpha1.TLS)(unsafe.Pointer(in.TLS))
 	return nil
 }
 
 // Convert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig is an autogenerated conversion function.
-func Convert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig(in *authentication.ClientCredentialConfig, out *ClientCredentialConfig, s conversion.Scope) error {
+func Convert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig(in *authentication.ClientCredentialConfig, out *authenticationv1alpha1.ClientCredentialConfig, s conversion.Scope) error {
 	return autoConvert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig(in, out, s)
 }
 
-func autoConvert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource(in *ExternalClaimsSource, out *authentication.ExternalClaimsSource, s conversion.Scope) error {
+func autoConvert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource(in *authenticationv1alpha1.ExternalClaimsSource, out *authentication.ExternalClaimsSource, s conversion.Scope) error {
 	out.Authentication = (*authentication.Authentication)(unsafe.Pointer(in.Authentication))
 	out.TLS = (*authentication.TLS)(unsafe.Pointer(in.TLS))
 	out.URL = (*authentication.SourceURL)(unsafe.Pointer(in.URL))
@@ -349,67 +350,67 @@ func autoConvert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsS
 }
 
 // Convert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource is an autogenerated conversion function.
-func Convert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource(in *ExternalClaimsSource, out *authentication.ExternalClaimsSource, s conversion.Scope) error {
+func Convert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource(in *authenticationv1alpha1.ExternalClaimsSource, out *authentication.ExternalClaimsSource, s conversion.Scope) error {
 	return autoConvert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource(in, out, s)
 }
 
-func autoConvert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource(in *authentication.ExternalClaimsSource, out *ExternalClaimsSource, s conversion.Scope) error {
-	out.Authentication = (*Authentication)(unsafe.Pointer(in.Authentication))
-	out.TLS = (*TLS)(unsafe.Pointer(in.TLS))
-	out.URL = (*SourceURL)(unsafe.Pointer(in.URL))
-	out.Mappings = *(*[]SourcedClaimMapping)(unsafe.Pointer(&in.Mappings))
-	out.Conditions = *(*[]ExternalSourceCondition)(unsafe.Pointer(&in.Conditions))
+func autoConvert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource(in *authentication.ExternalClaimsSource, out *authenticationv1alpha1.ExternalClaimsSource, s conversion.Scope) error {
+	out.Authentication = (*authenticationv1alpha1.Authentication)(unsafe.Pointer(in.Authentication))
+	out.TLS = (*authenticationv1alpha1.TLS)(unsafe.Pointer(in.TLS))
+	out.URL = (*authenticationv1alpha1.SourceURL)(unsafe.Pointer(in.URL))
+	out.Mappings = *(*[]authenticationv1alpha1.SourcedClaimMapping)(unsafe.Pointer(&in.Mappings))
+	out.Conditions = *(*[]authenticationv1alpha1.ExternalSourceCondition)(unsafe.Pointer(&in.Conditions))
 	return nil
 }
 
 // Convert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource is an autogenerated conversion function.
-func Convert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource(in *authentication.ExternalClaimsSource, out *ExternalClaimsSource, s conversion.Scope) error {
+func Convert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource(in *authentication.ExternalClaimsSource, out *authenticationv1alpha1.ExternalClaimsSource, s conversion.Scope) error {
 	return autoConvert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource(in, out, s)
 }
 
-func autoConvert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition(in *ExternalSourceCondition, out *authentication.ExternalSourceCondition, s conversion.Scope) error {
+func autoConvert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition(in *authenticationv1alpha1.ExternalSourceCondition, out *authentication.ExternalSourceCondition, s conversion.Scope) error {
 	out.Expression = (*string)(unsafe.Pointer(in.Expression))
 	return nil
 }
 
 // Convert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition is an autogenerated conversion function.
-func Convert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition(in *ExternalSourceCondition, out *authentication.ExternalSourceCondition, s conversion.Scope) error {
+func Convert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition(in *authenticationv1alpha1.ExternalSourceCondition, out *authentication.ExternalSourceCondition, s conversion.Scope) error {
 	return autoConvert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition(in, out, s)
 }
 
-func autoConvert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition(in *authentication.ExternalSourceCondition, out *ExternalSourceCondition, s conversion.Scope) error {
+func autoConvert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition(in *authentication.ExternalSourceCondition, out *authenticationv1alpha1.ExternalSourceCondition, s conversion.Scope) error {
 	out.Expression = (*string)(unsafe.Pointer(in.Expression))
 	return nil
 }
 
 // Convert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition is an autogenerated conversion function.
-func Convert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition(in *authentication.ExternalSourceCondition, out *ExternalSourceCondition, s conversion.Scope) error {
+func Convert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition(in *authentication.ExternalSourceCondition, out *authenticationv1alpha1.ExternalSourceCondition, s conversion.Scope) error {
 	return autoConvert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition(in, out, s)
 }
 
-func autoConvert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(in *ExtraMapping, out *authentication.ExtraMapping, s conversion.Scope) error {
+func autoConvert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(in *authenticationv1alpha1.ExtraMapping, out *authentication.ExtraMapping, s conversion.Scope) error {
 	out.Key = in.Key
 	out.ValueExpression = in.ValueExpression
 	return nil
 }
 
 // Convert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping is an autogenerated conversion function.
-func Convert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(in *ExtraMapping, out *authentication.ExtraMapping, s conversion.Scope) error {
+func Convert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(in *authenticationv1alpha1.ExtraMapping, out *authentication.ExtraMapping, s conversion.Scope) error {
 	return autoConvert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(in, out, s)
 }
 
-func autoConvert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(in *authentication.ExtraMapping, out *ExtraMapping, s conversion.Scope) error {
+func autoConvert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(in *authentication.ExtraMapping, out *authenticationv1alpha1.ExtraMapping, s conversion.Scope) error {
 	out.Key = in.Key
 	out.ValueExpression = in.ValueExpression
 	return nil
 }
 
 // Convert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping is an autogenerated conversion function.
-func Convert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(in *authentication.ExtraMapping, out *ExtraMapping, s conversion.Scope) error {
+func Convert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(in *authentication.ExtraMapping, out *authenticationv1alpha1.ExtraMapping, s conversion.Scope) error {
 	return autoConvert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(in, out, s)
 }
 
-func autoConvert_v1alpha1_Issuer_To_authentication_Issuer(in *Issuer, out *authentication.Issuer, s conversion.Scope) error {
+func autoConvert_v1alpha1_Issuer_To_authentication_Issuer(in *authenticationv1alpha1.Issuer, out *authentication.Issuer, s conversion.Scope) error {
 	out.URL = in.URL
 	out.DiscoveryURL = in.DiscoveryURL
 	out.CertificateAuthority = in.CertificateAuthority
@@ -419,25 +420,25 @@ func autoConvert_v1alpha1_Issuer_To_authentication_Issuer(in *Issuer, out *authe
 }
 
 // Convert_v1alpha1_Issuer_To_authentication_Issuer is an autogenerated conversion function.
-func Convert_v1alpha1_Issuer_To_authentication_Issuer(in *Issuer, out *authentication.Issuer, s conversion.Scope) error {
+func Convert_v1alpha1_Issuer_To_authentication_Issuer(in *authenticationv1alpha1.Issuer, out *authentication.Issuer, s conversion.Scope) error {
 	return autoConvert_v1alpha1_Issuer_To_authentication_Issuer(in, out, s)
 }
 
-func autoConvert_authentication_Issuer_To_v1alpha1_Issuer(in *authentication.Issuer, out *Issuer, s conversion.Scope) error {
+func autoConvert_authentication_Issuer_To_v1alpha1_Issuer(in *authentication.Issuer, out *authenticationv1alpha1.Issuer, s conversion.Scope) error {
 	out.URL = in.URL
 	out.DiscoveryURL = in.DiscoveryURL
 	out.CertificateAuthority = in.CertificateAuthority
 	out.Audiences = *(*[]string)(unsafe.Pointer(&in.Audiences))
-	out.AudienceMatchPolicy = AudienceMatchPolicyType(in.AudienceMatchPolicy)
+	out.AudienceMatchPolicy = authenticationv1alpha1.AudienceMatchPolicyType(in.AudienceMatchPolicy)
 	return nil
 }
 
 // Convert_authentication_Issuer_To_v1alpha1_Issuer is an autogenerated conversion function.
-func Convert_authentication_Issuer_To_v1alpha1_Issuer(in *authentication.Issuer, out *Issuer, s conversion.Scope) error {
+func Convert_authentication_Issuer_To_v1alpha1_Issuer(in *authentication.Issuer, out *authenticationv1alpha1.Issuer, s conversion.Scope) error {
 	return autoConvert_authentication_Issuer_To_v1alpha1_Issuer(in, out, s)
 }
 
-func autoConvert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(in *JWTAuthenticator, out *authentication.JWTAuthenticator, s conversion.Scope) error {
+func autoConvert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(in *authenticationv1alpha1.JWTAuthenticator, out *authentication.JWTAuthenticator, s conversion.Scope) error {
 	out.Issuer = (*authentication.Issuer)(unsafe.Pointer(in.Issuer))
 	out.ClaimValidationRules = *(*[]authentication.ClaimValidationRule)(unsafe.Pointer(&in.ClaimValidationRules))
 	out.ClaimMappings = (*authentication.ClaimMappings)(unsafe.Pointer(in.ClaimMappings))
@@ -447,25 +448,25 @@ func autoConvert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(in
 }
 
 // Convert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator is an autogenerated conversion function.
-func Convert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(in *JWTAuthenticator, out *authentication.JWTAuthenticator, s conversion.Scope) error {
+func Convert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(in *authenticationv1alpha1.JWTAuthenticator, out *authentication.JWTAuthenticator, s conversion.Scope) error {
 	return autoConvert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(in, out, s)
 }
 
-func autoConvert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(in *authentication.JWTAuthenticator, out *JWTAuthenticator, s conversion.Scope) error {
-	out.Issuer = (*Issuer)(unsafe.Pointer(in.Issuer))
-	out.ClaimValidationRules = *(*[]ClaimValidationRule)(unsafe.Pointer(&in.ClaimValidationRules))
-	out.ClaimMappings = (*ClaimMappings)(unsafe.Pointer(in.ClaimMappings))
-	out.UserValidationRules = *(*[]UserValidationRule)(unsafe.Pointer(&in.UserValidationRules))
-	out.ExternalClaimsSources = *(*[]ExternalClaimsSource)(unsafe.Pointer(&in.ExternalClaimsSources))
+func autoConvert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(in *authentication.JWTAuthenticator, out *authenticationv1alpha1.JWTAuthenticator, s conversion.Scope) error {
+	out.Issuer = (*authenticationv1alpha1.Issuer)(unsafe.Pointer(in.Issuer))
+	out.ClaimValidationRules = *(*[]authenticationv1alpha1.ClaimValidationRule)(unsafe.Pointer(&in.ClaimValidationRules))
+	out.ClaimMappings = (*authenticationv1alpha1.ClaimMappings)(unsafe.Pointer(in.ClaimMappings))
+	out.UserValidationRules = *(*[]authenticationv1alpha1.UserValidationRule)(unsafe.Pointer(&in.UserValidationRules))
+	out.ExternalClaimsSources = *(*[]authenticationv1alpha1.ExternalClaimsSource)(unsafe.Pointer(&in.ExternalClaimsSources))
 	return nil
 }
 
 // Convert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator is an autogenerated conversion function.
-func Convert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(in *authentication.JWTAuthenticator, out *JWTAuthenticator, s conversion.Scope) error {
+func Convert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(in *authentication.JWTAuthenticator, out *authenticationv1alpha1.JWTAuthenticator, s conversion.Scope) error {
 	return autoConvert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(in, out, s)
 }
 
-func autoConvert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(in *PrefixedClaimOrExpression, out *authentication.PrefixedClaimOrExpression, s conversion.Scope) error {
+func autoConvert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(in *authenticationv1alpha1.PrefixedClaimOrExpression, out *authentication.PrefixedClaimOrExpression, s conversion.Scope) error {
 	out.Claim = in.Claim
 	out.Prefix = (*string)(unsafe.Pointer(in.Prefix))
 	out.Expression = in.Expression
@@ -473,11 +474,11 @@ func autoConvert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedCl
 }
 
 // Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression is an autogenerated conversion function.
-func Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(in *PrefixedClaimOrExpression, out *authentication.PrefixedClaimOrExpression, s conversion.Scope) error {
+func Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(in *authenticationv1alpha1.PrefixedClaimOrExpression, out *authentication.PrefixedClaimOrExpression, s conversion.Scope) error {
 	return autoConvert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(in, out, s)
 }
 
-func autoConvert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(in *authentication.PrefixedClaimOrExpression, out *PrefixedClaimOrExpression, s conversion.Scope) error {
+func autoConvert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(in *authentication.PrefixedClaimOrExpression, out *authenticationv1alpha1.PrefixedClaimOrExpression, s conversion.Scope) error {
 	out.Claim = in.Claim
 	out.Prefix = (*string)(unsafe.Pointer(in.Prefix))
 	out.Expression = in.Expression
@@ -485,92 +486,92 @@ func autoConvert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedCl
 }
 
 // Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression is an autogenerated conversion function.
-func Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(in *authentication.PrefixedClaimOrExpression, out *PrefixedClaimOrExpression, s conversion.Scope) error {
+func Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(in *authentication.PrefixedClaimOrExpression, out *authenticationv1alpha1.PrefixedClaimOrExpression, s conversion.Scope) error {
 	return autoConvert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(in, out, s)
 }
 
-func autoConvert_v1alpha1_SourceURL_To_authentication_SourceURL(in *SourceURL, out *authentication.SourceURL, s conversion.Scope) error {
+func autoConvert_v1alpha1_SourceURL_To_authentication_SourceURL(in *authenticationv1alpha1.SourceURL, out *authentication.SourceURL, s conversion.Scope) error {
 	out.Hostname = (*string)(unsafe.Pointer(in.Hostname))
 	out.PathExpression = (*string)(unsafe.Pointer(in.PathExpression))
 	return nil
 }
 
 // Convert_v1alpha1_SourceURL_To_authentication_SourceURL is an autogenerated conversion function.
-func Convert_v1alpha1_SourceURL_To_authentication_SourceURL(in *SourceURL, out *authentication.SourceURL, s conversion.Scope) error {
+func Convert_v1alpha1_SourceURL_To_authentication_SourceURL(in *authenticationv1alpha1.SourceURL, out *authentication.SourceURL, s conversion.Scope) error {
 	return autoConvert_v1alpha1_SourceURL_To_authentication_SourceURL(in, out, s)
 }
 
-func autoConvert_authentication_SourceURL_To_v1alpha1_SourceURL(in *authentication.SourceURL, out *SourceURL, s conversion.Scope) error {
+func autoConvert_authentication_SourceURL_To_v1alpha1_SourceURL(in *authentication.SourceURL, out *authenticationv1alpha1.SourceURL, s conversion.Scope) error {
 	out.Hostname = (*string)(unsafe.Pointer(in.Hostname))
 	out.PathExpression = (*string)(unsafe.Pointer(in.PathExpression))
 	return nil
 }
 
 // Convert_authentication_SourceURL_To_v1alpha1_SourceURL is an autogenerated conversion function.
-func Convert_authentication_SourceURL_To_v1alpha1_SourceURL(in *authentication.SourceURL, out *SourceURL, s conversion.Scope) error {
+func Convert_authentication_SourceURL_To_v1alpha1_SourceURL(in *authentication.SourceURL, out *authenticationv1alpha1.SourceURL, s conversion.Scope) error {
 	return autoConvert_authentication_SourceURL_To_v1alpha1_SourceURL(in, out, s)
 }
 
-func autoConvert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(in *SourcedClaimMapping, out *authentication.SourcedClaimMapping, s conversion.Scope) error {
+func autoConvert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(in *authenticationv1alpha1.SourcedClaimMapping, out *authentication.SourcedClaimMapping, s conversion.Scope) error {
 	out.Name = (*string)(unsafe.Pointer(in.Name))
 	out.Expression = (*string)(unsafe.Pointer(in.Expression))
 	return nil
 }
 
 // Convert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping is an autogenerated conversion function.
-func Convert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(in *SourcedClaimMapping, out *authentication.SourcedClaimMapping, s conversion.Scope) error {
+func Convert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(in *authenticationv1alpha1.SourcedClaimMapping, out *authentication.SourcedClaimMapping, s conversion.Scope) error {
 	return autoConvert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(in, out, s)
 }
 
-func autoConvert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(in *authentication.SourcedClaimMapping, out *SourcedClaimMapping, s conversion.Scope) error {
+func autoConvert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(in *authentication.SourcedClaimMapping, out *authenticationv1alpha1.SourcedClaimMapping, s conversion.Scope) error {
 	out.Name = (*string)(unsafe.Pointer(in.Name))
 	out.Expression = (*string)(unsafe.Pointer(in.Expression))
 	return nil
 }
 
 // Convert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping is an autogenerated conversion function.
-func Convert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(in *authentication.SourcedClaimMapping, out *SourcedClaimMapping, s conversion.Scope) error {
+func Convert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(in *authentication.SourcedClaimMapping, out *authenticationv1alpha1.SourcedClaimMapping, s conversion.Scope) error {
 	return autoConvert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(in, out, s)
 }
 
-func autoConvert_v1alpha1_TLS_To_authentication_TLS(in *TLS, out *authentication.TLS, s conversion.Scope) error {
+func autoConvert_v1alpha1_TLS_To_authentication_TLS(in *authenticationv1alpha1.TLS, out *authentication.TLS, s conversion.Scope) error {
 	out.CertificateAuthority = (*string)(unsafe.Pointer(in.CertificateAuthority))
 	return nil
 }
 
 // Convert_v1alpha1_TLS_To_authentication_TLS is an autogenerated conversion function.
-func Convert_v1alpha1_TLS_To_authentication_TLS(in *TLS, out *authentication.TLS, s conversion.Scope) error {
+func Convert_v1alpha1_TLS_To_authentication_TLS(in *authenticationv1alpha1.TLS, out *authentication.TLS, s conversion.Scope) error {
 	return autoConvert_v1alpha1_TLS_To_authentication_TLS(in, out, s)
 }
 
-func autoConvert_authentication_TLS_To_v1alpha1_TLS(in *authentication.TLS, out *TLS, s conversion.Scope) error {
+func autoConvert_authentication_TLS_To_v1alpha1_TLS(in *authentication.TLS, out *authenticationv1alpha1.TLS, s conversion.Scope) error {
 	out.CertificateAuthority = (*string)(unsafe.Pointer(in.CertificateAuthority))
 	return nil
 }
 
 // Convert_authentication_TLS_To_v1alpha1_TLS is an autogenerated conversion function.
-func Convert_authentication_TLS_To_v1alpha1_TLS(in *authentication.TLS, out *TLS, s conversion.Scope) error {
+func Convert_authentication_TLS_To_v1alpha1_TLS(in *authentication.TLS, out *authenticationv1alpha1.TLS, s conversion.Scope) error {
 	return autoConvert_authentication_TLS_To_v1alpha1_TLS(in, out, s)
 }
 
-func autoConvert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(in *UserValidationRule, out *authentication.UserValidationRule, s conversion.Scope) error {
+func autoConvert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(in *authenticationv1alpha1.UserValidationRule, out *authentication.UserValidationRule, s conversion.Scope) error {
 	out.Expression = in.Expression
 	out.Message = in.Message
 	return nil
 }
 
 // Convert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule is an autogenerated conversion function.
-func Convert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(in *UserValidationRule, out *authentication.UserValidationRule, s conversion.Scope) error {
+func Convert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(in *authenticationv1alpha1.UserValidationRule, out *authentication.UserValidationRule, s conversion.Scope) error {
 	return autoConvert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(in, out, s)
 }
 
-func autoConvert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule(in *authentication.UserValidationRule, out *UserValidationRule, s conversion.Scope) error {
+func autoConvert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule(in *authentication.UserValidationRule, out *authenticationv1alpha1.UserValidationRule, s conversion.Scope) error {
 	out.Expression = in.Expression
 	out.Message = in.Message
 	return nil
 }
 
 // Convert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule is an autogenerated conversion function.
-func Convert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule(in *authentication.UserValidationRule, out *UserValidationRule, s conversion.Scope) error {
+func Convert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule(in *authentication.UserValidationRule, out *authenticationv1alpha1.UserValidationRule, s conversion.Scope) error {
 	return autoConvert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule(in, out, s)
 }
