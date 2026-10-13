@@ -1,0 +1,9 @@
+reviewers:
+  - p0lyn0mial
+  - benluddy
+  - sanchezl
+approvers:
+  - p0lyn0mial
+  - benluddy
+  - sanchezl
+component: oauth-apiserver
