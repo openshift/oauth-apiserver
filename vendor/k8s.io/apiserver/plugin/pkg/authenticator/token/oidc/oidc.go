@@ -409,12 +409,12 @@ func New(lifecycleCtx context.Context, opts Options) (AuthenticatorTokenWithHeal
 	}
 
 	authn := &jwtAuthenticator{
-		jwtAuthenticator: opts.JWTAuthenticator,
-		resolver:         resolver,
-		claimsExpanders:  opts.ClaimsExpanders,
+		jwtAuthenticator:                     opts.JWTAuthenticator,
+		resolver:                             resolver,
+		claimsExpanders:                      opts.ClaimsExpanders,
 		unknownCELValueTypesToStringListFunc: opts.UnknownCELValueTypesToStringListFunc,
-		celMapper:        celMapper,
-		requiredClaims:   requiredClaims,
+		celMapper:                            celMapper,
+		requiredClaims:                       requiredClaims,
 	}
 	authn.healthCheck.Store(&errorHolder{
 		err: fmt.Errorf("oidc: authenticator for issuer %q is not initialized", authn.jwtAuthenticator.Issuer.URL),
