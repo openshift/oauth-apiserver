@@ -8,6 +8,18 @@ import (
 
 type tokenReviewAuthorizer struct{}
 
+var _ authorizer.Authorizer = tokenReviewAuthorizer{}
+
+// ConditionsAwareAuthorize returns the same unconditional decision as Authorize.
+func (a tokenReviewAuthorizer) ConditionsAwareAuthorize(ctx context.Context, attrs authorizer.Attributes) authorizer.ConditionsAwareDecision {
+	return authorizer.ConditionsAwareDecisionFromParts(a.Authorize(ctx, attrs))
+}
+
+// EvaluateConditions fails closed because token review authorization has no conditions.
+func (tokenReviewAuthorizer) EvaluateConditions(context.Context, authorizer.ConditionsAwareDecision, authorizer.ConditionsData) (authorizer.Decision, string, error) {
+	return authorizer.DecisionDeny, "", authorizer.ErrorConditionEvaluationNotSupported
+}
+
 // GetUser() user.Info - checked
 // GetVerb() string - checked
 // IsReadOnly() bool - na

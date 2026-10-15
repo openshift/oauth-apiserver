@@ -1,7 +1,7 @@
 package hardcodedauthorizer
 
 import (
-	"context"
+	"errors"
 	"testing"
 
 	"k8s.io/apiserver/pkg/authentication/user"
@@ -54,16 +54,31 @@ func TestAuthorizer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, attr := range tt.shouldPass {
-				if decision, _, _ := tt.authorizer.Authorize(context.Background(), attr); decision != authorizer.DecisionAllow {
+				if decision, _, _ := tt.authorizer.Authorize(t.Context(), attr); decision != authorizer.DecisionAllow {
 					t.Errorf("incorrectly restricted %v", attr)
+				}
+				if decision := tt.authorizer.ConditionsAwareAuthorize(t.Context(), attr); !decision.IsAllow() {
+					t.Errorf("conditions-aware authorization incorrectly restricted %v", attr)
 				}
 			}
 
 			for _, attr := range tt.shouldNoOpinion {
-				if decision, _, _ := tt.authorizer.Authorize(context.Background(), attr); decision != authorizer.DecisionNoOpinion {
+				if decision, _, _ := tt.authorizer.Authorize(t.Context(), attr); decision != authorizer.DecisionNoOpinion {
 					t.Errorf("incorrectly opinionated %v", attr)
+				}
+				if decision := tt.authorizer.ConditionsAwareAuthorize(t.Context(), attr); !decision.IsNoOpinion() {
+					t.Errorf("conditions-aware authorization incorrectly opinionated %v", attr)
 				}
 			}
 		})
+	}
+}
+
+// TestEvaluateConditions verifies unsupported condition evaluation fails closed.
+func TestEvaluateConditions(t *testing.T) {
+	a := NewHardCodedTokenReviewAuthorizer()
+	decision, _, err := a.EvaluateConditions(t.Context(), authorizer.ConditionsAwareDecision{}, nil)
+	if decision != authorizer.DecisionDeny || !errors.Is(err, authorizer.ErrorConditionEvaluationNotSupported) {
+		t.Fatalf("expected denial for unsupported conditions, got decision %v, error %v", decision, err)
 	}
 }
