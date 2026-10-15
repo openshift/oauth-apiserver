@@ -111,11 +111,11 @@ func containsNewScopes(obj []string, old []string) bool {
 	return len(newScopes.Difference(oldScopes)) > 0
 }
 
-func (strategy) AllowCreateOnUpdate() bool {
+func (strategy) AllowCreateOnUpdate(ctx context.Context) bool {
 	return true
 }
 
-func (strategy) AllowUnconditionalUpdate() bool {
+func (strategy) AllowUnconditionalUpdate(ctx context.Context) bool {
 	return false
 }
 

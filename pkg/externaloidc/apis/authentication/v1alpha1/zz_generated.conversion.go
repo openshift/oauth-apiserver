@@ -184,8 +184,7 @@ func RegisterConversions(s *runtime.Scheme) error {
 }
 
 func autoConvert_v1alpha1_Authentication_To_authentication_Authentication(in *Authentication, out *authentication.Authentication, s conversion.Scope) error {
-	out.Type = (*authentication.AuthenticationType)(unsafe.Pointer(in.Type))
-	out.ClientCredential = (*authentication.ClientCredentialConfig)(unsafe.Pointer(in.ClientCredential))
+	*out = *(*authentication.Authentication)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -195,8 +194,7 @@ func Convert_v1alpha1_Authentication_To_authentication_Authentication(in *Authen
 }
 
 func autoConvert_authentication_Authentication_To_v1alpha1_Authentication(in *authentication.Authentication, out *Authentication, s conversion.Scope) error {
-	out.Type = (*AuthenticationType)(unsafe.Pointer(in.Type))
-	out.ClientCredential = (*ClientCredentialConfig)(unsafe.Pointer(in.ClientCredential))
+	*out = *(*Authentication)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -226,16 +224,7 @@ func Convert_authentication_AuthenticationConfiguration_To_v1alpha1_Authenticati
 }
 
 func autoConvert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(in *ClaimMappings, out *authentication.ClaimMappings, s conversion.Scope) error {
-	if err := Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(&in.Username, &out.Username, s); err != nil {
-		return err
-	}
-	if err := Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(&in.Groups, &out.Groups, s); err != nil {
-		return err
-	}
-	if err := Convert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(&in.UID, &out.UID, s); err != nil {
-		return err
-	}
-	out.Extra = *(*[]authentication.ExtraMapping)(unsafe.Pointer(&in.Extra))
+	*out = *(*authentication.ClaimMappings)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -245,16 +234,7 @@ func Convert_v1alpha1_ClaimMappings_To_authentication_ClaimMappings(in *ClaimMap
 }
 
 func autoConvert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(in *authentication.ClaimMappings, out *ClaimMappings, s conversion.Scope) error {
-	if err := Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(&in.Username, &out.Username, s); err != nil {
-		return err
-	}
-	if err := Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(&in.Groups, &out.Groups, s); err != nil {
-		return err
-	}
-	if err := Convert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(&in.UID, &out.UID, s); err != nil {
-		return err
-	}
-	out.Extra = *(*[]ExtraMapping)(unsafe.Pointer(&in.Extra))
+	*out = *(*ClaimMappings)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -264,8 +244,7 @@ func Convert_authentication_ClaimMappings_To_v1alpha1_ClaimMappings(in *authenti
 }
 
 func autoConvert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(in *ClaimOrExpression, out *authentication.ClaimOrExpression, s conversion.Scope) error {
-	out.Claim = in.Claim
-	out.Expression = in.Expression
+	*out = *(*authentication.ClaimOrExpression)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -275,8 +254,7 @@ func Convert_v1alpha1_ClaimOrExpression_To_authentication_ClaimOrExpression(in *
 }
 
 func autoConvert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(in *authentication.ClaimOrExpression, out *ClaimOrExpression, s conversion.Scope) error {
-	out.Claim = in.Claim
-	out.Expression = in.Expression
+	*out = *(*ClaimOrExpression)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -286,10 +264,7 @@ func Convert_authentication_ClaimOrExpression_To_v1alpha1_ClaimOrExpression(in *
 }
 
 func autoConvert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(in *ClaimValidationRule, out *authentication.ClaimValidationRule, s conversion.Scope) error {
-	out.Claim = in.Claim
-	out.RequiredValue = in.RequiredValue
-	out.Expression = in.Expression
-	out.Message = in.Message
+	*out = *(*authentication.ClaimValidationRule)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -299,10 +274,7 @@ func Convert_v1alpha1_ClaimValidationRule_To_authentication_ClaimValidationRule(
 }
 
 func autoConvert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(in *authentication.ClaimValidationRule, out *ClaimValidationRule, s conversion.Scope) error {
-	out.Claim = in.Claim
-	out.RequiredValue = in.RequiredValue
-	out.Expression = in.Expression
-	out.Message = in.Message
+	*out = *(*ClaimValidationRule)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -312,11 +284,7 @@ func Convert_authentication_ClaimValidationRule_To_v1alpha1_ClaimValidationRule(
 }
 
 func autoConvert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialConfig(in *ClientCredentialConfig, out *authentication.ClientCredentialConfig, s conversion.Scope) error {
-	out.ClientID = in.ClientID
-	out.ClientSecret = in.ClientSecret
-	out.TokenEndpoint = in.TokenEndpoint
-	out.Scopes = *(*[]string)(unsafe.Pointer(&in.Scopes))
-	out.TLS = (*authentication.TLS)(unsafe.Pointer(in.TLS))
+	*out = *(*authentication.ClientCredentialConfig)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -326,11 +294,7 @@ func Convert_v1alpha1_ClientCredentialConfig_To_authentication_ClientCredentialC
 }
 
 func autoConvert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialConfig(in *authentication.ClientCredentialConfig, out *ClientCredentialConfig, s conversion.Scope) error {
-	out.ClientID = in.ClientID
-	out.ClientSecret = in.ClientSecret
-	out.TokenEndpoint = in.TokenEndpoint
-	out.Scopes = *(*[]string)(unsafe.Pointer(&in.Scopes))
-	out.TLS = (*TLS)(unsafe.Pointer(in.TLS))
+	*out = *(*ClientCredentialConfig)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -340,11 +304,7 @@ func Convert_authentication_ClientCredentialConfig_To_v1alpha1_ClientCredentialC
 }
 
 func autoConvert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSource(in *ExternalClaimsSource, out *authentication.ExternalClaimsSource, s conversion.Scope) error {
-	out.Authentication = (*authentication.Authentication)(unsafe.Pointer(in.Authentication))
-	out.TLS = (*authentication.TLS)(unsafe.Pointer(in.TLS))
-	out.URL = (*authentication.SourceURL)(unsafe.Pointer(in.URL))
-	out.Mappings = *(*[]authentication.SourcedClaimMapping)(unsafe.Pointer(&in.Mappings))
-	out.Conditions = *(*[]authentication.ExternalSourceCondition)(unsafe.Pointer(&in.Conditions))
+	*out = *(*authentication.ExternalClaimsSource)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -354,11 +314,7 @@ func Convert_v1alpha1_ExternalClaimsSource_To_authentication_ExternalClaimsSourc
 }
 
 func autoConvert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSource(in *authentication.ExternalClaimsSource, out *ExternalClaimsSource, s conversion.Scope) error {
-	out.Authentication = (*Authentication)(unsafe.Pointer(in.Authentication))
-	out.TLS = (*TLS)(unsafe.Pointer(in.TLS))
-	out.URL = (*SourceURL)(unsafe.Pointer(in.URL))
-	out.Mappings = *(*[]SourcedClaimMapping)(unsafe.Pointer(&in.Mappings))
-	out.Conditions = *(*[]ExternalSourceCondition)(unsafe.Pointer(&in.Conditions))
+	*out = *(*ExternalClaimsSource)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -368,7 +324,7 @@ func Convert_authentication_ExternalClaimsSource_To_v1alpha1_ExternalClaimsSourc
 }
 
 func autoConvert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCondition(in *ExternalSourceCondition, out *authentication.ExternalSourceCondition, s conversion.Scope) error {
-	out.Expression = (*string)(unsafe.Pointer(in.Expression))
+	*out = *(*authentication.ExternalSourceCondition)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -378,7 +334,7 @@ func Convert_v1alpha1_ExternalSourceCondition_To_authentication_ExternalSourceCo
 }
 
 func autoConvert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCondition(in *authentication.ExternalSourceCondition, out *ExternalSourceCondition, s conversion.Scope) error {
-	out.Expression = (*string)(unsafe.Pointer(in.Expression))
+	*out = *(*ExternalSourceCondition)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -388,8 +344,7 @@ func Convert_authentication_ExternalSourceCondition_To_v1alpha1_ExternalSourceCo
 }
 
 func autoConvert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(in *ExtraMapping, out *authentication.ExtraMapping, s conversion.Scope) error {
-	out.Key = in.Key
-	out.ValueExpression = in.ValueExpression
+	*out = *(*authentication.ExtraMapping)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -399,8 +354,7 @@ func Convert_v1alpha1_ExtraMapping_To_authentication_ExtraMapping(in *ExtraMappi
 }
 
 func autoConvert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(in *authentication.ExtraMapping, out *ExtraMapping, s conversion.Scope) error {
-	out.Key = in.Key
-	out.ValueExpression = in.ValueExpression
+	*out = *(*ExtraMapping)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -410,11 +364,7 @@ func Convert_authentication_ExtraMapping_To_v1alpha1_ExtraMapping(in *authentica
 }
 
 func autoConvert_v1alpha1_Issuer_To_authentication_Issuer(in *Issuer, out *authentication.Issuer, s conversion.Scope) error {
-	out.URL = in.URL
-	out.DiscoveryURL = in.DiscoveryURL
-	out.CertificateAuthority = in.CertificateAuthority
-	out.Audiences = *(*[]string)(unsafe.Pointer(&in.Audiences))
-	out.AudienceMatchPolicy = authentication.AudienceMatchPolicyType(in.AudienceMatchPolicy)
+	*out = *(*authentication.Issuer)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -424,11 +374,7 @@ func Convert_v1alpha1_Issuer_To_authentication_Issuer(in *Issuer, out *authentic
 }
 
 func autoConvert_authentication_Issuer_To_v1alpha1_Issuer(in *authentication.Issuer, out *Issuer, s conversion.Scope) error {
-	out.URL = in.URL
-	out.DiscoveryURL = in.DiscoveryURL
-	out.CertificateAuthority = in.CertificateAuthority
-	out.Audiences = *(*[]string)(unsafe.Pointer(&in.Audiences))
-	out.AudienceMatchPolicy = AudienceMatchPolicyType(in.AudienceMatchPolicy)
+	*out = *(*Issuer)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -438,11 +384,7 @@ func Convert_authentication_Issuer_To_v1alpha1_Issuer(in *authentication.Issuer,
 }
 
 func autoConvert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(in *JWTAuthenticator, out *authentication.JWTAuthenticator, s conversion.Scope) error {
-	out.Issuer = (*authentication.Issuer)(unsafe.Pointer(in.Issuer))
-	out.ClaimValidationRules = *(*[]authentication.ClaimValidationRule)(unsafe.Pointer(&in.ClaimValidationRules))
-	out.ClaimMappings = (*authentication.ClaimMappings)(unsafe.Pointer(in.ClaimMappings))
-	out.UserValidationRules = *(*[]authentication.UserValidationRule)(unsafe.Pointer(&in.UserValidationRules))
-	out.ExternalClaimsSources = *(*[]authentication.ExternalClaimsSource)(unsafe.Pointer(&in.ExternalClaimsSources))
+	*out = *(*authentication.JWTAuthenticator)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -452,11 +394,7 @@ func Convert_v1alpha1_JWTAuthenticator_To_authentication_JWTAuthenticator(in *JW
 }
 
 func autoConvert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(in *authentication.JWTAuthenticator, out *JWTAuthenticator, s conversion.Scope) error {
-	out.Issuer = (*Issuer)(unsafe.Pointer(in.Issuer))
-	out.ClaimValidationRules = *(*[]ClaimValidationRule)(unsafe.Pointer(&in.ClaimValidationRules))
-	out.ClaimMappings = (*ClaimMappings)(unsafe.Pointer(in.ClaimMappings))
-	out.UserValidationRules = *(*[]UserValidationRule)(unsafe.Pointer(&in.UserValidationRules))
-	out.ExternalClaimsSources = *(*[]ExternalClaimsSource)(unsafe.Pointer(&in.ExternalClaimsSources))
+	*out = *(*JWTAuthenticator)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -466,9 +404,7 @@ func Convert_authentication_JWTAuthenticator_To_v1alpha1_JWTAuthenticator(in *au
 }
 
 func autoConvert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimOrExpression(in *PrefixedClaimOrExpression, out *authentication.PrefixedClaimOrExpression, s conversion.Scope) error {
-	out.Claim = in.Claim
-	out.Prefix = (*string)(unsafe.Pointer(in.Prefix))
-	out.Expression = in.Expression
+	*out = *(*authentication.PrefixedClaimOrExpression)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -478,9 +414,7 @@ func Convert_v1alpha1_PrefixedClaimOrExpression_To_authentication_PrefixedClaimO
 }
 
 func autoConvert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimOrExpression(in *authentication.PrefixedClaimOrExpression, out *PrefixedClaimOrExpression, s conversion.Scope) error {
-	out.Claim = in.Claim
-	out.Prefix = (*string)(unsafe.Pointer(in.Prefix))
-	out.Expression = in.Expression
+	*out = *(*PrefixedClaimOrExpression)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -490,8 +424,7 @@ func Convert_authentication_PrefixedClaimOrExpression_To_v1alpha1_PrefixedClaimO
 }
 
 func autoConvert_v1alpha1_SourceURL_To_authentication_SourceURL(in *SourceURL, out *authentication.SourceURL, s conversion.Scope) error {
-	out.Hostname = (*string)(unsafe.Pointer(in.Hostname))
-	out.PathExpression = (*string)(unsafe.Pointer(in.PathExpression))
+	*out = *(*authentication.SourceURL)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -501,8 +434,7 @@ func Convert_v1alpha1_SourceURL_To_authentication_SourceURL(in *SourceURL, out *
 }
 
 func autoConvert_authentication_SourceURL_To_v1alpha1_SourceURL(in *authentication.SourceURL, out *SourceURL, s conversion.Scope) error {
-	out.Hostname = (*string)(unsafe.Pointer(in.Hostname))
-	out.PathExpression = (*string)(unsafe.Pointer(in.PathExpression))
+	*out = *(*SourceURL)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -512,8 +444,7 @@ func Convert_authentication_SourceURL_To_v1alpha1_SourceURL(in *authentication.S
 }
 
 func autoConvert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(in *SourcedClaimMapping, out *authentication.SourcedClaimMapping, s conversion.Scope) error {
-	out.Name = (*string)(unsafe.Pointer(in.Name))
-	out.Expression = (*string)(unsafe.Pointer(in.Expression))
+	*out = *(*authentication.SourcedClaimMapping)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -523,8 +454,7 @@ func Convert_v1alpha1_SourcedClaimMapping_To_authentication_SourcedClaimMapping(
 }
 
 func autoConvert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(in *authentication.SourcedClaimMapping, out *SourcedClaimMapping, s conversion.Scope) error {
-	out.Name = (*string)(unsafe.Pointer(in.Name))
-	out.Expression = (*string)(unsafe.Pointer(in.Expression))
+	*out = *(*SourcedClaimMapping)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -534,7 +464,7 @@ func Convert_authentication_SourcedClaimMapping_To_v1alpha1_SourcedClaimMapping(
 }
 
 func autoConvert_v1alpha1_TLS_To_authentication_TLS(in *TLS, out *authentication.TLS, s conversion.Scope) error {
-	out.CertificateAuthority = (*string)(unsafe.Pointer(in.CertificateAuthority))
+	*out = *(*authentication.TLS)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -544,7 +474,7 @@ func Convert_v1alpha1_TLS_To_authentication_TLS(in *TLS, out *authentication.TLS
 }
 
 func autoConvert_authentication_TLS_To_v1alpha1_TLS(in *authentication.TLS, out *TLS, s conversion.Scope) error {
-	out.CertificateAuthority = (*string)(unsafe.Pointer(in.CertificateAuthority))
+	*out = *(*TLS)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -554,8 +484,7 @@ func Convert_authentication_TLS_To_v1alpha1_TLS(in *authentication.TLS, out *TLS
 }
 
 func autoConvert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(in *UserValidationRule, out *authentication.UserValidationRule, s conversion.Scope) error {
-	out.Expression = in.Expression
-	out.Message = in.Message
+	*out = *(*authentication.UserValidationRule)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -565,8 +494,7 @@ func Convert_v1alpha1_UserValidationRule_To_authentication_UserValidationRule(in
 }
 
 func autoConvert_authentication_UserValidationRule_To_v1alpha1_UserValidationRule(in *authentication.UserValidationRule, out *UserValidationRule, s conversion.Scope) error {
-	out.Expression = in.Expression
-	out.Message = in.Message
+	*out = *(*UserValidationRule)(unsafe.Pointer(in))
 	return nil
 }
 
