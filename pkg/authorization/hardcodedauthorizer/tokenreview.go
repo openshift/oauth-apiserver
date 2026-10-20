@@ -35,6 +35,18 @@ func (tokenReviewAuthorizer) Authorize(ctx context.Context, a authorizer.Attribu
 	return authorizer.DecisionNoOpinion, "", nil
 }
 
+// ConditionsAwareAuthorize returns a decision based on the Authorize method.
+// This authorizer is not conditions-aware, so it delegates to Authorize.
+func (t tokenReviewAuthorizer) ConditionsAwareAuthorize(ctx context.Context, a authorizer.Attributes) authorizer.ConditionsAwareDecision {
+	return authorizer.ConditionsAwareDecisionFromParts(t.Authorize(ctx, a))
+}
+
+// EvaluateConditions is not supported by this authorizer.
+// It fails closed and returns DecisionDeny with ErrorConditionEvaluationNotSupported.
+func (t tokenReviewAuthorizer) EvaluateConditions(_ context.Context, _ authorizer.ConditionsAwareDecision, _ authorizer.ConditionsData) (authorizer.Decision, string, error) {
+	return authorizer.DecisionDeny, "", authorizer.ErrorConditionEvaluationNotSupported
+}
+
 // NewHardCodedTokenReviewAuthorizer returns an authorizer that allows the expected kube-apiserver user to run tokenreviews.
 func NewHardCodedTokenReviewAuthorizer() *tokenReviewAuthorizer {
 	return new(tokenReviewAuthorizer)

@@ -168,10 +168,20 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 	// the oauth-apiserver provides an autentication webhook.  To avoid cyclical authorization checks, we will hardcode
 	// the expected user to a tokenreview permission.  Since this rule could never logically be removed in an openshift
 	// cluster, this is acceptable.
-	serverConfig.GenericConfig.Authorization.Authorizer = union.New(
-		hardcodedauthorizer.NewHardCodedTokenReviewAuthorizer(),
-		serverConfig.GenericConfig.Authorization.Authorizer,
+	authorizer, err := union.New(
+		union.NamedAuthorizer{
+			AuthorizerName: "openshift.io/hardcoded-tokenreview",
+			Authorizer:     hardcodedauthorizer.NewHardCodedTokenReviewAuthorizer(),
+		},
+		union.NamedAuthorizer{
+			AuthorizerName: "openshift.io/delegated",
+			Authorizer:     serverConfig.GenericConfig.Authorization.Authorizer,
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	serverConfig.GenericConfig.Authorization.Authorizer = authorizer
 
 	// the following section overwrites RESTOptionsGetter
 	// note we don't call ApplyWithStorageFactoryTo explicitly to prevent double registration of storage related health checks
@@ -187,7 +197,7 @@ func (o *OAuthAPIServerOptions) NewOAuthAPIServerConfig() (*apiserver.Config, er
 
 	// ApplyTo was called already which set up etcd health endpoints
 	o.RecommendedOptions.Etcd.SkipHealthEndpoints = true
-	err := o.RecommendedOptions.Etcd.ApplyWithStorageFactoryTo(storageFactory, &serverConfig.GenericConfig.Config)
+	err = o.RecommendedOptions.Etcd.ApplyWithStorageFactoryTo(storageFactory, &serverConfig.GenericConfig.Config)
 	if err != nil {
 		return nil, err
 	}
