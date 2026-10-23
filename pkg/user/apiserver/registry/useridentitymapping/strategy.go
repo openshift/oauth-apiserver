@@ -34,11 +34,11 @@ func (userIdentityMappingStrategy) GenerateName(base string) string {
 	return base
 }
 
-func (userIdentityMappingStrategy) AllowCreateOnUpdate() bool {
+func (userIdentityMappingStrategy) AllowCreateOnUpdate(ctx context.Context) bool {
 	return true
 }
 
-func (userIdentityMappingStrategy) AllowUnconditionalUpdate() bool {
+func (userIdentityMappingStrategy) AllowUnconditionalUpdate(ctx context.Context) bool {
 	return false
 }
 

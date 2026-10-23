@@ -57,11 +57,11 @@ func (userStrategy) Validate(ctx context.Context, obj runtime.Object) field.Erro
 }
 
 // AllowCreateOnUpdate is false for users
-func (userStrategy) AllowCreateOnUpdate() bool {
+func (userStrategy) AllowCreateOnUpdate(ctx context.Context) bool {
 	return false
 }
 
-func (userStrategy) AllowUnconditionalUpdate() bool {
+func (userStrategy) AllowUnconditionalUpdate(ctx context.Context) bool {
 	return false
 }
 

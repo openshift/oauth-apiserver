@@ -165,9 +165,7 @@ func RegisterConversions(s *runtime.Scheme) error {
 }
 
 func autoConvert_v1_ClusterRoleScopeRestriction_To_oauth_ClusterRoleScopeRestriction(in *oauthv1.ClusterRoleScopeRestriction, out *oauth.ClusterRoleScopeRestriction, s conversion.Scope) error {
-	out.RoleNames = *(*[]string)(unsafe.Pointer(&in.RoleNames))
-	out.Namespaces = *(*[]string)(unsafe.Pointer(&in.Namespaces))
-	out.AllowEscalation = in.AllowEscalation
+	*out = *(*oauth.ClusterRoleScopeRestriction)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -177,9 +175,7 @@ func Convert_v1_ClusterRoleScopeRestriction_To_oauth_ClusterRoleScopeRestriction
 }
 
 func autoConvert_oauth_ClusterRoleScopeRestriction_To_v1_ClusterRoleScopeRestriction(in *oauth.ClusterRoleScopeRestriction, out *oauthv1.ClusterRoleScopeRestriction, s conversion.Scope) error {
-	out.RoleNames = *(*[]string)(unsafe.Pointer(&in.RoleNames))
-	out.Namespaces = *(*[]string)(unsafe.Pointer(&in.Namespaces))
-	out.AllowEscalation = in.AllowEscalation
+	*out = *(*oauthv1.ClusterRoleScopeRestriction)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -443,9 +439,7 @@ func Convert_oauth_OAuthRedirectReference_To_v1_OAuthRedirectReference(in *oauth
 }
 
 func autoConvert_v1_RedirectReference_To_oauth_RedirectReference(in *oauthv1.RedirectReference, out *oauth.RedirectReference, s conversion.Scope) error {
-	out.Group = in.Group
-	out.Kind = in.Kind
-	out.Name = in.Name
+	*out = *(*oauth.RedirectReference)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -455,9 +449,7 @@ func Convert_v1_RedirectReference_To_oauth_RedirectReference(in *oauthv1.Redirec
 }
 
 func autoConvert_oauth_RedirectReference_To_v1_RedirectReference(in *oauth.RedirectReference, out *oauthv1.RedirectReference, s conversion.Scope) error {
-	out.Group = in.Group
-	out.Kind = in.Kind
-	out.Name = in.Name
+	*out = *(*oauthv1.RedirectReference)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -467,8 +459,7 @@ func Convert_oauth_RedirectReference_To_v1_RedirectReference(in *oauth.RedirectR
 }
 
 func autoConvert_v1_ScopeRestriction_To_oauth_ScopeRestriction(in *oauthv1.ScopeRestriction, out *oauth.ScopeRestriction, s conversion.Scope) error {
-	out.ExactValues = *(*[]string)(unsafe.Pointer(&in.ExactValues))
-	out.ClusterRole = (*oauth.ClusterRoleScopeRestriction)(unsafe.Pointer(in.ClusterRole))
+	*out = *(*oauth.ScopeRestriction)(unsafe.Pointer(in))
 	return nil
 }
 
@@ -478,8 +469,7 @@ func Convert_v1_ScopeRestriction_To_oauth_ScopeRestriction(in *oauthv1.ScopeRest
 }
 
 func autoConvert_oauth_ScopeRestriction_To_v1_ScopeRestriction(in *oauth.ScopeRestriction, out *oauthv1.ScopeRestriction, s conversion.Scope) error {
-	out.ExactValues = *(*[]string)(unsafe.Pointer(&in.ExactValues))
-	out.ClusterRole = (*oauthv1.ClusterRoleScopeRestriction)(unsafe.Pointer(in.ClusterRole))
+	*out = *(*oauthv1.ScopeRestriction)(unsafe.Pointer(in))
 	return nil
 }
 

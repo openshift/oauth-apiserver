@@ -50,11 +50,11 @@ func (groupStrategy) Validate(ctx context.Context, obj runtime.Object) field.Err
 }
 
 // AllowCreateOnUpdate is false for groups
-func (groupStrategy) AllowCreateOnUpdate() bool {
+func (groupStrategy) AllowCreateOnUpdate(ctx context.Context) bool {
 	return false
 }
 
-func (groupStrategy) AllowUnconditionalUpdate() bool {
+func (groupStrategy) AllowUnconditionalUpdate(ctx context.Context) bool {
 	return false
 }
 
