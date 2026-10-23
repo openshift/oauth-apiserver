@@ -263,7 +263,7 @@ github.com/openshift-eng/openshift-tests-extension/pkg/ginkgo
 github.com/openshift-eng/openshift-tests-extension/pkg/junit
 github.com/openshift-eng/openshift-tests-extension/pkg/util/sets
 github.com/openshift-eng/openshift-tests-extension/pkg/version
-# github.com/openshift/api v0.0.0-20261014122953-c6cd5e0f0e04
+# github.com/openshift/api v0.0.0-20261023091600-9809689a2448
 ## explicit; go 1.26.0
 github.com/openshift/api/authorization/v1
 github.com/openshift/api/build/v1
@@ -328,12 +328,13 @@ github.com/openshift/client-go/user/informers/externalversions/internalinterface
 github.com/openshift/client-go/user/informers/externalversions/user
 github.com/openshift/client-go/user/informers/externalversions/user/v1
 github.com/openshift/client-go/user/listers/user/v1
-# github.com/openshift/library-go v0.0.0-20261014142206-2386ca323e49
+# github.com/openshift/library-go v0.0.0-20261022100142-19890aeca00d
 ## explicit; go 1.26.0
 github.com/openshift/library-go/pkg/authentication/bootstrapauthenticator
 github.com/openshift/library-go/pkg/authorization/scopemetadata
 github.com/openshift/library-go/pkg/crypto
 github.com/openshift/library-go/pkg/features
+github.com/openshift/library-go/pkg/network/httptransport
 github.com/openshift/library-go/pkg/oauth/oauthserviceaccountclient
 github.com/openshift/library-go/pkg/oauth/usercache
 github.com/openshift/library-go/pkg/serviceability
