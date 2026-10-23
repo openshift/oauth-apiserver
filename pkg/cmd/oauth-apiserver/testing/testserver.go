@@ -3,7 +3,6 @@ package testing
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"path"
@@ -60,7 +59,7 @@ func StartTestServer(t Logger, customFlags []string, storageConfig *storagebacke
 		}
 	}()
 
-	result.TmpDir, err = ioutil.TempDir("", "openshift-apiserver")
+	result.TmpDir, err = os.MkdirTemp("", "openshift-apiserver")
 	if err != nil {
 		return result, fmt.Errorf("failed to create temp dir: %v", err)
 	}
