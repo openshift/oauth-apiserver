@@ -76,7 +76,11 @@ func TestClientCredential(t *testing.T) {
 					}(),
 				},
 			},
-			err: "certificate authority does not contain any valid PEM certificates",
+			// Deliberately matches only the parse failure, not the surrounding
+			// wrapper: httptransport numbers options by position, so asserting
+			// on "applying transport option N failed" breaks whenever the
+			// option list is reordered.
+			err: "failed to parse CA certificates from \"client credentials token endpoint CA\"",
 		},
 		{
 			name: "initial token fetch fails, error",
@@ -110,7 +114,7 @@ func TestClientCredential(t *testing.T) {
 				}
 			}
 
-			cc, err := NewClientCredential(t.Context(), tc.cfg)
+			cc, err := NewClientCredential(t.Context(), tc.cfg, nil)
 			switch {
 			case err == nil && len(tc.err) > 0:
 				t.Fatalf("expected error containing %q but got none", tc.err)

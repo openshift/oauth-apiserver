@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/coreos/go-oidc"
 
@@ -13,8 +14,10 @@ import (
 	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 	externalclaimsresolver "github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/resolver"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/tokengetters"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/internal/caclient"
 
 	authenticationcel "k8s.io/apiserver/pkg/authentication/cel"
+	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 )
 
@@ -30,11 +33,19 @@ type Options struct {
 	//  - apiserver_authentication_jwt_authenticator_jwks_fetch_last_key_set_info
 	KeySet oidc.KeySet
 
-	// PEM encoded root certificate contents of the provider.  Mutually exclusive with Client.
-	CAContentProvider k8soidc.CAContentProvider
+	// IssuerCertificateAuthority is an optional PEM-encoded CA bundle that
+	// pins trust for the issuer. Together with TrustedCAContentProvider, it is
+	// used to construct the discovery and JWKS HTTP client. Unlike
+	// TrustedCAContentProvider, this is not dynamically reloaded: it comes
+	// from the JWT authenticator's own configuration, which is only ever
+	// replaced wholesale on a config reload.
+	IssuerCertificateAuthority string
 
-	// Optional http.Client used to make all requests to the remote issuer.  Mutually exclusive with CAContentProvider and EgressLookup.
-	Client *http.Client
+	// TrustedCAContentProvider supplies additional, dynamically reloaded trust
+	// for all outbound HTTPS connections, including those made through an
+	// HTTPS or TLS-intercepting proxy. It is also used by external claim
+	// source and client-credentials requests.
+	TrustedCAContentProvider dynamiccertificates.CAContentProvider
 
 	// Optional CEL compiler used to compile the CEL expressions. This is useful to use a shared instance
 	// of the compiler as these compilers holding a CEL environment are expensive to create. If not provided,
@@ -66,16 +77,20 @@ func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealt
 		opts.Compiler = externaloidccel.NewCompiler()
 	}
 
-	externalClaimsExpanders, err := buildExternalClaimsExpanders(ctx, opts.Compiler, opts.JWTAuthenticator.ExternalClaimsSources...)
+	externalClaimsExpanders, err := buildExternalClaimsExpanders(ctx, opts.Compiler, opts.TrustedCAContentProvider, opts.JWTAuthenticator.ExternalClaimsSources...)
 	if err != nil {
 		return nil, fmt.Errorf("building external claims expanders: %w", err)
+	}
+
+	issuerClient, err := httpClientForIssuer(opts.IssuerCertificateAuthority, opts.TrustedCAContentProvider)
+	if err != nil {
+		return nil, fmt.Errorf("building HTTP client for issuer: %w", err)
 	}
 
 	k8sOpts := k8soidc.Options{
 		JWTAuthenticator:                     conversion.ConvertJWTAuthenticatorToApiserverJWTAuthenticator(opts.JWTAuthenticator),
 		KeySet:                               opts.KeySet,
-		CAContentProvider:                    opts.CAContentProvider,
-		Client:                               opts.Client,
+		Client:                               issuerClient,
 		Compiler:                             opts.Compiler,
 		SupportedSigningAlgs:                 opts.SupportedSigningAlgs,
 		DisallowedIssuers:                    opts.DisallowedIssuers,
@@ -86,15 +101,33 @@ func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealt
 	return k8soidc.New(ctx, k8sOpts)
 }
 
-func buildExternalClaimsExpanders(ctx context.Context, compiler Compiler, externalClaimSources ...authentication.ExternalClaimsSource) ([]k8soidc.ClaimsExpander, error) {
+// issuerRequestTimeout mirrors the timeout k8soidc applies to the client it
+// builds for itself when no CA is configured here:
+// vendor/k8s.io/apiserver/plugin/pkg/authenticator/token/oidc/oidc.go.
+const issuerRequestTimeout = 30 * time.Second
+
+// httpClientForIssuer builds the client used for issuer discovery and JWKS
+// requests. It returns a nil client when neither CA is configured, leaving
+// k8soidc to build its own client against the system trust roots.
+//
+// See caclient.New for the trust-pinning behavior when a CA is configured.
+func httpClientForIssuer(issuerCertificateAuthority string, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*http.Client, error) {
+	if len(issuerCertificateAuthority) == 0 && trustedCAContentProvider == nil {
+		return nil, nil
+	}
+
+	return caclient.New("issuer CA", issuerCertificateAuthority, trustedCAContentProvider, issuerRequestTimeout)
+}
+
+func buildExternalClaimsExpanders(ctx context.Context, compiler Compiler, trustedCAContentProvider dynamiccertificates.CAContentProvider, externalClaimSources ...authentication.ExternalClaimsSource) ([]k8soidc.ClaimsExpander, error) {
 	expanders := make([]k8soidc.ClaimsExpander, 0, len(externalClaimSources))
 	for _, source := range externalClaimSources {
-		tokenGetter, err := buildExternalClaimsTokenGetter(ctx, source.Authentication)
+		tokenGetter, err := buildExternalClaimsTokenGetter(ctx, source.Authentication, trustedCAContentProvider)
 		if err != nil {
 			return nil, fmt.Errorf("building access token getter: %w", err)
 		}
 
-		expander, err := externalclaimsresolver.New(compiler, tokenGetter, source)
+		expander, err := externalclaimsresolver.New(compiler, tokenGetter, source, trustedCAContentProvider)
 		if err != nil {
 			return nil, fmt.Errorf("creating new external claims resolver: %w", err)
 		}
@@ -105,7 +138,7 @@ func buildExternalClaimsExpanders(ctx context.Context, compiler Compiler, extern
 	return expanders, nil
 }
 
-func buildExternalClaimsTokenGetter(ctx context.Context, authn *authentication.Authentication) (externalclaimsresolver.AccessTokenGetter, error) {
+func buildExternalClaimsTokenGetter(ctx context.Context, authn *authentication.Authentication, trustedCAContentProvider dynamiccertificates.CAContentProvider) (externalclaimsresolver.AccessTokenGetter, error) {
 	if authn == nil {
 		return &tokengetters.Anonymous{}, nil
 	}
@@ -121,7 +154,7 @@ func buildExternalClaimsTokenGetter(ctx context.Context, authn *authentication.A
 		if authn.ClientCredential == nil {
 			return nil, fmt.Errorf("client credential configuration is required when authentication type is ClientCredential")
 		}
-		return tokengetters.NewClientCredential(ctx, authn.ClientCredential)
+		return tokengetters.NewClientCredential(ctx, authn.ClientCredential, trustedCAContentProvider)
 	default:
 		return nil, fmt.Errorf("unknown authentication type %q", *authn.Type)
 	}

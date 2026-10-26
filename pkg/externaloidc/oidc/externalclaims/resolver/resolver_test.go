@@ -36,7 +36,11 @@ func TestNew(t *testing.T) {
 					CertificateAuthority: ptr.To("not a real certificate"),
 				},
 			},
-			err: "building http client for external source: certificate authority does not contain any valid PEM certificates",
+			// Deliberately matches only the parse failure, not the surrounding
+			// wrapper: httptransport numbers options by position, so asserting
+			// on "applying transport option N failed" breaks whenever the
+			// option list is reordered.
+			err: "failed to parse CA certificates from \"external claims source CA\"",
 		},
 		{
 			name:     "invalid source, bad source URL path expression",
@@ -138,7 +142,7 @@ func TestNew(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := New(tc.compiler, nil, tc.source)
+			_, err := New(tc.compiler, nil, tc.source, nil)
 			switch {
 			case err == nil && len(tc.err) > 0:
 				t.Fatalf("expected error containing %q but got none", tc.err)
@@ -481,7 +485,7 @@ func TestExpandClaims(t *testing.T) {
 				CertificateAuthority: ptr.To(string(pemBytes)),
 			}
 
-			resolver, err := New(compiler, tc.tokenGetter, tc.source)
+			resolver, err := New(compiler, tc.tokenGetter, tc.source, nil)
 			if err != nil {
 				t.Fatalf("expected to sucessfully create a new external claims resolver but received error: %v", err)
 			}
