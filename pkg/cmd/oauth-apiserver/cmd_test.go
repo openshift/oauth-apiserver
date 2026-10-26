@@ -117,7 +117,6 @@ func TestAddFlags(t *testing.T) {
 				DeleteCollectionWorkers: 1,
 				EnableGarbageCollection: true,
 				EnableWatchCache:        true,
-				DefaultWatchCacheSize:   100,
 			},
 			SecureServing: (&genericapiserveroptions.SecureServingOptions{
 				BindAddress: netutils.ParseIPSloppy("0.0.0.0"),

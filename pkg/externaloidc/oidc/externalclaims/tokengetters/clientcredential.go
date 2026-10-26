@@ -2,8 +2,6 @@ package tokengetters
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,10 +9,22 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
+	"k8s.io/apiserver/pkg/server/dynamiccertificates"
+
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/internal/caclient"
 )
 
 // tokenEndpointRequestTimeout is the timeout for HTTP requests to the token endpoint.
+//
+// TO BE RESOLVED DURING REVIEW: this is tighter than the external source
+// timeout and, unlike that one, also gates the initial token fetch done
+// synchronously in NewClientCredential during authenticator construction, so
+// a timeout here fails a config reload outright rather than just dropping
+// claims. trustedCAContentProvider now lets this request route through an
+// HTTPS or TLS-intercepting proxy, which adds latency this budget was not
+// chosen with in mind. Confirm 1s is still enough once a proxy is in the
+// path, or raise it.
 const tokenEndpointRequestTimeout = time.Second
 
 // ClientCredential is an AccessTokenGetter that uses the OAuth2 client credentials
@@ -24,12 +34,12 @@ type ClientCredential struct {
 }
 
 // NewClientCredential creates a new ClientCredential token getter from the provided configuration.
-func NewClientCredential(ctx context.Context, cfg *authentication.ClientCredentialConfig) (*ClientCredential, error) {
+func NewClientCredential(ctx context.Context, cfg *authentication.ClientCredentialConfig, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*ClientCredential, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("client credential configuration must not be nil")
 	}
 
-	httpClient, err := httpClientForClientCredential(cfg.TLS)
+	httpClient, err := httpClientForClientCredential(cfg.TLS, trustedCAContentProvider)
 	if err != nil {
 		return nil, fmt.Errorf("building http client for client credential token endpoint: %w", err)
 	}
@@ -66,45 +76,13 @@ func (cc *ClientCredential) GetAccessToken(_ context.Context) (string, error) {
 	return token.AccessToken, nil
 }
 
-func httpClientForClientCredential(tlsCfg *authentication.TLS) (*http.Client, error) {
-	client := &http.Client{
-		Timeout: tokenEndpointRequestTimeout,
+// httpClientForClientCredential builds the client used for client-credentials
+// token endpoint requests. See caclient.New for the trust-pinning behavior.
+func httpClientForClientCredential(tlsCfg *authentication.TLS, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*http.Client, error) {
+	var certificateAuthority string
+	if tlsCfg != nil && tlsCfg.CertificateAuthority != nil {
+		certificateAuthority = *tlsCfg.CertificateAuthority
 	}
 
-	if tlsCfg == nil {
-		return client, nil
-	}
-
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-
-	err := modifyTransportRootCAs(transport, tlsCfg.CertificateAuthority)
-	if err != nil {
-		return nil, fmt.Errorf("setting client root CAs: %w", err)
-	}
-
-	client.Transport = transport
-
-	return client, nil
-}
-
-func modifyTransportRootCAs(transport *http.Transport, certificateAuthority *string) error {
-	if certificateAuthority == nil || len(*certificateAuthority) == 0 {
-		return nil
-	}
-
-	if transport == nil {
-		transport = http.DefaultTransport.(*http.Transport).Clone()
-	}
-
-	if transport.TLSClientConfig == nil {
-		transport.TLSClientConfig = &tls.Config{}
-	}
-
-	caCertPool := x509.NewCertPool()
-	if ok := caCertPool.AppendCertsFromPEM([]byte(*certificateAuthority)); !ok {
-		return fmt.Errorf("certificate authority does not contain any valid PEM certificates")
-	}
-
-	transport.TLSClientConfig.RootCAs = caCertPool
-	return nil
+	return caclient.New("client credentials token endpoint CA", certificateAuthority, trustedCAContentProvider, tokenEndpointRequestTimeout)
 }

@@ -2,8 +2,6 @@ package resolver
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,12 +14,15 @@ import (
 	"github.com/google/cel-go/cel"
 	"github.com/google/cel-go/common/types"
 
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
-	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 	authenticationcel "k8s.io/apiserver/pkg/authentication/cel"
+	"k8s.io/apiserver/pkg/server/dynamiccertificates"
+	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 	"k8s.io/klog/v2"
 
-	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/internal/caclient"
+
+	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 )
 
 var _ k8soidc.ClaimsExpander = (*externalClaimsResolver)(nil)
@@ -31,8 +32,8 @@ type Compiler interface {
 	CompileExternalSourceExpression(expressionAccessor authenticationcel.ExpressionAccessor) (authenticationcel.CompilationResult, error)
 }
 
-func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authentication.ExternalClaimsSource) (*externalClaimsResolver, error) {
-	httpClient, err := httpClientForTLSConfig(source.TLS)
+func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authentication.ExternalClaimsSource, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*externalClaimsResolver, error) {
+	httpClient, err := httpClientForTLSConfig(source.TLS, trustedCAContentProvider)
 	if err != nil {
 		return nil, fmt.Errorf("building http client for external source: %w", err)
 	}
@@ -58,32 +59,24 @@ func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authenti
 // 10 requests to external sources is a significant amount of buffer room for something
 // that we expect to be used sparingly and leaves at least 5 seconds for the rest
 // of the claim mapping logic to execute, which should be plenty of time.
+//
+// TO BE RESOLVED DURING REVIEW: this budget was chosen for a direct connection.
+// trustedCAContentProvider now lets this request route through an HTTPS or
+// TLS-intercepting proxy, which adds a CONNECT round trip and, for an
+// intercepting proxy, a second TLS handshake. Confirm 500ms is still enough
+// headroom once a proxy is in the path, or raise it while preserving a safe
+// margin under the 10s webhook authenticator timeout.
 const externalSourceRequestTimeout = 500 * time.Millisecond
 
-func httpClientForTLSConfig(tlsCfg *authentication.TLS) (*http.Client, error) {
-	client := &http.Client{
-		Timeout: externalSourceRequestTimeout,
+// httpClientForTLSConfig builds the client used for external claims source
+// requests. See caclient.New for the trust-pinning behavior.
+func httpClientForTLSConfig(tlsCfg *authentication.TLS, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*http.Client, error) {
+	var certificateAuthority string
+	if tlsCfg != nil && tlsCfg.CertificateAuthority != nil {
+		certificateAuthority = *tlsCfg.CertificateAuthority
 	}
 
-	if tlsCfg == nil || tlsCfg.CertificateAuthority == nil || len(*tlsCfg.CertificateAuthority) == 0 {
-		return client, nil
-	}
-
-	caCertPool := x509.NewCertPool()
-
-	if ok := caCertPool.AppendCertsFromPEM([]byte(*tlsCfg.CertificateAuthority)); !ok {
-		return nil, fmt.Errorf("certificate authority does not contain any valid PEM certificates")
-	}
-
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = &tls.Config{
-		RootCAs:    caCertPool,
-		MinVersion: tls.VersionTLS12,
-	}
-
-	client.Transport = transport
-
-	return client, nil
+	return caclient.New("external claims source CA", certificateAuthority, trustedCAContentProvider, externalSourceRequestTimeout)
 }
 
 func buildExternalSourceCELMapper(compiler Compiler, sourceURL *authentication.SourceURL, sourceMappings []authentication.SourcedClaimMapping, sourceConditions []authentication.ExternalSourceCondition) (*externaloidccel.ExternalSourceCELMapper, error) {

@@ -59,11 +59,11 @@ func (identityStrategy) Validate(ctx context.Context, obj runtime.Object) field.
 }
 
 // AllowCreateOnUpdate is false for identity
-func (identityStrategy) AllowCreateOnUpdate() bool {
+func (identityStrategy) AllowCreateOnUpdate(ctx context.Context) bool {
 	return false
 }
 
-func (identityStrategy) AllowUnconditionalUpdate() bool {
+func (identityStrategy) AllowUnconditionalUpdate(ctx context.Context) bool {
 	return false
 }
 
