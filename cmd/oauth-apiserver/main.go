@@ -31,7 +31,7 @@ func main() {
 	if len(os.Getenv("GOMAXPROCS")) == 0 {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
-
+	// empty comment
 	command := NewOAuthAPIServerCommand()
 	code := cli.Run(command)
 	os.Exit(code)
