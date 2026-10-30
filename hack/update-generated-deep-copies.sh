@@ -16,7 +16,6 @@ ALL_FQ_APIS=(
     github.com/openshift/oauth-apiserver/pkg/oauth/apis/oauth
     github.com/openshift/oauth-apiserver/pkg/user/apis/user
     github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication
-    github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/v1alpha1
 )
 
 echo "Generating deepcopy funcs"
