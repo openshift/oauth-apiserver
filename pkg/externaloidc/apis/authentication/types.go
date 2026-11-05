@@ -21,6 +21,18 @@ functionality that OpenShift needs.
 type AuthenticationConfiguration struct {
 	metav1.TypeMeta
 
+	// trustedCAFilePath is an optional path to a PEM-encoded CA bundle used to
+	// verify all outbound HTTPS connections, including through proxies. The
+	// file is watched and reloaded without a restart.
+	//
+	// The bundle is added to the trust already in effect for a connection:
+	// the system roots, or a connection-specific CA such as
+	// Issuer.CertificateAuthority when one is set.
+	//
+	// Must be an absolute path.
+	// Must not contain duplicate slashes, "." or ".." as path elements.
+	TrustedCAFilePath string `json:"trustedCAFilePath,omitempty"`
+
 	// jwt is a list of authenticator to authenticate Kubernetes users using
 	// JWT compliant tokens. The authenticator will attempt to parse a raw ID token,
 	// verify it's been signed by the configured issuer. The public key to verify the
