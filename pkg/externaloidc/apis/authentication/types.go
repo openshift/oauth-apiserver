@@ -22,23 +22,12 @@ type AuthenticationConfiguration struct {
 	metav1.TypeMeta
 
 	// trustedCAFilePath is an optional path to a PEM-encoded CA bundle used to
-	// verify all outbound HTTPS connections made by this authenticator,
-	// including those made through an HTTPS or TLS-intercepting proxy.
+	// verify all outbound HTTPS connections, including through proxies. The
+	// file is watched and reloaded without a restart.
 	//
-	// This is a path rather than inline PEM, unlike the other CA fields in this
-	// API: the cluster trust bundle it typically references is a separate
-	// ConfigMap, and a path lets that ConfigMap rotate without the operator
-	// re-rendering this configuration. The file is watched and updates are
-	// applied without restarting the webhook server.
-	//
-	// The bundle configured here is always added on top of whichever trust is
-	// already in effect for a given connection. By default, that is the system
-	// trust roots. If a more specific CA is configured for a connection (for
-	// example Issuer.CertificateAuthority), that CA replaces the system trust
-	// roots for that connection, and this bundle is added to it; this field
-	// does not restore the system trust roots. When neither this field nor a
-	// connection-specific CA is set, connections use the system trust roots
-	// only.
+	// The bundle is added to the trust already in effect for a connection:
+	// the system roots, or a connection-specific CA such as
+	// Issuer.CertificateAuthority when one is set.
 	TrustedCAFilePath string `json:"trustedCAFilePath,omitempty"`
 
 	// jwt is a list of authenticator to authenticate Kubernetes users using

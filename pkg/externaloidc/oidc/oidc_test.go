@@ -21,7 +21,6 @@ import (
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc"
 	"gopkg.in/go-jose/go-jose.v2"
 	"k8s.io/apiserver/pkg/authentication/user"
-	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	"k8s.io/utils/ptr"
 )
 
@@ -220,15 +219,10 @@ func TestOIDCAuthenticator(t *testing.T) {
 			}
 			pemBytes := pem.EncodeToMemory(pemBlock)
 
-			caContentProvider, err := dynamiccertificates.NewStaticCAContent("oidc-authenticator", pemBytes)
-			if err != nil {
-				t.Fatalf("creating CA content provider: %v", err)
-			}
-
 			authn, err := oidc.New(t.Context(), oidc.Options{
-				JWTAuthenticator:  *tc.configFunc(srv.URL, string(pemBytes)),
-				KeySet:            &oidcKeySet{&jwks},
-				CAContentProvider: caContentProvider,
+				JWTAuthenticator:           *tc.configFunc(srv.URL, string(pemBytes)),
+				KeySet:                     &oidcKeySet{&jwks},
+				IssuerCertificateAuthority: string(pemBytes),
 			})
 			if err != nil {
 				t.Fatalf("creating authenticator: %v", err)
