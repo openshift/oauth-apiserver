@@ -16,10 +16,24 @@ functionality that OpenShift needs.
 
 */
 
+// AuthenticationConfiguration is the configuration-file API read by the
+// oauth-apiserver when it runs in External OIDC mode.
+//
+// The cluster-authentication-operator is the only component that writes this
+// configuration file. It generates the file from the user-facing
+// config.openshift.io/v1, Kind=Authentication API. This type is not a CRD and
+// must not be configured directly.
+//
+// The oauth-apiserver performs semantic validation when it reads this file. See
+// https://github.com/openshift/oauth-apiserver/blob/97a820bd5412/pkg/externaloidc/apis/authentication/validation/validation.go.
+//
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
+//
+// Compatibility level 4: No compatibility is provided, the API can change at any point for any reason. These capabilities should not be used by applications needing long term support.
+// +openshift:compatibility-gen:level=4
+// +openshift:compatibility-gen:internal
 type AuthenticationConfiguration struct {
-	metav1.TypeMeta
+	metav1.TypeMeta `json:",inline"`
 
 	// jwt is a list of authenticator to authenticate Kubernetes users using
 	// JWT compliant tokens. The authenticator will attempt to parse a raw ID token,
@@ -40,15 +54,18 @@ type AuthenticationConfiguration struct {
 	//		"exp": 1234567890,
 	//		"<username claim>": "username"
 	// }
+	// +listType=atomic
 	JWT []JWTAuthenticator `json:"jwt,omitempty"`
 }
 
+// JWTAuthenticator configures one JWT authenticator.
 type JWTAuthenticator struct {
 	// issuer contains the basic OIDC provider connection options.
 	// +required
 	Issuer *Issuer `json:"issuer,omitempty"`
 
 	// claimValidationRules are rules that are applied to validate token claims to authenticate users.
+	// +listType=atomic
 	// +optional
 	ClaimValidationRules []ClaimValidationRule `json:"claimValidationRules,omitempty"`
 
@@ -60,15 +77,17 @@ type JWTAuthenticator struct {
 	// These allow invariants to be applied to incoming identities such as preventing the
 	// use of the system: prefix that is commonly used by Kubernetes components.
 	// The validation rules are logically ANDed together and must all return true for the validation to pass.
+	// +listType=atomic
 	// +optional
 	UserValidationRules []UserValidationRule `json:"userValidationRules,omitempty"`
 
-	// externalClaimSources is an optional field that can be used to configure
+	// externalClaimsSources is an optional field that can be used to configure
 	// sources, external to the token provided in a request, in which claims
 	// should be fetched from and made available to the claim mapping process
 	// that is used to build the identity of a token holder.
 	// For example, fetching additional user metadata from an OIDC provider's UserInfo endpoint.
-	// externalClaimSources must not exceed 5 entries.
+	// externalClaimsSources must not exceed 5 entries.
+	// +listType=atomic
 	// +optional
 	ExternalClaimsSources []ExternalClaimsSource `json:"externalClaimsSources,omitempty"`
 }
@@ -123,6 +142,7 @@ type Issuer struct {
 	// At least one of the entries must match the "aud" claim in presented JWTs.
 	// Same value as the --oidc-client-id flag (though this field supports an array).
 	// Required to be non-empty.
+	// +listType=atomic
 	// +required
 	Audiences []string `json:"audiences"`
 
@@ -247,6 +267,7 @@ type ClaimMappings struct {
 	//  - if is_admin claim is present and true, extra attribute - admin: ["true"]
 	//  - if is_admin claim is present and false or is_admin claim is not present, no extra attribute will be added
 	//
+	// +listType=atomic
 	// +optional
 	Extra []ExtraMapping `json:"extra,omitempty"`
 }
@@ -376,6 +397,7 @@ type ExternalClaimsSource struct {
 	// external claims can have guard conditions defined in the 'conditions'
 	// field.
 	//
+	// +listType=atomic
 	// +required
 	Mappings []SourcedClaimMapping `json:"mappings,omitempty"`
 	// conditions is an optional list of conditions in
@@ -387,6 +409,7 @@ type ExternalClaimsSource struct {
 	// before claims are attempted to be fetched from this external source.
 	// conditions must not exceed 16 entries.
 	// Entries must have unique expressions.
+	// +listType=atomic
 	// +optional
 	Conditions []ExternalSourceCondition `json:"conditions,omitempty"`
 }
@@ -484,6 +507,7 @@ type ClientCredentialConfig struct {
 	// scopes is an optional list of OAuth2 scopes to request when obtaining
 	// an access token. If not specified, the token endpoint's default scopes
 	// will be used. Each scope must not be an empty string ("").
+	// +listType=atomic
 	// +optional
 	Scopes []string `json:"scopes,omitempty"`
 
