@@ -3,6 +3,7 @@ package validation
 import (
 	"fmt"
 	"net/url"
+	"path/filepath"
 	"regexp"
 	"strconv"
 
@@ -39,6 +40,11 @@ func ValidateAuthenticationConfiguration(compiler oidc.Compiler, c *authenticati
 	// Now validate our custom fields
 	for i, jwt := range c.JWT {
 		errors = append(errors, validateExternalClaimsSources(compiler, jwt.ExternalClaimsSources, root.Index(i).Child("externalClaimsSources"))...)
+	}
+
+	// Make sure the trustedCA path is a valid, clean, absolute path.
+	if p := c.TrustedCAFilePath; len(p) > 0 && (!filepath.IsAbs(p) || filepath.Clean(p) != p) {
+		errors = append(errors, field.Invalid(field.NewPath("trustedCAFilePath"), p, "must be a clean valid absolute filepath"))
 	}
 
 	return errors
