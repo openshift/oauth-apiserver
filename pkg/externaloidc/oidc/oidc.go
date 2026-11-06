@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/coreos/go-oidc"
@@ -76,7 +75,7 @@ func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealt
 		return nil, fmt.Errorf("building external claims expanders: %w", err)
 	}
 
-	issuerClient, err := httpClientForIssuer(opts.IssuerCertificateAuthority, opts.TrustedCAContentProvider)
+	issuerClient, err := caclient.New("issuer CA", opts.IssuerCertificateAuthority, opts.TrustedCAContentProvider, issuerRequestTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("building HTTP client for issuer: %w", err)
 	}
@@ -97,16 +96,6 @@ func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealt
 
 // issuerRequestTimeout matches the timeout of k8soidc's own default client.
 const issuerRequestTimeout = 30 * time.Second
-
-// httpClientForIssuer returns nil when no CA is configured, letting k8soidc
-// build its default client.
-func httpClientForIssuer(issuerCertificateAuthority string, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*http.Client, error) {
-	if len(issuerCertificateAuthority) == 0 && trustedCAContentProvider == nil {
-		return nil, nil
-	}
-
-	return caclient.New("issuer CA", issuerCertificateAuthority, trustedCAContentProvider, issuerRequestTimeout)
-}
 
 func buildExternalClaimsExpanders(ctx context.Context, compiler Compiler, trustedCAContentProvider dynamiccertificates.CAContentProvider, externalClaimSources ...authentication.ExternalClaimsSource) ([]k8soidc.ClaimsExpander, error) {
 	expanders := make([]k8soidc.ClaimsExpander, 0, len(externalClaimSources))
