@@ -2665,6 +2665,42 @@ func TestValidateAuthenticationConfiguration(t *testing.T) {
 		},
 	}
 
+	for _, tc := range []struct {
+		name string
+		path string
+		want string
+	}{
+		{name: "trustedCAFilePath unset", path: "", want: ""},
+		{name: "trustedCAFilePath valid absolute path", path: "/etc/ca/ca.crt", want: ""},
+		{name: "trustedCAFilePath relative path", path: "etc/ca/ca.crt", want: `trustedCAFilePath: Invalid value: "etc/ca/ca.crt": must be a clean valid absolute filepath`},
+		{name: "trustedCAFilePath with parent traversal", path: "/etc/../ca.crt", want: `trustedCAFilePath: Invalid value: "/etc/../ca.crt": must be a clean valid absolute filepath`},
+		{name: "trustedCAFilePath with empty element", path: "/etc//ca.crt", want: `trustedCAFilePath: Invalid value: "/etc//ca.crt": must be a clean valid absolute filepath`},
+	} {
+		testCases = append(testCases, struct {
+			name string
+			in   *authentication.AuthenticationConfiguration
+			want string
+		}{
+			name: tc.name,
+			in: &authentication.AuthenticationConfiguration{
+				JWT: []authentication.JWTAuthenticator{{
+					Issuer: &authentication.Issuer{
+						URL:       "https://issuer-url",
+						Audiences: []string{"audience"},
+					},
+					ClaimMappings: &authentication.ClaimMappings{
+						Username: authentication.PrefixedClaimOrExpression{
+							Claim:  "sub",
+							Prefix: new("prefix"),
+						},
+					},
+				}},
+				TrustedCAFilePath: tc.path,
+			},
+			want: tc.want,
+		})
+	}
+
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			got := ValidateAuthenticationConfiguration(externaloidccel.NewCompiler(), tt.in).ToAggregate()

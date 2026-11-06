@@ -497,6 +497,9 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		configv1.TokenIssuer{}.OpenAPIModelName():                                               schema_openshift_api_config_v1_TokenIssuer(ref),
 		configv1.TokenRequiredClaim{}.OpenAPIModelName():                                        schema_openshift_api_config_v1_TokenRequiredClaim(ref),
 		configv1.TokenUserValidationRule{}.OpenAPIModelName():                                   schema_openshift_api_config_v1_TokenUserValidationRule(ref),
+		configv1.TopologyState{}.OpenAPIModelName():                                             schema_openshift_api_config_v1_TopologyState(ref),
+		configv1.TopologyTransition{}.OpenAPIModelName():                                        schema_openshift_api_config_v1_TopologyTransition(ref),
+		configv1.TopologyTransitionStatus{}.OpenAPIModelName():                                  schema_openshift_api_config_v1_TopologyTransitionStatus(ref),
 		configv1.Update{}.OpenAPIModelName():                                                    schema_openshift_api_config_v1_Update(ref),
 		configv1.UpdateHistory{}.OpenAPIModelName():                                             schema_openshift_api_config_v1_UpdateHistory(ref),
 		configv1.UsernameClaimMapping{}.OpenAPIModelName():                                      schema_openshift_api_config_v1_UsernameClaimMapping(ref),
@@ -2007,6 +2010,13 @@ func schema_openshift_api_authentication_v1alpha1_AuthenticationConfiguration(re
 					"apiVersion": {
 						SchemaProps: spec.SchemaProps{
 							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"trustedCAFilePath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "trustedCAFilePath is an optional path to a PEM-encoded CA bundle used to verify outbound HTTPS connections including proxies and TLS-intercepting proxies for outbound issuer discovery and JWKS requests. When specified, the file is watched and updates are applied without restarting the webhook server. When omitted, connections use the system trust roots only.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -14846,7 +14856,7 @@ func schema_openshift_api_config_v1_InfrastructureStatus(ref common.ReferenceCal
 					},
 					"controlPlaneTopology": {
 						SchemaProps: spec.SchemaProps{
-							Description: "controlPlaneTopology expresses the expectations for operands that normally run on control nodes. The default is 'HighlyAvailable', which represents the behavior operators have in a \"normal\" cluster. The 'SingleReplica' mode will be used in single-node deployments and the operators should not configure the operand for highly-available operation The 'External' mode indicates that the control plane is hosted externally to the cluster and that its components are not visible within the cluster. The 'HighlyAvailableArbiter' mode indicates that the control plane will consist of 2 control-plane nodes that run conventional services and 1 smaller sized arbiter node that runs a bare minimum of services to maintain quorum.",
+							Description: "controlPlaneTopology expresses the expectations for operands that normally run on control nodes. The default is 'HighlyAvailable', which represents the behavior operators have in a \"normal\" cluster. The 'SingleReplica' mode will be used in single-node deployments and the operators should not configure the operand for highly-available operation The 'DualReplica' mode is used in two-node deployments with fencing. The 'External' mode indicates that the control plane is hosted externally to the cluster and that its components are not visible within the cluster. The 'HighlyAvailableArbiter' mode indicates that the control plane will consist of 2 control-plane nodes that run conventional services and 1 smaller sized arbiter node that runs a bare minimum of services to maintain quorum.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -14857,6 +14867,13 @@ func schema_openshift_api_config_v1_InfrastructureStatus(ref common.ReferenceCal
 							Description: "infrastructureTopology expresses the expectations for infrastructure services that do not run on control plane nodes, usually indicated by a node selector for a `role` value other than `master`. The default is 'HighlyAvailable', which represents the behavior operators have in a \"normal\" cluster. The 'SingleReplica' mode will be used in single-node deployments and the operators should not configure the operand for highly-available operation NOTE: External topology mode is not applicable for this field.",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"topologyTransitionStatus": {
+						SchemaProps: spec.SchemaProps{
+							Description: "topologyTransitionStatus reports evaluations of supported topology transitions and the status of a requested transition, if any. It is optional and is omitted until the topology controller reports transition status. A transition is requested through spec.controlPlaneTopology. The controller reports completion only after both topologies reach that transition's target and post-transition checks pass; reaching the target topology alone is not completion.",
+							Default:     map[string]interface{}{},
+							Ref:         ref(configv1.TopologyTransitionStatus{}.OpenAPIModelName()),
 						},
 					},
 					"cpuPartitioning": {
@@ -14871,7 +14888,7 @@ func schema_openshift_api_config_v1_InfrastructureStatus(ref common.ReferenceCal
 			},
 		},
 		Dependencies: []string{
-			configv1.PlatformStatus{}.OpenAPIModelName()},
+			configv1.PlatformStatus{}.OpenAPIModelName(), configv1.TopologyTransitionStatus{}.OpenAPIModelName()},
 	}
 }
 
@@ -17627,6 +17644,13 @@ func schema_openshift_api_config_v1_OpenStackPlatformSpec(ref common.ReferenceCa
 									},
 								},
 							},
+						},
+					},
+					"maxAllowedAddressPairs": {
+						SchemaProps: spec.SchemaProps{
+							Description: "maxAllowedAddressPairs is the maximum number of allowed address pairs configured in Neutron. When set, the value must be between 1 and 2,147,483,647 inclusive. When omitted, it means there is no opinion and the platform will choose a reasonable default which is subject to change. Currently, the default value matches Neutron's default.",
+							Type:        []string{"integer"},
+							Format:      "int32",
 						},
 					},
 				},
@@ -20628,6 +20652,138 @@ func schema_openshift_api_config_v1_TokenUserValidationRule(ref common.Reference
 				Required: []string{"expression", "message"},
 			},
 		},
+	}
+}
+
+func schema_openshift_api_config_v1_TopologyState(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TopologyState describes the control-plane and infrastructure topology at one end of a topology transition. The topology controller determines which transitions are supported. Currently, it supports only transitions that change both topologies from SingleReplica to HighlyAvailable. Representing a topology here does not enable a transition to it.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"controlPlaneTopology": {
+						SchemaProps: spec.SchemaProps{
+							Description: "controlPlaneTopology is the topology of the control-plane nodes. Valid values are HighlyAvailable, HighlyAvailableArbiter, and SingleReplica. External is not valid: transitions cannot involve an externally hosted control plane. SingleReplica means a single instance of control-plane services is expected to meet cluster needs. HighlyAvailable means multiple instances are expected to provide redundancy. HighlyAvailableArbiter means two control-plane nodes and a smaller arbiter node to maintain quorum. See https://pkg.go.dev/github.com/openshift/api/config/v1#TopologyMode for topology definitions. controlPlaneTopology is required.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"infrastructureTopology": {
+						SchemaProps: spec.SchemaProps{
+							Description: "infrastructureTopology is the topology of infrastructure services. Valid values are SingleReplica and HighlyAvailable. SingleReplica means operators expect a single instance of infrastructure services to meet cluster needs. HighlyAvailable means operators expect multiple instances of infrastructure services to provide redundancy. infrastructureTopology is required.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"controlPlaneTopology", "infrastructureTopology"},
+			},
+		},
+	}
+}
+
+func schema_openshift_api_config_v1_TopologyTransition(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Description: "source is the control-plane and infrastructure topology this transition was evaluated from. It may differ from the current topology while status is being refreshed. External control planes cannot be a transition source. controlPlaneTopology is the topology of the control-plane nodes. Valid values are HighlyAvailable, HighlyAvailableArbiter, and SingleReplica. External is not valid: transitions cannot involve an externally hosted control plane. SingleReplica means a single instance of control-plane services is expected to meet cluster needs. HighlyAvailable means multiple instances are expected to provide redundancy. HighlyAvailableArbiter means two control-plane nodes and a smaller arbiter node to maintain quorum. See https://pkg.go.dev/github.com/openshift/api/config/v1#TopologyMode for topology definitions. infrastructureTopology is the topology of infrastructure services. Valid values are SingleReplica and HighlyAvailable. SingleReplica means operators expect a single instance of infrastructure services to meet cluster needs. HighlyAvailable means operators expect multiple instances of infrastructure services to provide redundancy. source is required.",
+							Default:     map[string]interface{}{},
+							Ref:         ref(configv1.TopologyState{}.OpenAPIModelName()),
+						},
+					},
+					"target": {
+						SchemaProps: spec.SchemaProps{
+							Description: "target is the control-plane and infrastructure topology this transition would move to. controlPlaneTopology is the topology of the control-plane nodes. Valid values are HighlyAvailable, HighlyAvailableArbiter, and SingleReplica. External is not valid: transitions cannot involve an externally hosted control plane. SingleReplica means a single instance of control-plane services is expected to meet cluster needs. HighlyAvailable means multiple instances are expected to provide redundancy. HighlyAvailableArbiter means two control-plane nodes and a smaller arbiter node to maintain quorum. See https://pkg.go.dev/github.com/openshift/api/config/v1#TopologyMode for topology definitions. infrastructureTopology is the topology of infrastructure services. Valid values are SingleReplica and HighlyAvailable. SingleReplica means operators expect a single instance of infrastructure services to meet cluster needs. HighlyAvailable means operators expect multiple instances of infrastructure services to provide redundancy. External control planes cannot be a transition target. target is required.",
+							Default:     map[string]interface{}{},
+							Ref:         ref(configv1.TopologyState{}.OpenAPIModelName()),
+						},
+					},
+					"evaluations": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"type",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "evaluations contains the availability condition for this transition and conditions for the checks run against the cluster to determine availability.\n\nTopologyTransitionAvailable is required; other condition types report individual checks. Between one and 32 conditions must be present, allowing at most 31 individual checks in addition to the availability condition. The controller defines individual check types, reasons, and messages, and always reports each one explicitly, using Unknown when a check's result is not yet known.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref(metav1.Condition{}.OpenAPIModelName()),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"source", "target", "evaluations"},
+			},
+		},
+		Dependencies: []string{
+			configv1.TopologyState{}.OpenAPIModelName(), metav1.Condition{}.OpenAPIModelName()},
+	}
+}
+
+func schema_openshift_api_config_v1_TopologyTransitionStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TopologyTransitionStatus reports availability of each type of topology transition and contains the status of any initiated transition.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"type",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "conditions provides information on topology transition progress and the evaluation of supported transition types. The controller always reports both conditions once topologyTransitionStatus is set.\n\nValid condition types are TopologyTransitionsEvaluated and TopologyTransitionCompleted. Both conditions must be present: the controller always reports each condition explicitly, using Unknown when a condition's state is not yet known, rather than omitting it.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref(metav1.Condition{}.OpenAPIModelName()),
+									},
+								},
+							},
+						},
+					},
+					"transitions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "atomic",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "transitions contains each supported transition type and its availability. It is optional. The controller clears this list whenever TopologyTransitionsEvaluated is not True, so its presence always reflects current, trustworthy results: an omitted list while TopologyTransitionsEvaluated is True means no supported transition options were found, and an omitted list otherwise means no transition options have been reported yet.\n\nBetween one and eight transition options must be present when the list is set. This list reports transition options, not concurrent transitions. The topology controller determines which transition options are supported.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref(configv1.TopologyTransition{}.OpenAPIModelName()),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			configv1.TopologyTransition{}.OpenAPIModelName(), metav1.Condition{}.OpenAPIModelName()},
 	}
 }
 
