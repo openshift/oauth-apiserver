@@ -6,13 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/caclient"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
-
-	"k8s.io/apiserver/pkg/server/dynamiccertificates"
-
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/internal/caclient"
 )
 
 // tokenEndpointRequestTimeout is the timeout for HTTP requests to the token endpoint.
@@ -28,15 +25,20 @@ type ClientCredential struct {
 }
 
 // NewClientCredential creates a new ClientCredential token getter from the provided configuration.
-func NewClientCredential(ctx context.Context, cfg *authentication.ClientCredentialConfig, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*ClientCredential, error) {
+func NewClientCredential(ctx context.Context, cfg *authentication.ClientCredentialConfig, buildHTTPClient caclient.ClientFactoryFunc) (*ClientCredential, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("client credential configuration must not be nil")
 	}
-
-	httpClient, err := httpClientForClientCredential(cfg.TLS, trustedCAContentProvider)
-	if err != nil {
-		return nil, fmt.Errorf("building http client for client credential token endpoint: %w", err)
+	if buildHTTPClient == nil {
+		return nil, fmt.Errorf("HTTP client factory must not be nil")
 	}
+
+	httpClient, err := httpClientForClientCredential(cfg.TLS, buildHTTPClient)
+	if err != nil {
+		return nil, fmt.Errorf("creating client credential HTTP client: %w", err)
+	}
+
+	wrappedCtx := context.WithValue(ctx, oauth2.HTTPClient, httpClient)
 
 	ccCfg := &clientcredentials.Config{
 		ClientID:     cfg.ClientID,
@@ -44,9 +46,6 @@ func NewClientCredential(ctx context.Context, cfg *authentication.ClientCredenti
 		TokenURL:     cfg.TokenEndpoint,
 		Scopes:       cfg.Scopes,
 	}
-
-	wrappedCtx := context.WithValue(ctx, oauth2.HTTPClient, httpClient)
-
 	cc := &ClientCredential{
 		tokenSource: ccCfg.TokenSource(wrappedCtx),
 	}
@@ -70,11 +69,11 @@ func (cc *ClientCredential) GetAccessToken(_ context.Context) (string, error) {
 	return token.AccessToken, nil
 }
 
-func httpClientForClientCredential(tlsCfg *authentication.TLS, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*http.Client, error) {
+func httpClientForClientCredential(tlsCfg *authentication.TLS, buildHTTPClient caclient.ClientFactoryFunc) (*http.Client, error) {
 	var certificateAuthority string
 	if tlsCfg != nil && tlsCfg.CertificateAuthority != nil {
 		certificateAuthority = *tlsCfg.CertificateAuthority
 	}
 
-	return caclient.New("client credentials token endpoint CA", certificateAuthority, trustedCAContentProvider, tokenEndpointRequestTimeout)
+	return buildHTTPClient("client credentials token endpoint CA", certificateAuthority, tokenEndpointRequestTimeout)
 }

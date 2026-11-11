@@ -17,11 +17,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc"
 	"gopkg.in/go-jose/go-jose.v2"
+
 	"k8s.io/apiserver/pkg/authentication/user"
+	"k8s.io/apiserver/pkg/server/dynamiccertificates"
+	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 	"k8s.io/utils/ptr"
+
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/caclient"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc"
+	externalclaimsresolver "github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/resolver"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/tokengetters"
 )
 
 func newIssuerServer(keys jose.JSONWebKeySet, userInfoMap map[string]interface{}) *httptest.Server {
@@ -219,10 +227,29 @@ func TestOIDCAuthenticator(t *testing.T) {
 			}
 			pemBytes := pem.EncodeToMemory(pemBlock)
 
+			caContentProvider, err := dynamiccertificates.NewStaticCAContent("test-issuer", pemBytes)
+			if err != nil {
+				t.Fatalf("creating CA content provider: %v", err)
+			}
+
+			jwtAuthenticator := *tc.configFunc(srv.URL, string(pemBytes))
+
+			var expanders []k8soidc.ClaimsExpander
+			for _, source := range jwtAuthenticator.ExternalClaimsSources {
+				expander, err := externalclaimsresolver.New(externaloidccel.NewCompiler(), &tokengetters.Anonymous{}, source, func(name, ca string, timeout time.Duration) (*http.Client, error) {
+					return caclient.New(name, ca, nil, timeout)
+				})
+				if err != nil {
+					t.Fatalf("creating external claims resolver: %v", err)
+				}
+				expanders = append(expanders, expander)
+			}
+
 			authn, err := oidc.New(t.Context(), oidc.Options{
-				JWTAuthenticator:           *tc.configFunc(srv.URL, string(pemBytes)),
-				KeySet:                     &oidcKeySet{&jwks},
-				IssuerCertificateAuthority: string(pemBytes),
+				JWTAuthenticator:        jwtAuthenticator,
+				KeySet:                  &oidcKeySet{&jwks},
+				CAContentProvider:       caContentProvider,
+				ExternalClaimsExpanders: expanders,
 			})
 			if err != nil {
 				t.Fatalf("creating authenticator: %v", err)

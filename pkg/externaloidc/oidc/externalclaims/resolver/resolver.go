@@ -15,14 +15,12 @@ import (
 	"github.com/google/cel-go/common/types"
 
 	authenticationcel "k8s.io/apiserver/pkg/authentication/cel"
-	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 	"k8s.io/klog/v2"
 
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/internal/caclient"
-
 	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/caclient"
 )
 
 var _ k8soidc.ClaimsExpander = (*externalClaimsResolver)(nil)
@@ -32,8 +30,8 @@ type Compiler interface {
 	CompileExternalSourceExpression(expressionAccessor authenticationcel.ExpressionAccessor) (authenticationcel.CompilationResult, error)
 }
 
-func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authentication.ExternalClaimsSource, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*externalClaimsResolver, error) {
-	httpClient, err := httpClientForTLSConfig(source.TLS, trustedCAContentProvider)
+func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authentication.ExternalClaimsSource, buildHTTPClient caclient.ClientFactoryFunc) (*externalClaimsResolver, error) {
+	httpClient, err := httpClientForExternalSources(source.TLS, buildHTTPClient)
 	if err != nil {
 		return nil, fmt.Errorf("building http client for external source: %w", err)
 	}
@@ -61,13 +59,12 @@ func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authenti
 // of the claim mapping logic to execute, which should be plenty of time.
 const externalSourceRequestTimeout = 500 * time.Millisecond
 
-func httpClientForTLSConfig(tlsCfg *authentication.TLS, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*http.Client, error) {
+func httpClientForExternalSources(tlsCfg *authentication.TLS, buildHTTPClient caclient.ClientFactoryFunc) (*http.Client, error) {
 	var certificateAuthority string
 	if tlsCfg != nil && tlsCfg.CertificateAuthority != nil {
 		certificateAuthority = *tlsCfg.CertificateAuthority
 	}
-
-	return caclient.New("external claims source CA", certificateAuthority, trustedCAContentProvider, externalSourceRequestTimeout)
+	return buildHTTPClient("external claims source CA", certificateAuthority, externalSourceRequestTimeout)
 }
 
 func buildExternalSourceCELMapper(compiler Compiler, sourceURL *authentication.SourceURL, sourceMappings []authentication.SourcedClaimMapping, sourceConditions []authentication.ExternalSourceCondition) (*externaloidccel.ExternalSourceCELMapper, error) {

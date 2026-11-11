@@ -12,6 +12,10 @@ import (
 	"github.com/openshift/library-go/pkg/network/httptransport"
 )
 
+// ClientFactoryFunc builds an *http.Client trusting certAuthority (if set) with
+// the given timeout. certAuthorityName identifies certAuthority in parse errors.
+type ClientFactoryFunc func(certAuthorityName, certAuthority string, timeout time.Duration) (*http.Client, error)
+
 // New builds an *http.Client trusting certificateAuthority if set, otherwise
 // the system roots, plus trustedCA if non-nil. certAuthorityName identifies
 // certificateAuthority in parse errors.

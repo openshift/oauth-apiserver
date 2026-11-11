@@ -5,13 +5,18 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/caclient"
+	externalclaimsresolver "github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/resolver"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/tokengetters"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/token/union"
 	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	apiserverfilesystem "k8s.io/apiserver/pkg/util/filesystem"
+	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/util/filesystem"
 	"sigs.k8s.io/yaml"
@@ -178,15 +183,44 @@ func AuthenticationConfigurationFromConfigurationFile(fs filesystem.Filesystem, 
 	return out, string(configHash[:]), nil
 }
 
+// issuerRequestTimeout matches the timeout of k8soidc's own default client.
+const issuerRequestTimeout = 30 * time.Second
+
 func tokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *authentication.AuthenticationConfiguration, compiler oidc.Compiler, trustedCAProvider dynamiccertificates.CAContentProvider) (authenticator.Token, error) {
 	jwtAuthenticators := make([]authenticator.Token, 0, len(cfg.JWT))
 
 	for _, jwt := range cfg.JWT {
+		externalClaimsExpanders, err := buildExternalClaimsExpanders(ctx, compiler, func(certAuthorityName, certAuthority string, timeout time.Duration) (*http.Client, error) {
+			return caclient.New(certAuthorityName, certAuthority, trustedCAProvider, timeout)
+		}, jwt.ExternalClaimsSources...)
+		if err != nil {
+			return nil, fmt.Errorf("building external claims expanders: %w", err)
+		}
+
+		// On unset trustedCAProvider we leave everything to k8soidc,
+		// otherwise we need to initialize a custom client using the CA provider.
+		var (
+			caContentProvider k8soidc.CAContentProvider
+			httpClient        *http.Client
+		)
+		if trustedCAProvider != nil {
+			httpClient, err = caclient.New("OIDC authenticator", jwt.Issuer.CertificateAuthority, trustedCAProvider, issuerRequestTimeout)
+			if err != nil {
+				return nil, fmt.Errorf("building OIDC authenticator HTTP client: %w", err)
+			}
+		} else if len(jwt.Issuer.CertificateAuthority) > 0 {
+			caContentProvider, err = dynamiccertificates.NewStaticCAContent("oidc-authenticator", []byte(jwt.Issuer.CertificateAuthority))
+			if err != nil {
+				return nil, fmt.Errorf("creating CA content provider: %w", err)
+			}
+		}
+
 		tokenAuthenticator, err := oidc.New(ctx, oidc.Options{
-			JWTAuthenticator:           jwt,
-			IssuerCertificateAuthority: jwt.Issuer.CertificateAuthority,
-			TrustedCAContentProvider:   trustedCAProvider,
-			Compiler:                   compiler,
+			JWTAuthenticator:        jwt,
+			CAContentProvider:       caContentProvider,
+			Client:                  httpClient,
+			Compiler:                compiler,
+			ExternalClaimsExpanders: externalClaimsExpanders,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("creating token authenticator: %w", err)
@@ -196,4 +230,45 @@ func tokenAuthenticatorForAuthenticationConfiguration(ctx context.Context, cfg *
 	}
 
 	return union.New(jwtAuthenticators...), nil
+}
+
+func buildExternalClaimsExpanders(ctx context.Context, compiler oidc.Compiler, buildHTTPClient caclient.ClientFactoryFunc, externalClaimSources ...authentication.ExternalClaimsSource) ([]k8soidc.ClaimsExpander, error) {
+	expanders := make([]k8soidc.ClaimsExpander, 0, len(externalClaimSources))
+	for _, source := range externalClaimSources {
+		tokenGetter, err := buildExternalClaimsTokenGetter(ctx, source.Authentication, buildHTTPClient)
+		if err != nil {
+			return nil, fmt.Errorf("building access token getter: %w", err)
+		}
+
+		expander, err := externalclaimsresolver.New(compiler, tokenGetter, source, buildHTTPClient)
+		if err != nil {
+			return nil, fmt.Errorf("creating new external claims resolver: %w", err)
+		}
+
+		expanders = append(expanders, expander)
+	}
+
+	return expanders, nil
+}
+
+func buildExternalClaimsTokenGetter(ctx context.Context, authn *authentication.Authentication, buildHTTPClient caclient.ClientFactoryFunc) (externalclaimsresolver.AccessTokenGetter, error) {
+	if authn == nil {
+		return &tokengetters.Anonymous{}, nil
+	}
+	if authn.Type == nil {
+		return nil, errors.New("no authentication type specified")
+	}
+
+	switch *authn.Type {
+	case authentication.AuthenticationTypeRequestProvidedToken:
+		return &tokengetters.RequestProvided{}, nil
+	case authentication.AuthenticationTypeClientCredential:
+		if authn.ClientCredential == nil {
+			return nil, fmt.Errorf("client credential configuration is required when authentication type is ClientCredential")
+		}
+
+		return tokengetters.NewClientCredential(ctx, authn.ClientCredential, buildHTTPClient)
+	default:
+		return nil, fmt.Errorf("unknown authentication type %q", *authn.Type)
+	}
 }
