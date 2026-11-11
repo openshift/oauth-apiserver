@@ -28,6 +28,9 @@ type AuthenticationConfiguration struct {
 	// The bundle is added to the trust already in effect for a connection:
 	// the system roots, or a connection-specific CA such as
 	// Issuer.CertificateAuthority when one is set.
+	//
+	// Must be an absolute path.
+	// Must not contain duplicate slashes, "." or ".." as path elements.
 	TrustedCAFilePath string `json:"trustedCAFilePath,omitempty"`
 
 	// jwt is a list of authenticator to authenticate Kubernetes users using
