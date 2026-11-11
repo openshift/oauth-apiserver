@@ -43,8 +43,13 @@ func ValidateAuthenticationConfiguration(compiler oidc.Compiler, c *authenticati
 	}
 
 	// Make sure the trustedCA path is a valid, clean, absolute path.
-	if p := c.TrustedCAFilePath; len(p) > 0 && (!filepath.IsAbs(p) || filepath.Clean(p) != p) {
-		errors = append(errors, field.Invalid(field.NewPath("trustedCAFilePath"), p, "must be a clean valid absolute filepath"))
+	if p := c.TrustedCAFilePath; len(p) > 0 {
+		switch {
+		case !filepath.IsAbs(p):
+			errors = append(errors, field.Invalid(field.NewPath("trustedCAFilePath"), p, "must be an absolute filepath"))
+		case filepath.Clean(p) != p:
+			errors = append(errors, field.Invalid(field.NewPath("trustedCAFilePath"), p, `must not contain duplicate slashes, "." or ".." as path elements`))
+		}
 	}
 
 	return errors

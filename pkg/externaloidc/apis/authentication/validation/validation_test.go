@@ -2672,9 +2672,9 @@ func TestValidateAuthenticationConfiguration(t *testing.T) {
 	}{
 		{name: "trustedCAFilePath unset", path: "", want: ""},
 		{name: "trustedCAFilePath valid absolute path", path: "/etc/ca/ca.crt", want: ""},
-		{name: "trustedCAFilePath relative path", path: "etc/ca/ca.crt", want: `trustedCAFilePath: Invalid value: "etc/ca/ca.crt": must be a clean valid absolute filepath`},
-		{name: "trustedCAFilePath with parent traversal", path: "/etc/../ca.crt", want: `trustedCAFilePath: Invalid value: "/etc/../ca.crt": must be a clean valid absolute filepath`},
-		{name: "trustedCAFilePath with empty element", path: "/etc//ca.crt", want: `trustedCAFilePath: Invalid value: "/etc//ca.crt": must be a clean valid absolute filepath`},
+		{name: "trustedCAFilePath relative path", path: "etc/ca/ca.crt", want: `trustedCAFilePath: Invalid value: "etc/ca/ca.crt": must be an absolute filepath`},
+		{name: "trustedCAFilePath with parent traversal", path: "/etc/../ca.crt", want: `trustedCAFilePath: Invalid value: "/etc/../ca.crt": must not contain duplicate slashes, "." or ".." as path elements`},
+		{name: "trustedCAFilePath with empty element", path: "/etc//ca.crt", want: `trustedCAFilePath: Invalid value: "/etc//ca.crt": must not contain duplicate slashes, "." or ".." as path elements`},
 	} {
 		testCases = append(testCases, struct {
 			name string
