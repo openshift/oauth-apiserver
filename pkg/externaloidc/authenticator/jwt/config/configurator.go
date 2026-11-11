@@ -118,19 +118,19 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 		return nil
 	}
 
-	var (
-		trustedCAContent  *dynamiccertificates.DynamicFileCAContent
-		trustedCAProvider dynamiccertificates.CAContentProvider
-	)
+	wrappedCtx, cancel := context.WithCancel(ctx)
+	var trustedCAProvider dynamiccertificates.CAContentProvider
 	if authnCfg.TrustedCAFilePath != "" {
-		trustedCAContent, err = dynamiccertificates.NewDynamicCAContentFromFile("trusted-ca", authnCfg.TrustedCAFilePath)
+		trustedCAContent, err := dynamiccertificates.NewDynamicCAContentFromFile("trusted-ca", authnCfg.TrustedCAFilePath)
 		if err != nil {
+			cancel()
 			return fmt.Errorf("loading trusted CA from %q: %w", authnCfg.TrustedCAFilePath, err)
 		}
+
+		go trustedCAContent.Run(wrappedCtx, 1)
 		trustedCAProvider = trustedCAContent
 	}
 
-	wrappedCtx, cancel := context.WithCancel(ctx)
 	compiler := externaloidccel.NewCompiler()
 	tokenAuthenticator, err := tokenAuthenticatorForAuthenticationConfiguration(wrappedCtx, authnCfg, compiler, trustedCAProvider)
 	if err != nil {
@@ -147,10 +147,6 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 		cancel:        cancel,
 	}
 	c.configHash = cfgHash
-	if trustedCAContent != nil {
-		go trustedCAContent.Run(wrappedCtx, 1)
-	}
-
 	return nil
 }
 
