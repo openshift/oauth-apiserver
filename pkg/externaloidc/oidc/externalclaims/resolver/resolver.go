@@ -59,8 +59,6 @@ func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authenti
 // 10 requests to external sources is a significant amount of buffer room for something
 // that we expect to be used sparingly and leaves at least 5 seconds for the rest
 // of the claim mapping logic to execute, which should be plenty of time.
-//
-// TODO: revisit whether 500ms leaves enough headroom when routed through a proxy.
 const externalSourceRequestTimeout = 500 * time.Millisecond
 
 func httpClientForTLSConfig(tlsCfg *authentication.TLS, trustedCAContentProvider dynamiccertificates.CAContentProvider) (*http.Client, error) {
