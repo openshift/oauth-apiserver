@@ -241,6 +241,12 @@ func TestTokenAuthenticatorForAuthenticationConfiguration(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
+		// k8soidc.New does not perform OIDC discovery synchronously: it starts a
+		// goroutine that polls oidc.NewProvider, with the first attempt made
+		// immediately. Wait for that first request to reach the server, polling
+		// the hit counter. If the provider were not honored, the TLS handshake
+		// would fail, the server would never see a request, and the next retry
+		// is 10s away, so the deadline below is hit.
 		deadline := time.Now().Add(5 * time.Second)
 		for discoveryHits.Load() == before {
 			if time.Now().After(deadline) {

@@ -9,9 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/caclient"
-	externalclaimsresolver "github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/resolver"
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/tokengetters"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/token/union"
 	"k8s.io/apiserver/pkg/server/dynamiccertificates"
@@ -28,6 +25,10 @@ import (
 	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc"
 	"github.com/spf13/pflag"
+
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/caclient"
+	externalclaimsresolver "github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/resolver"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/tokengetters"
 )
 
 func NewConfigurator() *Configurator {
