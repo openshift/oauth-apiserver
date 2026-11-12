@@ -125,15 +125,18 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 	}
 
 	wrappedCtx, cancel := context.WithCancel(ctx)
-	var trustedCAProvider dynamiccertificates.CAContentProvider
+	var (
+		trustedCAContent  *dynamiccertificates.DynamicFileCAContent
+		trustedCAProvider dynamiccertificates.CAContentProvider
+	)
 	if authnCfg.TrustedCAFilePath != "" {
-		trustedCAContent, err := dynamiccertificates.NewDynamicCAContentFromFile("trusted-ca", authnCfg.TrustedCAFilePath)
+		var err error
+		trustedCAContent, err = dynamiccertificates.NewDynamicCAContentFromFile("trusted-ca", authnCfg.TrustedCAFilePath)
 		if err != nil {
 			cancel()
 			return fmt.Errorf("loading trusted CA from %q: %w", authnCfg.TrustedCAFilePath, err)
 		}
 
-		go trustedCAContent.Run(wrappedCtx, 1)
 		trustedCAProvider = trustedCAContent
 	}
 
@@ -142,6 +145,14 @@ func (c *Configurator) handleConfigChange(ctx context.Context) error {
 	if err != nil {
 		cancel()
 		return fmt.Errorf("creating token authenticator: %w", err)
+	}
+
+	// Start watching the CA file only now. The HTTP transports built above
+	// register themselves as listeners on the provider, and the provider does not
+	// synchronize adding listeners with notifying them, so registration must not
+	// overlap with a running provider.
+	if trustedCAContent != nil {
+		go trustedCAContent.Run(wrappedCtx, 1)
 	}
 
 	if c.authenticatorWithCancel != nil {
