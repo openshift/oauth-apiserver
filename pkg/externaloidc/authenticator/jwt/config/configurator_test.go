@@ -10,14 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 
 	"k8s.io/utils/ptr"
 
-	"github.com/openshift/library-go/pkg/crypto"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/tlstest"
 )
 
 func TestConfigurator_Run(t *testing.T) {
@@ -234,7 +233,7 @@ jwt:
         claim: "preferred_username"
         prefix: ""
 `,
-			trustedCAFileContent: generateTestCAPEM(t),
+			trustedCAFileContent: tlstest.NewCAPEM(t, "test-ca"),
 			wantErr:              false,
 		},
 	}
@@ -300,21 +299,4 @@ jwt:
 			}
 		})
 	}
-}
-
-// generateTestCAPEM returns a PEM-encoded self-signed CA certificate.
-func generateTestCAPEM(t *testing.T) string {
-	t.Helper()
-
-	caConfig, err := crypto.MakeSelfSignedCAConfig("test-ca", time.Hour)
-	if err != nil {
-		t.Fatalf("generating self-signed CA: %v", err)
-	}
-
-	certBytes, _, err := caConfig.GetPEMBytes()
-	if err != nil {
-		t.Fatalf("encoding CA certificate: %v", err)
-	}
-
-	return string(certBytes)
 }

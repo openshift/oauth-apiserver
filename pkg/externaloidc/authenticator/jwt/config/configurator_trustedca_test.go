@@ -20,10 +20,9 @@ import (
 
 	"gopkg.in/go-jose/go-jose.v2"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	"github.com/openshift/library-go/pkg/crypto"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/tlstest"
 )
 
 // skippedInvalidCABundle, when set, receives a signal each time the dynamic CA
@@ -87,8 +86,8 @@ func TestConfigurator_TrustedCAReload(t *testing.T) {
 	issuerCAPEM := string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: issuer.Certificate().Raw}))
 
 	// External claims source: its serving certificate can be swapped at runtime.
-	cert1, cert1PEM := newServerCertWithCA(t, "source-1")
-	cert2, cert2PEM := newServerCertWithCA(t, "source-2")
+	cert1, cert1PEM := tlstest.NewServerCert(t, "source-1")
+	cert2, cert2PEM := tlstest.NewServerCert(t, "source-2")
 
 	var servingCert atomic.Pointer[tls.Certificate]
 	servingCert.Store(&cert1)
@@ -251,38 +250,4 @@ jwt:
 	if got := configurator.TokenAuthenticator(); got != initialAuthenticator {
 		t.Fatal("the authenticator was rebuilt, the CA bundle update must not require an authentication configuration reload")
 	}
-}
-
-// newServerCertWithCA creates a new CA and a serving certificate for 127.0.0.1
-// signed by it. It returns the serving certificate and the PEM encoded CA, which
-// is what a trusted CA bundle contains.
-func newServerCertWithCA(t *testing.T, name string) (tls.Certificate, string) {
-	t.Helper()
-
-	caConfig, err := crypto.MakeSelfSignedCAConfig(name, time.Hour)
-	if err != nil {
-		t.Fatalf("generating self-signed CA: %v", err)
-	}
-	ca := &crypto.CA{Config: caConfig, SerialGenerator: &crypto.RandomSerialGenerator{}}
-
-	serverConfig, err := ca.MakeServerCert(sets.New("127.0.0.1"), time.Hour)
-	if err != nil {
-		t.Fatalf("generating serving certificate: %v", err)
-	}
-
-	certPEM, keyPEM, err := serverConfig.GetPEMBytes()
-	if err != nil {
-		t.Fatalf("encoding serving certificate: %v", err)
-	}
-	cert, err := tls.X509KeyPair(certPEM, keyPEM)
-	if err != nil {
-		t.Fatalf("loading serving certificate: %v", err)
-	}
-
-	caPEM, _, err := caConfig.GetPEMBytes()
-	if err != nil {
-		t.Fatalf("encoding CA: %v", err)
-	}
-
-	return cert, string(caPEM)
 }

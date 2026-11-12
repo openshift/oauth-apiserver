@@ -14,6 +14,7 @@ import (
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
 	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/caclient"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/tlstest"
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/tokengetters"
 	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 )
@@ -195,7 +196,7 @@ func TestTokenAuthenticatorForAuthenticationConfiguration(t *testing.T) {
 			name: "trusted provider, invalid issuer CA",
 			cfg:  newConfig("not a certificate"),
 			provider: func(t *testing.T) dynamiccertificates.CAContentProvider {
-				return staticProvider(t, generateTestCAPEM(t))
+				return staticProvider(t, tlstest.NewCAPEM(t, "test-ca"))
 			},
 			errContains: "building OIDC authenticator HTTP client",
 		},
