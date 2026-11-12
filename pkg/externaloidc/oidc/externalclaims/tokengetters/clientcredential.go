@@ -13,9 +13,6 @@ import (
 )
 
 // tokenEndpointRequestTimeout is the timeout for HTTP requests to the token endpoint.
-//
-// TODO: revisit whether 1s is enough when routed through a proxy. A timeout
-// on the initial fetch in NewClientCredential fails the whole config reload.
 const tokenEndpointRequestTimeout = time.Second
 
 // ClientCredential is an AccessTokenGetter that uses the OAuth2 client credentials
