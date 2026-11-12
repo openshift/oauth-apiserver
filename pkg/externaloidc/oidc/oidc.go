@@ -2,8 +2,6 @@ package oidc
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/coreos/go-oidc"
@@ -12,8 +10,6 @@ import (
 	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication/conversion"
 	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 	externalclaimsresolver "github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/resolver"
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/oidc/externalclaims/tokengetters"
-
 	authenticationcel "k8s.io/apiserver/pkg/authentication/cel"
 	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 )
@@ -54,6 +50,8 @@ type Options struct {
 	SupportedSigningAlgs []string
 
 	DisallowedIssuers []string
+
+	ExternalClaimsExpanders []k8soidc.ClaimsExpander
 }
 
 type Compiler interface {
@@ -66,11 +64,6 @@ func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealt
 		opts.Compiler = externaloidccel.NewCompiler()
 	}
 
-	externalClaimsExpanders, err := buildExternalClaimsExpanders(ctx, opts.Compiler, opts.JWTAuthenticator.ExternalClaimsSources...)
-	if err != nil {
-		return nil, fmt.Errorf("building external claims expanders: %w", err)
-	}
-
 	k8sOpts := k8soidc.Options{
 		JWTAuthenticator:                     conversion.ConvertJWTAuthenticatorToApiserverJWTAuthenticator(opts.JWTAuthenticator),
 		KeySet:                               opts.KeySet,
@@ -79,50 +72,9 @@ func New(ctx context.Context, opts Options) (k8soidc.AuthenticatorTokenWithHealt
 		Compiler:                             opts.Compiler,
 		SupportedSigningAlgs:                 opts.SupportedSigningAlgs,
 		DisallowedIssuers:                    opts.DisallowedIssuers,
-		ClaimsExpanders:                      externalClaimsExpanders,
+		ClaimsExpanders:                      opts.ExternalClaimsExpanders,
 		UnknownCELValueTypesToStringListFunc: externalclaimsresolver.UnknownCELValueTypesToStringListHandler(),
 	}
 
 	return k8soidc.New(ctx, k8sOpts)
-}
-
-func buildExternalClaimsExpanders(ctx context.Context, compiler Compiler, externalClaimSources ...authentication.ExternalClaimsSource) ([]k8soidc.ClaimsExpander, error) {
-	expanders := make([]k8soidc.ClaimsExpander, 0, len(externalClaimSources))
-	for _, source := range externalClaimSources {
-		tokenGetter, err := buildExternalClaimsTokenGetter(ctx, source.Authentication)
-		if err != nil {
-			return nil, fmt.Errorf("building access token getter: %w", err)
-		}
-
-		expander, err := externalclaimsresolver.New(compiler, tokenGetter, source)
-		if err != nil {
-			return nil, fmt.Errorf("creating new external claims resolver: %w", err)
-		}
-
-		expanders = append(expanders, expander)
-	}
-
-	return expanders, nil
-}
-
-func buildExternalClaimsTokenGetter(ctx context.Context, authn *authentication.Authentication) (externalclaimsresolver.AccessTokenGetter, error) {
-	if authn == nil {
-		return &tokengetters.Anonymous{}, nil
-	}
-
-	if authn.Type == nil {
-		return nil, errors.New("no authentication type specified")
-	}
-
-	switch *authn.Type {
-	case authentication.AuthenticationTypeRequestProvidedToken:
-		return &tokengetters.RequestProvided{}, nil
-	case authentication.AuthenticationTypeClientCredential:
-		if authn.ClientCredential == nil {
-			return nil, fmt.Errorf("client credential configuration is required when authentication type is ClientCredential")
-		}
-		return tokengetters.NewClientCredential(ctx, authn.ClientCredential)
-	default:
-		return nil, fmt.Errorf("unknown authentication type %q", *authn.Type)
-	}
 }

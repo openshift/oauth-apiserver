@@ -12,8 +12,11 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+
 	"k8s.io/utils/ptr"
+
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/tlstest"
 )
 
 func TestConfigurator_Run(t *testing.T) {
@@ -92,12 +95,13 @@ jwt:
 	}
 
 	type testcase struct {
-		name          string
-		configFile    string
-		configContent string
-		wantErr       bool
-		errContains   string
-		wantConfig    *authentication.AuthenticationConfiguration
+		name                 string
+		configFile           string
+		configContent        string
+		trustedCAFileContent string
+		wantErr              bool
+		errContains          string
+		wantConfig           *authentication.AuthenticationConfiguration
 	}
 
 	testcases := []testcase{
@@ -171,6 +175,67 @@ jwt:
 			wantErr:       true,
 			errContains:   `unknown field "unknownClientID"`,
 		},
+		{
+			name:       "trustedCAFilePath pointing at a missing file fails",
+			configFile: "config.yaml",
+			configContent: `
+apiVersion: config.openshift.io/v1alpha1
+kind: AuthenticationConfiguration
+trustedCAFilePath: /non/existent/ca-bundle.pem
+jwt:
+  - issuer:
+      url: https://keycloak:8443/realms/k8s
+      audiences:
+        - k8s-client
+    claimMappings:
+      username:
+        claim: "preferred_username"
+        prefix: ""
+`,
+			wantErr:     true,
+			errContains: `loading trusted CA from "/non/existent/ca-bundle.pem": open /non/existent/ca-bundle.pem: no such file or directory`,
+		},
+		{
+			name:       "trustedCAFilePath pointing at an unparseable file fails",
+			configFile: "config.yaml",
+			configContent: `
+apiVersion: config.openshift.io/v1alpha1
+kind: AuthenticationConfiguration
+trustedCAFilePath: {{caFile}}
+jwt:
+  - issuer:
+      url: https://keycloak:8443/realms/k8s
+      audiences:
+        - k8s-client
+    claimMappings:
+      username:
+        claim: "preferred_username"
+        prefix: ""
+`,
+			trustedCAFileContent: "not a valid CA bundle",
+			wantErr:              true,
+			errContains:          "data does not contain any valid RSA or ECDSA certificates",
+		},
+		{
+			name:       "trustedCAFilePath pointing at a valid CA bundle is loaded",
+			configFile: "config.yaml",
+			configContent: `
+apiVersion: config.openshift.io/v1alpha1
+kind: AuthenticationConfiguration
+trustedCAFilePath: {{caFile}}
+jwt:
+  - issuer:
+      url: https://keycloak:8443/realms/k8s
+      audiences:
+        - k8s-client
+    claimMappings:
+      username:
+        claim: "preferred_username"
+        prefix: ""
+`,
+			trustedCAFileContent: tlstest.NewCAPEM(t, "test-ca"),
+			wantErr:              false,
+		},
 	}
 
 	for _, tc := range testcases {
@@ -180,6 +245,16 @@ jwt:
 
 			if tc.configContent != "" {
 				dir := t.TempDir()
+
+				configContent := tc.configContent
+				if tc.trustedCAFileContent != "" {
+					caPath := filepath.Join(dir, "ca-bundle.pem")
+					if err := os.WriteFile(caPath, []byte(tc.trustedCAFileContent), 0o644); err != nil {
+						t.Fatalf("failed to write test CA file: %v", err)
+					}
+					configContent = strings.ReplaceAll(configContent, "{{caFile}}", caPath)
+				}
+
 				filePath := filepath.Join(dir, tc.configFile)
 				file, err := os.Create(filePath)
 				if err != nil {
@@ -187,7 +262,7 @@ jwt:
 				}
 				defer file.Close()
 
-				if _, err := file.Write([]byte(tc.configContent)); err != nil {
+				if _, err := file.Write([]byte(configContent)); err != nil {
 					t.Fatalf("failed to write test config file: %v", err)
 				}
 				cfgPath = filePath
