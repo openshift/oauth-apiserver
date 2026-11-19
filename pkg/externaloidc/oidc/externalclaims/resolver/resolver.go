@@ -2,8 +2,6 @@ package resolver
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,12 +14,13 @@ import (
 	"github.com/google/cel-go/cel"
 	"github.com/google/cel-go/common/types"
 
-	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
-	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
 	authenticationcel "k8s.io/apiserver/pkg/authentication/cel"
+	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 	"k8s.io/klog/v2"
 
-	k8soidc "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/apis/authentication"
+	externaloidccel "github.com/openshift/oauth-apiserver/pkg/externaloidc/cel"
+	"github.com/openshift/oauth-apiserver/pkg/externaloidc/internal/caclient"
 )
 
 var _ k8soidc.ClaimsExpander = (*externalClaimsResolver)(nil)
@@ -31,8 +30,8 @@ type Compiler interface {
 	CompileExternalSourceExpression(expressionAccessor authenticationcel.ExpressionAccessor) (authenticationcel.CompilationResult, error)
 }
 
-func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authentication.ExternalClaimsSource) (*externalClaimsResolver, error) {
-	httpClient, err := httpClientForTLSConfig(source.TLS)
+func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authentication.ExternalClaimsSource, buildHTTPClient caclient.ClientFactoryFunc) (*externalClaimsResolver, error) {
+	httpClient, err := httpClientForExternalSources(source.TLS, buildHTTPClient)
 	if err != nil {
 		return nil, fmt.Errorf("building http client for external source: %w", err)
 	}
@@ -60,30 +59,12 @@ func New(compiler Compiler, accessTokenGetter AccessTokenGetter, source authenti
 // of the claim mapping logic to execute, which should be plenty of time.
 const externalSourceRequestTimeout = 500 * time.Millisecond
 
-func httpClientForTLSConfig(tlsCfg *authentication.TLS) (*http.Client, error) {
-	client := &http.Client{
-		Timeout: externalSourceRequestTimeout,
+func httpClientForExternalSources(tlsCfg *authentication.TLS, buildHTTPClient caclient.ClientFactoryFunc) (*http.Client, error) {
+	var certificateAuthority string
+	if tlsCfg != nil && tlsCfg.CertificateAuthority != nil {
+		certificateAuthority = *tlsCfg.CertificateAuthority
 	}
-
-	if tlsCfg == nil || tlsCfg.CertificateAuthority == nil || len(*tlsCfg.CertificateAuthority) == 0 {
-		return client, nil
-	}
-
-	caCertPool := x509.NewCertPool()
-
-	if ok := caCertPool.AppendCertsFromPEM([]byte(*tlsCfg.CertificateAuthority)); !ok {
-		return nil, fmt.Errorf("certificate authority does not contain any valid PEM certificates")
-	}
-
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = &tls.Config{
-		RootCAs:    caCertPool,
-		MinVersion: tls.VersionTLS12,
-	}
-
-	client.Transport = transport
-
-	return client, nil
+	return buildHTTPClient("external claims source CA", certificateAuthority, externalSourceRequestTimeout)
 }
 
 func buildExternalSourceCELMapper(compiler Compiler, sourceURL *authentication.SourceURL, sourceMappings []authentication.SourcedClaimMapping, sourceConditions []authentication.ExternalSourceCondition) (*externaloidccel.ExternalSourceCELMapper, error) {
